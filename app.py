@@ -18,7 +18,7 @@ if st.sidebar.button("Reset Session"):
 st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
     "Cash Flow",
-    "PV and NPV",
+    "NPV",
     "Bonds Evaluation",
     "Stock Evaluation",
     "Mortgage amortization: French and Italian",
@@ -238,6 +238,6 @@ if page == "Cash Flow":
             except Exception as e:
                 st.error(str(e))
             
-if page == "PV and NPV":
-    st.subheader("PV and NPV")
+if page == "NPV":
+    st.subheader("NPV")
     
