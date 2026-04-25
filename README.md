@@ -19,7 +19,7 @@ Calculates the main cash flow metrics used in corporate finance:
 
 Each section accepts either direct input of the final value or its components. Previously calculated values are automatically carried forward as dependencies.
 
-### PV and NPV
+### NPV
 Net Present Value calculation with:
 - Variable number of periods
 - Per-period cash flows and timing
