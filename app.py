@@ -6,7 +6,6 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
 st.title("Corporate Finance Calc")
 st.caption("v2.0")
 
-# Inizializza session state
 for key in ['fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'pat_net_list', 'of_list']:
     if key not in st.session_state:
         st.session_state[key] = None
@@ -32,12 +31,12 @@ if page == "Cash Flow":
     if op == "FCCNOGC":
         st.markdown("Insert here its components")
  
-        ric    = st.number_input("Operating Revenue", key="ric", value=0.0)
-        cost   = st.number_input("Operating Costs", key="cost", value=0.0)
-        imp    = st.number_input("Taxes", key="imp", value=0.0)
+        ric = st.number_input("Operating Revenue", key="ric", value=0.0)
+        cost = st.number_input("Operating Costs", key="cost", value=0.0)
+        imp = st.number_input("Taxes", key="imp", value=0.0)
         ammort = st.number_input("Amortisation", key="ammort", value=0.0)
-        mol    = st.number_input("Gross Operating Margin", key="mol", value=0.0)
-        rol_a  = st.number_input("EBIT", key="rol_a", value=0.0)
+        mol = st.number_input("Gross Operating Margin", key="mol", value=0.0)
+        rol_a = st.number_input("EBIT", key="rol_a", value=0.0)
  
         if st.button("Calculate FCCNOGC"):
             try:
@@ -53,10 +52,10 @@ if page == "Cash Flow":
     elif op == "RO-L":
         st.markdown("Insert here its components")
  
-        ric    = st.number_input("Operating Revenue", key="ric_rol", value=0.0)
-        cost   = st.number_input("Operating Costs", key="cost_rol", value=0.0)
+        ric = st.number_input("Operating Revenue", key="ric_rol", value=0.0)
+        cost = st.number_input("Operating Costs", key="cost_rol", value=0.0)
         ammort = st.number_input("Amortisation", key="ammort_rol", value=0.0)
-        mol    = st.number_input("Gross Operating Margin", key="mol_rol", value=0.0)
+        mol = st.number_input("Gross Operating Margin", key="mol_rol", value=0.0)
  
         if st.button("Calculate RO-L"):
             try:
@@ -72,7 +71,7 @@ if page == "Cash Flow":
     elif op == "FCGC":
         st.markdown("Insert here its components")
  
-        # FCCNOGC: da session state oppure inserito diretto
+        # FCCNOGC: da session state oppure inserito diretto, stesso schema per le prossime dipendenze
         if st.session_state.fccnogc is not None:
             st.info(f"FCCNOGC from previous calculation: {st.session_state.fccnogc}")
             fccnogc_v = st.session_state.fccnogc
@@ -103,8 +102,8 @@ if page == "Cash Flow":
         st.markdown("Insert here its components")
  
         rimb_cap = st.number_input("Rimborso quota capitale", key="rimb_cap", value=0.0)
-        pat_net  = st.number_input("Patrimonio netto", key="pat_net", value=0.0)
-        deb_f    = st.number_input("Debito finanziario", key="deb_f", value=0.0)
+        pat_net = st.number_input("Patrimonio netto", key="pat_net", value=0.0)
+        deb_f = st.number_input("Debito finanziario", key="deb_f", value=0.0)
  
         if st.button("Calculate FCFR"):
             res = calc_fcfr(fcfr=None, rimb_cap=rimb_cap, pat_net=pat_net, deb_f=deb_f)
@@ -115,7 +114,7 @@ if page == "Cash Flow":
         st.markdown("Insert here its components")
  
         of_v = st.number_input("Oneri finanziari", key="of_v", value=0.0)
-        div  = st.number_input("Dividendi", key="div", value=0.0)
+        div = st.number_input("Dividendi", key="div", value=0.0)
  
         if st.button("Calculate FCRf"):
             res = calc_fcrf(fcrf=None, of=of_v, div=div)
@@ -134,7 +133,7 @@ if page == "Cash Flow":
             use_direct_fcgc = st.checkbox("Insert FCGC directly", key="use_direct_fcgc")
             fcgc_v = st.number_input("FCGC", key="fcgc_direct", value=0.0) if use_direct_fcgc else 0.0
  
-        # FCID
+        
         if st.session_state.fcid is not None:
             st.info(f"FCID from previous calculation: {st.session_state.fcid}")
             fcid_v = st.session_state.fcid
@@ -151,7 +150,7 @@ if page == "Cash Flow":
     elif op == "Variazione Liquidità":
         st.markdown("Insert here its components")
  
-        # FCGC
+        
         if st.session_state.fcgc is not None:
             st.info(f"FCGC from previous calculation: {st.session_state.fcgc}")
             fcgc_v = st.session_state.fcgc
@@ -160,7 +159,7 @@ if page == "Cash Flow":
             use_direct_fcgc = st.checkbox("Insert FCGC directly", key="use_direct_fcgc_vl")
             fcgc_v = st.number_input("FCGC", key="fcgc_direct_vl", value=0.0) if use_direct_fcgc else 0.0
  
-        # FCID
+        
         if st.session_state.fcid is not None:
             st.info(f"FCID from previous calculation: {st.session_state.fcid}")
             fcid_v = st.session_state.fcid
@@ -169,7 +168,7 @@ if page == "Cash Flow":
             use_direct_fcid = st.checkbox("Insert FCID directly", key="use_direct_fcid_vl")
             fcid_v = st.number_input("FCID", key="fcid_direct_vl", value=0.0) if use_direct_fcid else 0.0
  
-        # FCFR
+        
         if st.session_state.fcfr is not None:
             st.info(f"FCFR from previous calculation: {st.session_state.fcfr}")
             fcfr_v = st.session_state.fcfr
@@ -178,7 +177,7 @@ if page == "Cash Flow":
             use_direct_fcfr = st.checkbox("Insert FCFR directly", key="use_direct_fcfr_vl")
             fcfr_v = st.number_input("FCFR", key="fcfr_direct_vl", value=0.0) if use_direct_fcfr else 0.0
  
-        # FCRf
+        
         if st.session_state.fcrf is not None:
             st.info(f"FCRf from previous calculation: {st.session_state.fcrf}")
             fcrf_v = st.session_state.fcrf
@@ -197,7 +196,7 @@ if page == "Cash Flow":
     elif op == "FCE":
         st.markdown("Insert here its components")
  
-        # FCU
+        
         if st.session_state.fcu is not None:
             st.info(f"FCU from previous calculation: {st.session_state.fcu}")
             fcu_v = st.session_state.fcu
@@ -206,7 +205,7 @@ if page == "Cash Flow":
             use_direct_fcu = st.checkbox("Insert FCU directly", key="use_direct_fcu")
             fcu_v = st.number_input("FCU", key="fcu_direct", value=0.0) if use_direct_fcu else 0.0
  
-        # FCFR
+        
         if st.session_state.fcfr is not None:
             st.info(f"FCFR from previous calculation: {st.session_state.fcfr}")
             fcfr_v = st.session_state.fcfr
@@ -215,7 +214,7 @@ if page == "Cash Flow":
             use_direct_fcfr = st.checkbox("Insert FCFR directly", key="use_direct_fcfr_fce")
             fcfr_v = st.number_input("FCFR", key="fcfr_direct_fce", value=0.0) if use_direct_fcfr else 0.0
  
-        # FCRf
+        
         if st.session_state.fcrf is not None:
             st.info(f"FCRf from previous calculation: {st.session_state.fcrf}")
             fcrf_v = st.session_state.fcrf
@@ -234,7 +233,6 @@ if page == "Cash Flow":
             except Exception as e:
                 st.error(str(e))
             
-        
 if page == "PV and NPV":
-        st.subheader("PV and NPV")
+    st.subheader("PV and NPV")
     
