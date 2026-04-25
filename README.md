@@ -48,3 +48,39 @@ There are many types of bonds. The ones that can be calculated via this service 
 - PV = Present Value  
 - NV = Nominal Value (also Face Value)
 
+## Stock Valuation and Growth
+
+The price of a stock is independent of the individual investor's timing and is a function of the infinite series of expected future dividends. If the following are assumed constant:
+
+- The dividend flow
+- The discount rate
+
+the value of a stock is calculated as the present value of a perpetuity.
+
+If a company's dividends grow at a given rate \( g \), the stock price can be obtained by applying the formula used in this service.
+
+### Conditions for Increasing Value
+
+To increase value, two conditions must be satisfied simultaneously:
+
+1. Retain earnings to finance projects;
+2. The projects must have a return greater than the cost of capital. In other words, they must have a positive NPV (Net Present Value) > 0.
+
+### Sustainable Growth Rate
+
+Through this service, you can also calculate the **sustainable growth rate**, which represents the maximum rate at which a company can grow without changing its financial leverage (Debt/Equity ratio = D/E). It is given by the product of:
+
+- The **retention ratio** (i.e., retained earnings or internal financing)
+- The **ROE** (Return on Equity)
+- 
+## Types of Stocks
+
+There are different categories of stocks, each with specific characteristics that meet different investor needs:
+
+- **Common stock (ordinary shares)**: grants holders all typical rights (see above)
+
+- **Preferred stock (preference shares)**: provides greater rights in the distribution of profits, but voting rights may be limited to extraordinary shareholders' meetings only
+
+- **Savings shares**: a particular type of preferred stock, whose issuance is reserved for listed companies
+
+### This calculator focuses on the valuation of common stock.
