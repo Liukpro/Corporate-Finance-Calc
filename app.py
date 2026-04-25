@@ -9,7 +9,12 @@ st.caption("v2.0")
 for key in ['fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'pat_net_list', 'of_list']:
     if key not in st.session_state:
         st.session_state[key] = None
-
+      
+if st.sidebar.button("Reset Session"):
+    for key in st.session_state:
+        st.session_state[key] = None
+    st.rerun()
+  
 st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
     "Cash Flow",
