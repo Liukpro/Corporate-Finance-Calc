@@ -39,7 +39,7 @@ page = st.sidebar.radio("Select a topic:", [
     "Comparazione tra VAN",
     "Teoria del Portafoglio"
 ])
-
+#logica troppo lineare, inserire possibilità di calcolo singolari, meno sequenziali
 if page == "Cash Flows":
     st.subheader("FCCNOGC, RO-L, FCGC, FCID, FCFR, FCRF in Corporate Finance Calc")
     op = st.selectbox("Quale Flusso di Cassa preferisci Calcolare?", ["FCCNOGC","RO-L", "FCGC", "FCID", "FCFR", "FCRf"])
