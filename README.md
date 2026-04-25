@@ -31,7 +31,6 @@ Net Present Value calculation with:
 Corporate-Finance-Calc/
 ├── app.py          # Streamlit interface
 ├── formulas.py     # Pure Python calculation logic
-├── requirements.txt
 ├── LICENSE
 ├── NOTICE
 └── README.md
