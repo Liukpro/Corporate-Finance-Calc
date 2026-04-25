@@ -48,7 +48,7 @@ There are many types of bonds. The ones that can be calculated via this service 
 - PV = Present Value  
 - NV = Nominal Value (also Face Value)
 
-## Stock Valuation and Growth
+## Stock Evaluation and Growth
 
 The price of a stock is independent of the individual investor's timing and is a function of the infinite series of expected future dividends. If the following are assumed constant:
 
