@@ -50,7 +50,7 @@ def calc_var_liq(var_liq, fcgc, fcid, fcfr, fcrf):
     if var_liq is not None:
         return var_liq
     else:
-        return fcgc + fcif + fcfr + fcrf
+        return fcgc + fcid + fcfr + fcrf
 
 def calc_fcu(fcu, fcgc, fcid):
     if fcu is not None:
@@ -62,7 +62,7 @@ def calc_fce(fce, fcu, fcfr, fcrf, rimb_cap, div):
     if fce is not None:
         return fce
     else:
-        return fcu + fcfr - rim_cap +fcrf - div
+        return fcu + fcfr - rimb_cap +fcrf - div
 
 #fixed cost per period
 def calc_npv(npv, fc, k, i_0, t, cost):
@@ -77,5 +77,3 @@ def calc_npv(npv, fc, k, i_0, t, cost):
 
         result = pv - i_0
         return result
-
-
