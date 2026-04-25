@@ -25,8 +25,7 @@ if 'fcu' not in st.session_state:
 
 
 
-#input per Capitalizzazione
-
+#Update: trasformare la logica if in def e richiamare le def da altro file py contenente i calcoli. Questo principale deve contenere solo richiami e interfaccia utente. 
 
 
 #Tendina laterale
