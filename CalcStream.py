@@ -1,7 +1,7 @@
 import streamlit as st
 
-st.title("Calcolatore per Finanza Aziendale")
-st.caption("non una calcolatrice scientifica, per ora")
+st.title("Corporate Finance Calc")
+st.caption("Not a scientific calculator, atm")
 
 #salvataggio dei dati
 if 'fccnogc' not in st.session_state:
@@ -30,18 +30,18 @@ if 'fcu' not in st.session_state:
 
 
 #Tendina laterale
-st.sidebar.title("Strumenti di Finanza Aziendale")
-page = st.sidebar.radio("Seleziona un argomento:", [
-    "Flussi di Cassa",
-    "Capitalizzazione",
-    "Valutazione Obbligazioni",
-    "Valutazione Azioni",
+st.sidebar.title("Tools for Corporate Finance")
+page = st.sidebar.radio("Select a topic:", [
+    "Cash Flows",
+    "Capitalization",
+    "Bonds Evaluation",
+    "Stock Evaluation",
     "Ammortamenti: Francese e Italiano",
     "Comparazione tra VAN",
     "Teoria del Portafoglio"
 ])
 
-if page == "Flussi di Cassa":
+if page == "Cash Flows":
     st.subheader("FCCNOGC, RO-L, FCGC, FCID, FCFR, FCRF in Corporate Finance Calc")
     op = st.selectbox("Quale Flusso di Cassa preferisci Calcolare?", ["FCCNOGC","RO-L", "FCGC", "FCID", "FCFR", "FCRf"])
     #input  per Flussi di cassa
@@ -139,5 +139,5 @@ if page == "Flussi di Cassa":
         if res is not None:
             st.success(f"Risultato: {res}")
             
-if page == "Capitalizzazione":
+if page == "Capitalization":
         st.subheader("Interesse Semplice & Composto")
