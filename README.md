@@ -72,7 +72,7 @@ Through this service, you can also calculate the **sustainable growth rate**, wh
 
 - The **retention ratio** (i.e., retained earnings or internal financing)
 - The **ROE** (Return on Equity)
-- 
+
 ## Types of Stocks
 
 There are different categories of stocks, each with specific characteristics that meet different investor needs:
