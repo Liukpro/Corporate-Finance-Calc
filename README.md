@@ -2,6 +2,9 @@
 
 A Streamlit-based calculator for corporate finance, built to support common cash flow and valuation calculations without relying on spreadsheets.
 
+# Future update:
+- implementation of data reading to import values from excel
+
 ## Features
 
 ### Cash Flow
