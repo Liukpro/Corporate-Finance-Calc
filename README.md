@@ -36,6 +36,7 @@ Corporate-Finance-Calc/
 ├── formulas.py     # Pure Python calculation logic
 ├── LICENSE
 ├── NOTICE
+├── requirements.txt
 └── README.md
 ```
 The calculation logic in `formulas.py` is completely decoupled from the interface, making it independently testable.
