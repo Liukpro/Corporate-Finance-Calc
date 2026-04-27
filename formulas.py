@@ -28,11 +28,23 @@ def calc_fcgc(fcgc, fccnogc, ccno):
     else:
         return fccnogc - ccno
 
-def calc_fcid(fcid, inv, dis):
+def calc_fcid(fcid, inv=0, dis=0,
+              vnc=0, val_sto=0, plus=0, minus=0,
+              ammo_ti=0, n_ammo=0,
+              acqui_1=0, acqui_2=0):
+
     if fcid is not None:
         return fcid
+    elif val_sto != 0 and ammo_ti != 0 and n_ammo != 0:
+        vnc = val_sto - (ammo_ti * n_ammo)
+        dis = vnc + plus - minus
+        if inv != 0:
+            inv_final = inv
+        else:
+            inv_final = acqui_1 + acqui_2
+        return dis - inv_final
     else:
-        return - inv + dis
+        return dis - inv_final
 
 def calc_fcfr(fcfr, rimb_cap, pat_net, deb_f):
     if fcfr is not None:
@@ -74,6 +86,9 @@ def calc_npv(npv, fc, k, i_0, t, cost):
         for i in range(len(fc)):
             fc_net = fc[i] - cost
             pv += fc_net / ((1 + k) ** t[i])
+
+        result = pv - i_0
+        return result
 
         result = pv - i_0
         return result
