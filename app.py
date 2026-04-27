@@ -108,22 +108,22 @@ if page == "Cash Flow":
         dis = st.number_input("Disinvestment (dis)", key="dis", value=0.0)
         
         st.markdown("**Investment**")
-        inv     = st.number_input("Direct investment value (if known)", key="inv", value=0.0)
+        inv = st.number_input("Direct investment value (if known)", key="inv", value=0.0)
         st.markdown("*Or insert acquisitions separately:*")
         acqui_1 = st.number_input("Acquisition 1", key="acqui_1", value=0.0)
         acqui_2 = st.number_input("Acquisition 2", key="acqui_2", value=0.0)
 
     if st.button("Calculate FCID"):
         res = calc_fcid(
-            fcid    = fcid_a,
-            inv     = inv,
-            dis     = dis,
-            vnc     = 0,
+            fcid = fcid_a,
+            inv = inv,
+            dis = dis,
+            vnc = 0,
             val_sto = val_sto,
-            plus    = plus,
-            minus   = minus,
+            plus = plus,
+            minus = minus,
             ammo_ti = ammo_ti,
-            n_ammo  = int(n_ammo),
+            n_ammo = int(n_ammo),
             acqui_1 = acqui_1,
             acqui_2 = acqui_2
         )
@@ -268,15 +268,15 @@ if page == "Cash Flow":
 if page == "NPV":
     st.subheader("Net Present Value (NPV)")
 
-    k    = st.number_input("Discount rate k", key="k", value=0.0, format="%.4f")
-    i_0  = st.number_input("Initial investment I₀", key="i_0", value=0.0)
+    k = st.number_input("Discount rate k", key="k", value=0.0, format="%.4f")
+    i_0 = st.number_input("Initial investment I₀", key="i_0", value=0.0)
     cost = st.number_input("Fixed cost per period", key="cost", value=0.0)
-    n    = st.number_input("Number of periods", key="n", min_value=1, step=1, value=1)
+    n = st.number_input("Number of periods", key="n", min_value=1, step=1, value=1)
 
     st.markdown("**Cash flows and time for each period:**")
 
     fc_list = []
-    t_list  = []
+    t_list = []
 
     for i in range(int(n)):
         col1, col2 = st.columns(2)
