@@ -9,7 +9,7 @@ st.markdown("""
 ---
 **License:** Apache 2.0  
 **Source code:** https://github.com/Liukpro/Corporate-Finance-Calc
-""")
+---""")
 for key in ['fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'pat_net_list', 'of_list']:
     if key not in st.session_state:
         st.session_state[key] = None
@@ -23,11 +23,11 @@ st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
     "Cash Flow",
     "NPV",
-    "Bonds Evaluation",
-    "Stock Evaluation",
-    "Mortgage amortization: French and Italian",
-    "NPV Comparision",
-    "Portfolio"
+    "Bonds Evaluation -coming soon",
+    "Stock Evaluation -coming soon",
+    "Mortgage amortization: French and Italian -coming soon",
+    "NPV Comparision -coming soon",
+    "Portfolio -coming soon"
 ])
 
 if page == "Cash Flow":
