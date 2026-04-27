@@ -44,7 +44,7 @@ def calc_fcid(fcid, inv=0, dis=0,
             inv_final = acqui_1 + acqui_2
         return dis - inv_final
     else:
-        return dis - inv
+        return dis - inv_final
 
 def calc_fcfr(fcfr, rimb_cap, pat_net, deb_f):
     if fcfr is not None:
