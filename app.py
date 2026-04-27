@@ -112,20 +112,20 @@ if page == "Cash Flow":
         st.markdown("*Or insert acquisitions separately:*")
         acqui_1 = st.number_input("Acquisition 1", key="acqui_1", value=0.0)
         acqui_2 = st.number_input("Acquisition 2", key="acqui_2", value=0.0)
-
-    if st.button("Calculate FCID"):
+      
+      if st.button("Calculate FCID"):
         res = calc_fcid(
-            fcid = fcid_a,
-            inv = inv,
-            dis = dis,
-            vnc = 0,
-            val_sto = val_sto,
-            plus = plus,
-            minus = minus,
-            ammo_ti = ammo_ti,
-            n_ammo = int(n_ammo),
-            acqui_1 = acqui_1,
-            acqui_2 = acqui_2
+          fcid = fcid_a,
+          inv = inv,
+          dis = dis,
+          vnc = 0,
+          val_sto = val_sto,
+          plus = plus,
+          minus = minus,
+          ammo_ti = ammo_ti,
+          n_ammo = int(n_ammo),
+          acqui_1 = acqui_1,
+          acqui_2 = acqui_2
         )
         st.session_state.fcid = res
         st.success(f"FCID = {res:.2f}")
