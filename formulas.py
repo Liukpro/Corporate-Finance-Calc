@@ -89,6 +89,3 @@ def calc_npv(npv, fc, k, i_0, t, cost):
 
         result = pv - i_0
         return result
-
-        result = pv - i_0
-        return result
