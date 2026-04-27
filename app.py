@@ -120,7 +120,7 @@ if page == "Cash Flow":
           res = calc_fcid(fcid = fcid_a,
                           inv = inv,
                           dis = dis,
-                          vnc = 0,
+                          vnc = None,
                           val_sto = val_sto,
                           plus = plus,
                           minus = minus,
