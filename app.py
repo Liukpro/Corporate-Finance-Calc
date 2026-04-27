@@ -44,7 +44,7 @@ if page == "Cash Flow":
         imp = st.number_input("Taxes", key="imp", value=0.0)
         ammort = st.number_input("Amortisation", key="ammort", value=0.0)
         mol = st.number_input("Gross Operating Margin", key="mol", value=0.0)
-        rol_a = st.number_input("EBIT", key="rol_a", value=0.0)
+        rol_a = st.number_input("RO-L", key="rol_a", value=0.0)
  
         if st.button("Calculate FCCNOGC"):
             try:
