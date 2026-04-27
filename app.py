@@ -229,7 +229,7 @@ if page == "Cash Flow":
             fcrf_v = st.number_input("FCRf", key="fcrf_direct_fce", value=0.0) if use_direct_fcrf else 0.0
  
         rimb_cap = st.number_input("Rimborso quota capitale", key="rimb_cap_fce", value=0.0)
-        div      = st.number_input("Dividendi", key="div_fce", value=0.0)
+        div = st.number_input("Dividendi", key="div_fce", value=0.0)
  
         if st.button("Calculate FCE"):
             try:
