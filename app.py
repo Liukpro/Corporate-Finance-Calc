@@ -94,14 +94,41 @@ if page == "Cash Flow":
  
     elif op == "FCID":
         st.markdown("Insert here its components")
- 
-        inv = st.number_input("Investments", key="inv", value=0.0)
-        dis = st.number_input("Disinvestments", key="dis", value=0.0)
- 
-        if st.button("Calculate FCID"):
-            res = calc_fcid(fcid=None, inv=inv, dis=dis)
-            st.session_state.fcid = res
-            st.success(f"FCID = {res}")
+        use_direct = st.checkbox("Insert FCID directly", key="use_direct_fcid_main")
+        fcid_a = st.number_input("FCID value:", key="fcid_a", value=0.0) if use_direct else None
+        
+        st.markdown("**Method 1 — via VNC**")
+        val_sto = st.number_input("Historical value (val. storico)", key="val_sto", value=0.0)
+        ammo_ti = st.number_input("Annual amortisation quota", key="ammo_ti", value=0.0)
+        n_ammo = st.number_input("Number of amortisation periods", key="n_ammo", value=0, step=1)
+        plus = st.number_input("Capital gain (plusvalenza)", key="plus", value=0.0)
+        minus = st.number_input("Capital loss (minusvalenza)", key="minus", value=0.0)
+        
+        st.markdown("**Method 2 — direct disinvestment value**")
+        dis = st.number_input("Disinvestment (dis)", key="dis", value=0.0)
+        
+        st.markdown("**Investment**")
+        inv     = st.number_input("Direct investment value (if known)", key="inv", value=0.0)
+        st.markdown("*Or insert acquisitions separately:*")
+        acqui_1 = st.number_input("Acquisition 1", key="acqui_1", value=0.0)
+        acqui_2 = st.number_input("Acquisition 2", key="acqui_2", value=0.0)
+
+    if st.button("Calculate FCID"):
+        res = calc_fcid(
+            fcid    = fcid_a,
+            inv     = inv,
+            dis     = dis,
+            vnc     = 0,
+            val_sto = val_sto,
+            plus    = plus,
+            minus   = minus,
+            ammo_ti = ammo_ti,
+            n_ammo  = int(n_ammo),
+            acqui_1 = acqui_1,
+            acqui_2 = acqui_2
+        )
+        st.session_state.fcid = res
+        st.success(f"FCID = {res:.2f}")
  
     elif op == "FCFR":
         st.markdown("Insert here its components")
@@ -239,5 +266,35 @@ if page == "Cash Flow":
                 st.error(str(e))
             
 if page == "NPV":
-    st.subheader("NPV")
+    st.subheader("Net Present Value (NPV)")
+
+    k    = st.number_input("Discount rate k", key="k", value=0.0, format="%.4f")
+    i_0  = st.number_input("Initial investment I₀", key="i_0", value=0.0)
+    cost = st.number_input("Fixed cost per period", key="cost", value=0.0)
+    n    = st.number_input("Number of periods", key="n", min_value=1, step=1, value=1)
+
+    st.markdown("**Cash flows and time for each period:**")
+
+    fc_list = []
+    t_list  = []
+
+    for i in range(int(n)):
+        col1, col2 = st.columns(2)
+        with col1:
+            fc_list.append(st.number_input(f"Cash flow period {i+1}", key=f"fc_{i}", value=0.0))
+        with col2:
+            t_list.append(st.number_input(f"Time period {i+1}", key=f"t_{i}", min_value=0, step=1, value=i+1))
+
+    use_direct = st.checkbox("Insert NPV directly", key="use_direct_npv")
+    npv_a = st.number_input("NPV value:", key="npv_a", value=0.0) if use_direct else None
+
+    if st.button("Calculate NPV"):
+        res = calc_npv(npv=npv_a, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
+        st.metric(label="NPV", value=f"{res:.2f}")
+        if res > 0:
+            st.info("NPV > 0: the project creates value.")
+        elif res < 0:
+            st.info("NPV < 0: the project destroys value.")
+        else:
+            st.info("NPV = 0: the project is neutral.")
     
