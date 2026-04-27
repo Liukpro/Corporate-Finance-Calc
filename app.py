@@ -24,7 +24,7 @@ page = st.sidebar.radio("Select one", [
     "NPV",
     "Bonds Evaluation -coming soon",
     "Stock Evaluation -coming soon",
-    "Mortgage amortization: French and Italian -coming soon",
+    "Mortgage amortisation: French and Italian -coming soon",
     "NPV Comparision -coming soon",
     "Portfolio -coming soon"
 ])
