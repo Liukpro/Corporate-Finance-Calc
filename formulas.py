@@ -38,12 +38,10 @@ def calc_fcid(fcid, inv=0, dis=0,
     elif val_sto != 0 and ammo_ti != 0 and n_ammo != 0:
         vnc = val_sto - (ammo_ti * n_ammo)
         dis = vnc + plus - minus
-        if inv != 0:
-            inv_final = inv
-        else:
-            inv_final = acqui_1 + acqui_2
+        inv_final = inv if inv != 0 else acqui_1 + acqui_2
         return dis - inv_final
     else:
+        inv_final = inv if inv != 0 else acqui_1 + acqui_2
         return dis - inv_final
 
 def calc_fcfr(fcfr, rimb_cap, pat_net, deb_f):
