@@ -22,7 +22,7 @@ st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
     "Cash Flow",
     "NPV",
-    "Bonds Evaluation -coming soon",
+    "Bond Evaluation",
     "Stock Evaluation -coming soon",
     "Mortgage amortisation: French and Italian -coming soon",
     "NPV Comparision -coming soon",
@@ -299,3 +299,22 @@ if page == "NPV":
             st.info("NPV < 0: the project destroys value.")
         else:
             st.info("NPV = 0: the project is neutral.")
+          
+elif page == "Bond Evaluation":
+  st.subheader("Bond Evaluation")
+  st.markdown("Insert here its components")
+
+  vn = st.number_input("Face value (VN)", key="vn_zero", value=0.0)
+  k = st.number_input("Discount rate k", key="k_zero", value=0.0, format="%.4f")
+  dur = st.number_input("Duration (years)", key="dur_zero", value=0, step=1)
+
+  if st.button("Calculate Zero Coupon Bond VA"):
+      try:
+          res = calc_va_bond_zero(
+              k   = k,
+              vn  = vn,
+              dur = int(dur)
+          )
+          st.success(f"PV = {res}")
+      except ValueError as e:
+            st.error(str(e))
