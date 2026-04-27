@@ -5,7 +5,11 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
 
 st.title("Corporate Finance Calc")
 st.caption("v2.0")
-
+st.markdown("""
+---
+**License:** Apache 2.0  
+**Source code:** https://github.com/tuo-repo
+""")
 for key in ['fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'pat_net_list', 'of_list']:
     if key not in st.session_state:
         st.session_state[key] = None
