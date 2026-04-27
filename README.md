@@ -58,7 +58,7 @@ numpy
 ## Roadmap
 - Bonds Evaluation
 - Stock Evaluation (DDM, Gordon Growth Model)
-- Depreciation: French and Italian methods
+- Mortgage amortisation: French and Italian methods
 - NPV Comparison between projects
 - Portfolio Theory
 
