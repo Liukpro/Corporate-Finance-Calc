@@ -292,7 +292,7 @@ if page == "NPV":
 
     if st.button("Calculate NPV"):
         res = calc_npv(npv=npv_a, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
-        st.metric(label="NPV", value=f"{res:.2f}")
+        st.success(f"NPV = {res}")
         if res > 0:
             st.info("NPV > 0: the project creates value.")
         elif res < 0:
@@ -301,20 +301,22 @@ if page == "NPV":
             st.info("NPV = 0: the project is neutral.")
           
 elif page == "Bond Evaluation":
-  st.subheader("Bond Evaluation")
-  st.markdown("Insert here its components")
+    st.subheader("Bond Evaluation")
+    st.markdown("Insert here its components")
+  
+    vn  = st.number_input("Face value (VN)", key="vn_zero", value=0.0)
+    k  = st.number_input("Discount rate k", key="k_zero", value=0.0, format="%.4f")
+    dur = st.number_input("Duration (years)", key="dur_zero", value=0, step=1)
 
-  vn = st.number_input("Face value (VN)", key="vn_zero", value=0.0)
-  k = st.number_input("Discount rate k", key="k_zero", value=0.0, format="%.4f")
-  dur = st.number_input("Duration (years)", key="dur_zero", value=0, step=1)
-
-  if st.button("Calculate Zero Coupon Bond PV"):
-      try:
-          res = calc_va_bond_zero(
-              k   = k,
-              vn  = vn,
-              dur = int(dur)
-          )
-          st.success(f"PV = {res}")
-      except ValueError as e:
+    if st.button("Calculate Zero Coupon Bond PV"):
+        try:
+            res = calc_va_bond_zero(k=k, vn=vn, dur=int(dur))
+            st.success(f"PV = {res}")
+            if res > vn:
+                st.info("PV > VN: Above par.")
+            elif res < vn:
+                st.info("PV < VN: Below par.")
+            else:
+                st.info("PV = VN: At par.")
+        except ValueError as e:
             st.error(str(e))
