@@ -301,10 +301,10 @@ if page == "NPV":
             st.info("NPV = 0: the project is neutral.")
           
 elif page == "Bond Evaluation":
-    st.subheader("Bond Evaluation")
+    st.subheader("Zero Coupon Bond PV")
     st.markdown("Insert here its components")
   
-    vn  = st.number_input("Face value (VN)", key="vn_zero", value=0.0)
+    vn = st.number_input("Face value (VN)", key="vn_zero", value=0.0)
     k = st.number_input("Discount rate k", key="k_zero", value=0.0, format="%.4f")
     dur = st.number_input("Duration (years)", key="dur_zero", value=0, step=1)
 
