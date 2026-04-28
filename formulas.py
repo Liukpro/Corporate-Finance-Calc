@@ -125,3 +125,10 @@ def calc_va_bond_zero(va, k, vn, dur):
     else:
         raise ValueError("Insufficient Data")
         
+def yield_to_mat_zero(k, va, vn, dur):
+    if k is not None:
+        return k
+    if va !=0 and vn != 0 and dur != 0:
+        return (vn / va) ** (1/dur) - 1
+    else:
+        raise ValueError("Insufficient Data")
