@@ -61,17 +61,17 @@ The project is built with a strict separation between financial logic and interf
 
 | Feature | Status |
 |---|---|
-| Cash Flow (FCCNOGC, RO-L, FCGC, FCID, FCFR, FCRf, FCU, FCE, Var. Liquidità) | ✅ Complete |
-| NPV | ✅ Complete |
-| Bond Evaluation (Zero Coupon) | ✅ Complete |
-| Stock Evaluation (DDM, Gordon Growth Model) | 🔄 In progress |
-| Mortgage Amortisation (French and Italian) | 🔄 In progress |
-| DCF valuation + WACC | 📋 Planned |
-| NPV Comparison | 🔄 In progress |
-| Portfolio (risk/return, Markowitz frontier) | 🔄 In progress |
-| Excel input layer | 📋 Planned |
-| PDF/Excel report output | 📋 Planned |
-| Market data integration | 📋 Planned |
+| Cash Flow (FCCNOGC, RO-L, FCGC, FCID, FCFR, FCRf, FCU, FCE, Var. Liquidità) | Complete |
+| NPV | Complete |
+| Bond Evaluation (Zero Coupon) | Complete |
+| Stock Evaluation (DDM, Gordon Growth Model) | In progress |
+| Mortgage Amortisation (French and Italian) | In progress |
+| DCF valuation + WACC | Planned |
+| NPV Comparison | In progress |
+| Portfolio (risk/return, Markowitz frontier) | In progress |
+| Excel input layer | Planned |
+| PDF/Excel report output | Planned |
+| Market data integration | Planned |
 
 ---
 
