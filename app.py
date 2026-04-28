@@ -267,7 +267,7 @@ if page == "Cash Flow":
             except Exception as e:
                 st.error(str(e))
             
-if page == "NPV":
+elif page == "NPV":
     st.subheader("Net Present Value (NPV)")
 
     k = st.number_input("Discount rate k", key="k", value=0.0, format="%.4f")
