@@ -8,8 +8,6 @@ Build a Python tool that reads real financial statements, runs financial analysi
 Specifically: balance sheet analysis, financial model support, DCF valuation,
 due diligence, client-ready reports.
 
-**Target roles:** Deloitte / KPMG / PwC / boutique M&A / CFO office
-
 ---
 
 ## Core Principle: Output Readability
