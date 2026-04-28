@@ -88,7 +88,7 @@ def calc_npv(npv, fc, k, i_0, t, cost):
         result = pv - i_0
         return result
 
-def calc_va_bond_zero(va, k, vn, dur):
+def calc_va_bond_zero(k, vn, dur):
     if k != 0 and vn != 0 and dur != 0:
         return vn / ((1 + k) ** dur)
     else:
