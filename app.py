@@ -4,7 +4,7 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                      calc_fce, calc_npv, calc_va_bond_zero)
 
 st.title("Corporate Finance Calc")
-st.caption("v2.0")
+st.caption("v2.1")
 st.caption("""
 **License:** Apache 2.0  
 **Source code:** https://github.com/Liukpro/Corporate-Finance-Calc
