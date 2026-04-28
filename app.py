@@ -33,7 +33,7 @@ if st.sidebar.button("Reset Session"):
   
 st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
-    "Cash Flow",
+    "Cash Flow and Ratio Analysis",
     "NPV",
     "Bond Evaluation -in progress",
     "Stock Evaluation -coming soon",
@@ -44,7 +44,7 @@ page = st.sidebar.radio("Select one", [
     "Portfolio -coming soon"
 ])
 
-if page == "Cash Flow":
+if page == "Cash Flow and Ratio Analysis":
     st.subheader("Cash Flow")
 
     op = st.selectbox("Which cash flow you need to calculate?", ["FCCNOGC", "RO-L", "FCGC", "FCID",
