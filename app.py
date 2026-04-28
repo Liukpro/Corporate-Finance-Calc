@@ -342,8 +342,7 @@ elif page == "NPV":
         else:
             st.info("NPV = 0: the project is neutral.")
           
-    
-    elif page == "Bond Evaluation -in progress":
+elif page == "Bond Evaluation -in progress":
     st.subheader("Zero Coupon Bond PV")
     st.markdown("Insert here its components")
   
