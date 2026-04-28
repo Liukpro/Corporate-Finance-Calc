@@ -4,6 +4,8 @@ A Python-based corporate finance analysis tool designed to replicate the workflo
 
 The project evolves from a simple Streamlit demo into a full production tool that reads real financial statements, performs analysis (cash flows, valuation, benchmarking), and generates client-ready reports.
 
+## Accessible demo: https://corporate-finance-calc.streamlit.app/
+
 ---
 
 ## Vision
