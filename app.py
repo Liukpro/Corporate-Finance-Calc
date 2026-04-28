@@ -22,7 +22,7 @@ st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
     "Cash Flow",
     "NPV",
-    "Bond Evaluation",
+    "Bond Evaluation -in progress",
     "Stock Evaluation -coming soon",
     "Mortgage amortisation: French and Italian -coming soon",
     "NPV Comparision -coming soon",
