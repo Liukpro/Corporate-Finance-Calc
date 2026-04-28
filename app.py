@@ -284,7 +284,7 @@ if page == "Cash Flow and Ratio Analysis":
 
     st.markdown("---")
     if st.button("Make a Ratio Analysis"):
-        st.markdown("### Ratio Analysis")
+        st.markdown("### Ratio Analysis(ROS, ROI, ROE")
         
         ric_op_mon = st.number_input("Operating Revenue", key="ric_ratio", value=0.0)
         rol_a      = st.number_input("RO-L", key="rol_ratio", value=0.0)
