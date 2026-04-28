@@ -1,7 +1,8 @@
 import streamlit as st
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                      calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
-                     calc_fce, calc_npv, calc_va_bond_zero)
+                     calc_fce, calc_npv, calc_va_bond_zero, calc_ros, 
+                     calc_roi, calc_roe)
 
 st.title("Corporate Finance Calc")
 st.caption("v2.1")
@@ -9,7 +10,19 @@ st.caption("""
 **License:** Apache 2.0  
 **Source code:** https://github.com/Liukpro/Corporate-Finance-Calc
 """)
-for key in ['fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'pat_net_list', 'of_list']:
+
+for key in [
+    # Risultati
+    'fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'fce',
+    'ros', 'roi', 'roe',
+
+    'pat_net', 'deb_f', 'liq', 'pos_fin_net', 'cin',
+
+    'ric_op_mon', 'cost_op_mon', 'ammort', 'mol',
+    'of', 'imp', 'ut_net',
+
+    'ccno', 'rimb_cap', 'div'
+]:
     if key not in st.session_state:
         st.session_state[key] = None
       
@@ -36,7 +49,7 @@ if page == "Cash Flow":
 
     op = st.selectbox("Which cash flow you need to calculate?", ["FCCNOGC", "RO-L", "FCGC", "FCID",
                                                                  "FCFR", "FCRf", "Variazione Liquidità",
-                                                                 "FCU", "FCE"])
+                                                                 "FCU", "FCE", "Ratio Analysis"])
     
     if op == "FCCNOGC":
         st.markdown("Insert here its components")
@@ -267,6 +280,31 @@ if page == "Cash Flow":
                 res = calc_fce(fce=None, fcu=fcu_v, fcfr=fcfr_v, fcrf=fcrf_v, rimb_cap=rimb_cap, div=div)
                 st.success(f"FCE = {res}")
             except Exception as e:
+                st.error(str(e))
+
+    elif op == "Ratio Analysis":
+        st.markdown("Insert here its components")
+
+        ric_op_mon = st.number_input("Operating Revenue", key="ric_ratio", value=0.0)
+        rol_a      = st.number_input("RO-L", key="rol_ratio", value=0.0)
+        deb_f      = st.number_input("Financial Debt", key="deb_f_ratio", value=0.0)
+        liq        = st.number_input("Liquidity", key="liq_ratio", value=0.0)
+        pat_net    = st.number_input("Patrimonio Netto", key="pat_net_ratio", value=0.0)
+        of_v       = st.number_input("Oneri Finanziari", key="of_ratio", value=0.0)
+        imp        = st.number_input("Imposte", key="imp_ratio", value=0.0)
+
+        if st.button("Calculate Ratios"):
+            try:
+                ros = calc_ros(ros=None, rol=rol_a, ric_op_mon=ric_op_mon)
+                roi = calc_roi(roi=None, rol=rol_a, deb_f=deb_f, liq=liq, pat_net=pat_net)
+                roe = calc_roe(roe=None, ut_net=None, pat_net=pat_net, rol=rol_a, of=of_v, imp=imp)
+                st.session_state.ros = ros
+                st.session_state.roi = roi
+                st.session_state.roe = roe
+                st.metric(label="ROS", value=f"{ros:.2%}")
+                st.metric(label="ROI", value=f"{roi:.2%}")
+                st.metric(label="ROE", value=f"{roe:.2%}")
+            except ValueError as e:
                 st.error(str(e))
             
 elif page == "NPV":
