@@ -1,7 +1,7 @@
 import streamlit as st
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                      calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
-                     calc_fce, calc_npv)
+                     calc_fce, calc_npv, calc_va_bond_zero)
 
 st.title("Corporate Finance Calc")
 st.caption("v2.0")
