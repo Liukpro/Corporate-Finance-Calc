@@ -307,10 +307,11 @@ elif page == "Bond Evaluation":
     vn = st.number_input("Face value (VN)", key="vn_zero", value=0.0)
     k = st.number_input("Discount rate k", key="k_zero", value=0.0, format="%.4f")
     dur = st.number_input("Duration (years)", key="dur_zero", value=0.0, format="%.2f")
-
+    use_direct = st.checkbox("Insert PV directly", key="use_direct_pv")
+    pv_a = st.number_input("PV value:", key="pv_a", value=0.0) if use_direct else None
     if st.button("Calculate Zero Coupon Bond PV"):
         try:
-            res = calc_va_bond_zero(k=k, vn=vn, dur=dur)
+            res = calc_va_bond_zero(va=pv_a, k=k, vn=vn, dur=dur)
             st.success(f"PV = {res}")
             if res > vn:
                 st.info("PV > VN: Above par.")
