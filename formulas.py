@@ -22,6 +22,35 @@ def calc_rol(rol, ric_op_mon = 0, cost_op_mon = 0, ammort = 0, mol = 0):
     else:
         raise ValueError("Insufficient Data")
 
+def calc_ros(ros, rol, ric_op_mon):
+    if ros is not None:
+        return ros
+    elif rol is not None and ric_op_mon is not None and ric_op_mon != 0:
+        return rol / ric_op_mon
+    else:
+        raise ValueError("Insufficient Data")
+
+def calc_roi(roi, rol, deb_f, liq, pat_net):
+    if roi is not None:
+        return roi
+    elif rol is not None and deb_f is not None and liq is not None and pat_net is not None:
+        pos_fin_net = deb_f - liq
+        cin = pat_net + pos_fin_net
+        if cin == 0:
+            raise ValueError("CIN is zero, division not possible")
+        return rol / cin
+    else:
+        raise ValueError("Insufficient Data")
+
+def calc_roe(roe, rol, of, imp, pat_net):
+    if roe is not None:
+        return roe
+    elif rol is not None and of is not None and imp is not None and pat_net is not None and pat_net != 0:
+        ut_net = rol - of - imp
+        return ut_net / pat_net
+    else:
+        raise ValueError("Insufficient Data")
+
 def calc_fcgc(fcgc, fccnogc, ccno):
     if fcgc is not None:
         return fcgc
