@@ -49,7 +49,7 @@ if page == "Cash Flow":
 
     op = st.selectbox("Which cash flow you need to calculate?", ["FCCNOGC", "RO-L", "FCGC", "FCID",
                                                                  "FCFR", "FCRf", "Variazione Liquidità",
-                                                                 "FCU", "FCE", "Ratio Analysis"])
+                                                                 "FCU", "FCE"])
     
     if op == "FCCNOGC":
         st.markdown("Insert here its components")
@@ -282,9 +282,10 @@ if page == "Cash Flow":
             except Exception as e:
                 st.error(str(e))
 
-    elif op == "Ratio Analysis":
-        st.markdown("Insert here its components")
-
+    st.markdown("---")
+    if st.button("📊 Make a Ratio Analysis"):
+        st.markdown("### Ratio Analysis")
+        
         ric_op_mon = st.number_input("Operating Revenue", key="ric_ratio", value=0.0)
         rol_a      = st.number_input("RO-L", key="rol_ratio", value=0.0)
         deb_f      = st.number_input("Financial Debt", key="deb_f_ratio", value=0.0)
@@ -293,7 +294,7 @@ if page == "Cash Flow":
         of_v       = st.number_input("Oneri Finanziari", key="of_ratio", value=0.0)
         imp        = st.number_input("Imposte", key="imp_ratio", value=0.0)
 
-        if st.button("Calculate Ratios"):
+        if st.button("Calculate Ratios", key="calc_ratios_btn"):
             try:
                 ros = calc_ros(ros=None, rol=rol_a, ric_op_mon=ric_op_mon)
                 roi = calc_roi(roi=None, rol=rol_a, deb_f=deb_f, liq=liq, pat_net=pat_net)
@@ -306,6 +307,7 @@ if page == "Cash Flow":
                 st.metric(label="ROE", value=f"{roe:.2%}")
             except ValueError as e:
                 st.error(str(e))
+
             
 elif page == "NPV":
     st.subheader("Net Present Value (NPV)")
