@@ -283,7 +283,7 @@ if page == "Cash Flow":
                 st.error(str(e))
 
     st.markdown("---")
-    if st.button("📊 Make a Ratio Analysis"):
+    if st.button("Make a Ratio Analysis"):
         st.markdown("### Ratio Analysis")
         
         ric_op_mon = st.number_input("Operating Revenue", key="ric_ratio", value=0.0)
