@@ -1,364 +1,259 @@
 import streamlit as st
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
-                     calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
-                     calc_fce, calc_npv, calc_va_bond_zero, calc_ros, 
-                     calc_roi, calc_roe)
+                      calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
+                      calc_fce, calc_npv, calc_va_bond_zero, calc_ros, 
+                      calc_roi, calc_roe)
+
+# Configurazione Pagina
+st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
 
 st.title("Corporate Finance Calc")
-st.caption("v2.1 -If the program crashes with a TypeError, it means that the input or the import of the data required for the calculation was unsuccessful (incomplete).")
-st.caption("""
+st.caption("v2.1 - Fail-Fast Philosophy Implementation")
+st.caption("If the program crashes with a TypeError, it means that the input or the import of the data required for the calculation was unsuccessful (incomplete).")
+
+st.sidebar.markdown("""
 **License:** Apache 2.0  
-**Source code:** https://github.com/Liukpro/Corporate-Finance-Calc
+**Source code:** [GitHub](https://github.com/Liukpro/Corporate-Finance-Calc)
 """)
-for key in [
-    # Risultati
+
+# Inizializzazione Session State
+keys_to_init = [
     'fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'fce',
-    'ros', 'roi', 'roe',
-
-    'pat_net', 'deb_f', 'liq', 'pos_fin_net', 'cin',
-
-    'ric_op_mon', 'cost_op_mon', 'ammort', 'mol',
-    'of', 'imp', 'ut_net',
-
+    'ros', 'roi', 'roe', 'pat_net', 'deb_f', 'liq', 'pos_fin_net', 'cin',
+    'ric_op_mon', 'cost_op_mon', 'ammort', 'mol', 'of', 'imp', 'ut_net',
     'ccno', 'rimb_cap', 'div'
-]:
+]
+for key in keys_to_init:
     if key not in st.session_state:
         st.session_state[key] = None
       
 if st.sidebar.button("Reset Session"):
-    for key in st.session_state:
+    for key in keys_to_init:
         st.session_state[key] = None
     st.rerun()
   
 st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
-    "Cash Flow and Ratio Analysis",
+    "Cash Flow Analysis",
+    "Ratio Analysis",
     "NPV",
-    "Bond Evaluation -in progress",
-    "Stock Evaluation -coming soon",
-    "Mortgage amortisation: French and Italian -coming soon",
-    "NPV Comparision -coming soon",
-    "WACC -coming soon",
-    "TIR -coming soon",
-    "Portfolio -coming soon"
+    "Bond Evaluation - in progress",
+    "Coming Soon..."
 ])
 
-if page == "Cash Flow and Ratio Analysis":
-    st.subheader("Cash Flow")
+# --- PAGE: CASH FLOW ANALYSIS ---
+if page == "Cash Flow Analysis":
+    st.subheader("Cash Flow Calculation")
 
-    op = st.selectbox("Which cash flow you need to calculate?", ["FCCNOGC", "RO-L", "FCGC", "FCID",
-                                                                 "FCFR", "FCRf", "Variazione Liquidità",
-                                                                 "FCU", "FCE"])
+    op = st.selectbox("Select the Cash Flow to calculate:", 
+                      ["FCCNOGC", "RO-L", "FCGC", "FCID", "FCFR", "FCRf", "Variazione Liquidità", "FCU", "FCE"])
     
+    # Helper per mostrare valori calcolati in precedenza
+    def show_dependency(key_name, label):
+        if st.session_state[key_name] is not None:
+            st.info(f"{label} from previous calculation: {st.session_state[key_name]:.2f}")
+            return st.session_state[key_name]
+        else:
+            st.warning(f"{label} not calculated yet.")
+            return st.number_input(f"Insert {label} manually", value=0.0)
+
     if op == "FCCNOGC":
-        st.markdown("Insert here its components")
- 
-        ric = st.number_input("Operating Revenue", key="ric", value=0.0)
-        cost = st.number_input("Operating Costs", key="cost", value=0.0)
-        imp = st.number_input("Taxes", key="imp", value=0.0)
-        ammort = st.number_input("Amortisation", key="ammort", value=0.0)
-        mol = st.number_input("Gross Operating Margin", key="mol", value=0.0)
-        rol_a = st.number_input("RO-L", key="rol_a", value=0.0)
- 
+        st.write("Formula: Multiple paths (Revenue-Costs-Taxes / MOL-Taxes / ROL-Taxes+Ammort)")
+        c1, c2 = st.columns(2)
+        with c1:
+            ric = st.number_input("Operating Revenue", value=0.0)
+            cost = st.number_input("Operating Costs", value=0.0)
+            imp = st.number_input("Taxes (Income)", value=0.0)
+        with c2:
+            ammort = st.number_input("Amortisation", value=0.0)
+            mol = st.number_input("MOL (EBITDA)", value=0.0)
+            rol_input = st.number_input("RO-L (EBIT)", value=0.0)
+
         if st.button("Calculate FCCNOGC"):
             try:
-                res = calc_fccnogc(
-                    fccnogc=None,
-                    ric_op_mon=ric, cost_op_mon=cost,
-                    imp=imp, ammort=ammort, mol=mol, rol=rol_a)
+                # Passiamo i valori. Se l'utente lascia 0.0, calc_fccnogc userà le sue logiche elif
+                res = calc_fccnogc(None, ric_op_mon=ric, cost_op_mon=cost, imp=imp, ammort=ammort, mol=mol, rol=rol_input)
                 st.session_state.fccnogc = res
-                st.success(f"FCCNOGC = {res}")
+                st.success(f"FCCNOGC = {res:.2f}")
             except ValueError as e:
-                st.error(str(e))
- 
+                st.error(f"Error: {e}")
+
     elif op == "RO-L":
-        st.markdown("Insert here its components")
- 
-        ric = st.number_input("Operating Revenue", key="ric_rol", value=0.0)
-        cost = st.number_input("Operating Costs", key="cost_rol", value=0.0)
-        ammort = st.number_input("Amortisation", key="ammort_rol", value=0.0)
-        mol = st.number_input("Gross Operating Margin", key="mol_rol", value=0.0)
- 
+        c1, c2 = st.columns(2)
+        with c1:
+            ric = st.number_input("Operating Revenue", value=0.0)
+            cost = st.number_input("Operating Costs", value=0.0)
+        with c2:
+            ammort = st.number_input("Amortisation", value=0.0)
+            mol = st.number_input("MOL (EBITDA)", value=0.0)
+
         if st.button("Calculate RO-L"):
             try:
-                res = calc_rol(
-                    rol=None,
-                    ric_op_mon=ric, cost_op_mon=cost,
-                    ammort=ammort, mol=mol)
+                res = calc_rol(None, ric_op_mon=ric, cost_op_mon=cost, ammort=ammort, mol=mol)
                 st.session_state.rol = res
-                st.success(f"RO-L = {res}")
+                st.success(f"RO-L = {res:.2f}")
             except ValueError as e:
-                st.error(str(e))
- 
+                st.error(f"Error: {e}")
+
     elif op == "FCGC":
-        st.markdown("Insert here its components")
- 
-        # FCCNOGC: da session state oppure inserito diretto, stesso schema per le prossime dipendenze
-        if st.session_state.fccnogc is not None:
-            st.info(f"FCCNOGC from previous calculation: {st.session_state.fccnogc}")
-            fccnogc_v = st.session_state.fccnogc
-        else:
-            st.warning("FCCNOGC not calculated yet.")
-            use_direct_fccnogc = st.checkbox("Insert FCCNOGC directly", key="use_direct_fccnogc")
-            fccnogc_v = st.number_input("FCCNOGC", key="fccnogc_direct", value=0.0) if use_direct_fccnogc else 0.0
- 
-        ccno = st.number_input("Variazione CCNO", key="ccno", value=0.0)
- 
+        fccnogc_v = show_dependency('fccnogc', 'FCCNOGC')
+        ccno = st.number_input("Delta CCNO (Working Capital Variation)", value=0.0)
         if st.button("Calculate FCGC"):
-            res = calc_fcgc(fcgc=None, fccnogc=fccnogc_v, ccno=ccno)
+            res = calc_fcgc(None, fccnogc=fccnogc_v, ccno=ccno)
             st.session_state.fcgc = res
-            st.success(f"FCGC = {res}")
- 
+            st.success(f"FCGC = {res:.2f}")
+
     elif op == "FCID":
-        st.markdown("Insert here its components")
-        use_direct = st.checkbox("Insert FCID directly", key="use_direct_fcid_main")
-        fcid_a = st.number_input("FCID value:", key="fcid_a", value=0.0) if use_direct else None
-        
-        st.markdown("**Method 1 — via VNC**")
-        val_sto = st.number_input("Historical value (val. storico)", key="val_sto", value=0.0)
-        ammo_ti = st.number_input("Annual amortisation quota", key="ammo_ti", value=0.0)
-        n_ammo = st.number_input("Number of amortisation periods", key="n_ammo", value=0, step=1)
-        plus = st.number_input("Capital gain (plusvalenza)", key="plus", value=0.0)
-        minus = st.number_input("Capital loss (minusvalenza)", key="minus", value=0.0)
-        
-        st.markdown("**Method 2 — direct disinvestment value**")
-        dis = st.number_input("Disinvestment (dis)", key="dis", value=0.0)
-        
-        st.markdown("**Investment**")
-        inv = st.number_input("Direct investment value (if known)", key="inv", value=0.0)
-        st.markdown("*Or insert acquisitions separately:*")
-        acqui_1 = st.number_input("Acquisition 1", key="acqui_1", value=0.0)
-        acqui_2 = st.number_input("Acquisition 2", key="acqui_2", value=0.0)
+        st.write("Calculation of Cash Flow from Investing Activities")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown("**Disinvestment Data**")
+            val_sto = st.number_input("Historical Value", value=0.0)
+            ammo_ti = st.number_input("Annual Amort. Quota", value=0.0)
+            n_ammo = st.number_input("Years of Amort.", value=0, step=1)
+            plus = st.number_input("Capital Gain (Plusvalenza)", value=0.0)
+            minus = st.number_input("Capital Loss (Minusvalenza)", value=0.0)
+            dis_manual = st.number_input("Direct Disinvestment Value (if known)", value=0.0)
+        with c2:
+            st.markdown("**Investment Data**")
+            inv_manual = st.number_input("Direct Investment Value", value=0.0)
+            acq1 = st.number_input("Acquisition 1", value=0.0)
+            acq2 = st.number_input("Acquisition 2", value=0.0)
 
         if st.button("Calculate FCID"):
-          res = calc_fcid(fcid = fcid_a,
-                          inv = inv,
-                          dis = dis,
-                          vnc = None,
-                          val_sto = val_sto,
-                          plus = plus,
-                          minus = minus,
-                          ammo_ti = ammo_ti,
-                          n_ammo = int(n_ammo),
-                          acqui_1 = acqui_1,
-                          acqui_2 = acqui_2
-                         )
-          st.session_state.fcid = res
-          st.success(f"FCID = {res:.2f}")
- 
-    elif op == "FCFR":
-        st.markdown("Insert here its components")
- 
-        rimb_cap = st.number_input("Rimborso quota capitale", key="rimb_cap", value=0.0)
-        pat_net = st.number_input("Patrimonio netto", key="pat_net", value=0.0)
-        deb_f = st.number_input("Debito finanziario", key="deb_f", value=0.0)
- 
-        if st.button("Calculate FCFR"):
-            res = calc_fcfr(fcfr=None, rimb_cap=rimb_cap, pat_net=pat_net, deb_f=deb_f)
-            st.session_state.fcfr = res
-            st.success(f"FCFR = {res}")
- 
-    elif op == "FCRf":
-        st.markdown("Insert here its components")
- 
-        of_v = st.number_input("Oneri finanziari", key="of_v", value=0.0)
-        div = st.number_input("Dividendi", key="div", value=0.0)
- 
-        if st.button("Calculate FCRf"):
-            res = calc_fcrf(fcrf=None, of=of_v, div=div)
-            st.session_state.fcrf = res
-            st.success(f"FCRf = {res}")
- 
-    elif op == "FCU":
-        st.markdown("Insert here its components")
- 
-        # FCGC
-        if st.session_state.fcgc is not None:
-            st.info(f"FCGC from previous calculation: {st.session_state.fcgc}")
-            fcgc_v = st.session_state.fcgc
-        else:
-            st.warning("FCGC not calculated yet.")
-            use_direct_fcgc = st.checkbox("Insert FCGC directly", key="use_direct_fcgc")
-            fcgc_v = st.number_input("FCGC", key="fcgc_direct", value=0.0) if use_direct_fcgc else 0.0
- 
-        
-        if st.session_state.fcid is not None:
-            st.info(f"FCID from previous calculation: {st.session_state.fcid}")
-            fcid_v = st.session_state.fcid
-        else:
-            st.warning("FCID not calculated yet.")
-            use_direct_fcid = st.checkbox("Insert FCID directly", key="use_direct_fcid")
-            fcid_v = st.number_input("FCID", key="fcid_direct", value=0.0) if use_direct_fcid else 0.0
- 
-        if st.button("Calculate FCU"):
-            res = calc_fcu(fcu=None, fcgc=fcgc_v, fcid=fcid_v)
-            st.session_state.fcu = res
-            st.success(f"FCU = {res}")
- 
-    elif op == "Variazione Liquidità":
-        st.markdown("Insert here its components")
- 
-        
-        if st.session_state.fcgc is not None:
-            st.info(f"FCGC from previous calculation: {st.session_state.fcgc}")
-            fcgc_v = st.session_state.fcgc
-        else:
-            st.warning("FCGC not calculated yet.")
-            use_direct_fcgc = st.checkbox("Insert FCGC directly", key="use_direct_fcgc_vl")
-            fcgc_v = st.number_input("FCGC", key="fcgc_direct_vl", value=0.0) if use_direct_fcgc else 0.0
- 
-        
-        if st.session_state.fcid is not None:
-            st.info(f"FCID from previous calculation: {st.session_state.fcid}")
-            fcid_v = st.session_state.fcid
-        else:
-            st.warning("FCID not calculated yet.")
-            use_direct_fcid = st.checkbox("Insert FCID directly", key="use_direct_fcid_vl")
-            fcid_v = st.number_input("FCID", key="fcid_direct_vl", value=0.0) if use_direct_fcid else 0.0
- 
-        
-        if st.session_state.fcfr is not None:
-            st.info(f"FCFR from previous calculation: {st.session_state.fcfr}")
-            fcfr_v = st.session_state.fcfr
-        else:
-            st.warning("FCFR not calculated yet.")
-            use_direct_fcfr = st.checkbox("Insert FCFR directly", key="use_direct_fcfr_vl")
-            fcfr_v = st.number_input("FCFR", key="fcfr_direct_vl", value=0.0) if use_direct_fcfr else 0.0
- 
-        
-        if st.session_state.fcrf is not None:
-            st.info(f"FCRf from previous calculation: {st.session_state.fcrf}")
-            fcrf_v = st.session_state.fcrf
-        else:
-            st.warning("FCRf not calculated yet.")
-            use_direct_fcrf = st.checkbox("Insert FCRf directly", key="use_direct_fcrf_vl")
-            fcrf_v = st.number_input("FCRf", key="fcrf_direct_vl", value=0.0) if use_direct_fcrf else 0.0
- 
-        if st.button("Calculate Variazione Liquidità"):
             try:
-                res = calc_var_liq(var_liq=None, fcgc=fcgc_v, fcid=fcid_v, fcfr=fcfr_v, fcrf=fcrf_v)
-                st.success(f"Variazione Liquidità = {res}")
-            except Exception as e:
-                st.error(str(e))
- 
-    elif op == "FCE":
-        st.markdown("Insert here its components")
- 
-        
-        if st.session_state.fcu is not None:
-            st.info(f"FCU from previous calculation: {st.session_state.fcu}")
-            fcu_v = st.session_state.fcu
-        else:
-            st.warning("FCU not calculated yet.")
-            use_direct_fcu = st.checkbox("Insert FCU directly", key="use_direct_fcu")
-            fcu_v = st.number_input("FCU", key="fcu_direct", value=0.0) if use_direct_fcu else 0.0
- 
-        
-        if st.session_state.fcfr is not None:
-            st.info(f"FCFR from previous calculation: {st.session_state.fcfr}")
-            fcfr_v = st.session_state.fcfr
-        else:
-            st.warning("FCFR not calculated yet.")
-            use_direct_fcfr = st.checkbox("Insert FCFR directly", key="use_direct_fcfr_fce")
-            fcfr_v = st.number_input("FCFR", key="fcfr_direct_fce", value=0.0) if use_direct_fcfr else 0.0
- 
-        
-        if st.session_state.fcrf is not None:
-            st.info(f"FCRf from previous calculation: {st.session_state.fcrf}")
-            fcrf_v = st.session_state.fcrf
-        else:
-            st.warning("FCRf not calculated yet.")
-            use_direct_fcrf = st.checkbox("Insert FCRf directly", key="use_direct_fcrf_fce")
-            fcrf_v = st.number_input("FCRf", key="fcrf_direct_fce", value=0.0) if use_direct_fcrf else 0.0
- 
-        rimb_cap = st.number_input("Rimborso quota capitale", key="rimb_cap_fce", value=0.0)
-        div = st.number_input("Dividendi", key="div_fce", value=0.0)
- 
-        if st.button("Calculate FCE"):
-            try:
-                res = calc_fce(fce=None, fcu=fcu_v, fcfr=fcfr_v, fcrf=fcrf_v, rimb_cap=rimb_cap, div=div)
-                st.success(f"FCE = {res}")
-            except Exception as e:
-                st.error(str(e))
-
-    st.markdown("---")
-    if st.button("Make a Ratio Analysis"):
-        st.markdown("### Ratio Analysis (ROS, ROI, ROE)")
-        
-        ric_op_mon = st.number_input("Operating Revenue", key="ric_ratio", value=0.0)
-        rol_a      = st.number_input("RO-L", key="rol_ratio", value=0.0)
-        deb_f      = st.number_input("Financial Debt", key="deb_f_ratio", value=0.0)
-        liq        = st.number_input("Liquidity", key="liq_ratio", value=0.0)
-        pat_net    = st.number_input("Patrimonio Netto", key="pat_net_ratio", value=0.0)
-        of_v       = st.number_input("Oneri Finanziari", key="of_ratio", value=0.0)
-        imp        = st.number_input("Imposte", key="imp_ratio", value=0.0)
-
-        if st.button("Calculate Ratios", key="calc_ratios_btn"):
-            try:
-                ros = calc_ros(ros=None, rol=rol_a, ric_op_mon=ric_op_mon)
-                roi = calc_roi(roi=None, rol=rol_a, deb_f=deb_f, liq=liq, pat_net=pat_net)
-                roe = calc_roe(roe=None, ut_net=None, pat_net=pat_net, rol=rol_a, of=of_v, imp=imp)
-                st.session_state.ros = ros
-                st.session_state.roi = roi
-                st.session_state.roe = roe
-                st.metric(label="ROS", value=f"{ros:.2%}")
-                st.metric(label="ROI", value=f"{roi:.2%}")
-                st.metric(label="ROE", value=f"{roe:.2%}")
+                res = calc_fcid(fcid=None, inv=inv_manual if inv_manual != 0 else None, 
+                                dis=dis_manual if dis_manual != 0 else None,
+                                val_sto=val_sto if val_sto != 0 else None, 
+                                ammo_ti=ammo_ti, n_ammo=n_ammo,
+                                plus=plus, minus=minus, acqui_1=acq1, acqui_2=acq2)
+                st.session_state.fcid = res
+                st.success(f"FCID = {res:.2f}")
             except ValueError as e:
                 st.error(str(e))
 
+    elif op == "FCFR":
+        rimb_cap = st.number_input("Repayment of Capital (Rimborso Quota Capitale)", value=0.0)
+        pat_net = st.number_input("Equity (Patrimonio Netto)", value=0.0)
+        deb_f = st.number_input("Financial Debt", value=0.0)
+        if st.button("Calculate FCFR"):
+            res = calc_fcfr(None, rimb_cap=rimb_cap, pat_net=pat_net, deb_f=deb_f)
+            st.session_state.fcfr = res
+            st.success(f"FCFR = {res:.2f}")
+
+    elif op == "FCRf":
+        of = st.number_input("Interest Expense (Oneri Finanziari)", value=0.0)
+        div = st.number_input("Dividends", value=0.0)
+        if st.button("Calculate FCRf"):
+            res = calc_fcrf(None, of=of, div=div)
+            st.session_state.fcrf = res
+            st.success(f"FCRf = {res:.2f}")
+
+    elif op == "FCU":
+        v1 = show_dependency('fcgc', 'FCGC')
+        v2 = show_dependency('fcid', 'FCID')
+        if st.button("Calculate FCU"):
+            res = calc_fcu(None, fcgc=v1, fcid=v2)
+            st.session_state.fcu = res
+            st.success(f"FCU = {res:.2f}")
+
+    elif op == "FCE":
+        fcu_v = show_dependency('fcu', 'FCU')
+        fcfr_v = show_dependency('fcfr', 'FCFR')
+        fcrf_v = show_dependency('fcrf', 'FCRf')
+        rimb_cap = st.number_input("Capital Repayment", value=0.0)
+        div = st.number_input("Dividends Paid", value=0.0)
+        if st.button("Calculate FCE"):
+            try:
+                res = calc_fce(None, fcu=fcu_v, fcfr=fcfr_v, fcrf=fcrf_v, rimb_cap=rimb_cap, div=div)
+                st.session_state.fce = res
+                st.success(f"FCE = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
+
+    elif op == "Variazione Liquidità":
+        v1 = show_dependency('fcgc', 'FCGC')
+        v2 = show_dependency('fcid', 'FCID')
+        v3 = show_dependency('fcfr', 'FCFR')
+        v4 = show_dependency('fcrf', 'FCRf')
+        if st.button("Calculate Delta Cash"):
+            try:
+                res = calc_var_liq(None, fcgc=v1, fcid=v2, fcfr=v3, fcrf=v4)
+                st.success(f"Total Liquidity Variation = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
+
+# --- PAGE: RATIO ANALYSIS ---
+elif page == "Ratio Analysis":
+    st.subheader("Profitability Ratios")
+    c1, c2 = st.columns(2)
+    with c1:
+        ric_op = st.number_input("Operating Revenue", value=0.0)
+        rol_v = st.number_input("RO-L (EBIT)", value=0.0)
+        pat_n = st.number_input("Equity (Patrimonio Netto)", value=0.0)
+    with c2:
+        deb_f = st.number_input("Financial Debt", value=0.0)
+        liq = st.number_input("Liquidity", value=0.0)
+        of_v = st.number_input("Interest Expense", value=0.0)
+        imp_v = st.number_input("Income Taxes", value=0.0)
+
+    if st.button("Run Ratio Analysis"):
+        try:
+            ros = calc_ros(None, rol=rol_v, ric_op_mon=ric_op)
+            roi = calc_roi(None, rol=rol_v, deb_f=deb_f, liq=liq, pat_net=pat_n)
+            roe = calc_roe(None, rol=rol_v, of=of_v, imp=imp_v, pat_net=pat_n)
             
+            st.markdown("---")
+            col_a, col_b, col_c = st.columns(3)
+            col_a.metric("ROS", f"{ros:.2%}")
+            col_b.metric("ROI", f"{roi:.2%}")
+            col_c.metric("ROE", f"{roe:.2%}")
+        except ValueError as e:
+            st.error(str(e))
+        except ZeroDivisionError:
+            st.error("Mathematical Error: Division by zero.")
+
+# --- PAGE: NPV ---
 elif page == "NPV":
     st.subheader("Net Present Value (NPV)")
-
-    k = st.number_input("Discount rate k", key="k", value=0.0, format="%.4f")
-    i_0 = st.number_input("Initial investment I₀", key="i_0", value=0.0)
-    cost = st.number_input("Fixed cost per period", key="cost", value=0.0)
-    n = st.number_input("Number of periods", key="n", min_value=1, step=1, value=1)
-
-    st.markdown("**Cash flows and time for each period:**")
+    k = st.number_input("Discount rate k (decimal, e.g. 0.08)", value=0.0, format="%.4f")
+    i_0 = st.number_input("Initial investment I₀", value=0.0)
+    cost = st.number_input("Fixed cost per period", value=0.0)
+    n = st.number_input("Number of periods", min_value=1, step=1, value=1)
 
     fc_list = []
     t_list = []
-
     for i in range(int(n)):
         col1, col2 = st.columns(2)
         with col1:
             fc_list.append(st.number_input(f"Cash flow period {i+1}", key=f"fc_{i}", value=0.0))
         with col2:
-            t_list.append(st.number_input(f"Time period {i+1}", key=f"t_{i}", min_value=0, step=1, value=i+1))
-
-    use_direct = st.checkbox("Insert NPV directly", key="use_direct_npv")
-    npv_a = st.number_input("NPV value:", key="npv_a", value=0.0) if use_direct else None
+            t_list.append(st.number_input(f"Time period {i+1}", key=f"t_{i}", value=float(i+1)))
 
     if st.button("Calculate NPV"):
-        res = calc_npv(npv=npv_a, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
-        st.success(f"NPV = {res}")
-        if res > 0:
-            st.info("NPV > 0: the project creates value.")
-        elif res < 0:
-            st.info("NPV < 0: the project destroys value.")
-        else:
-            st.info("NPV = 0: the project is neutral.")
-          
-elif page == "Bond Evaluation -in progress":
-    st.subheader("Zero Coupon Bond PV")
-    st.markdown("Insert here its components")
-  
-    vn = st.number_input("Face value (VN)", key="vn_zero", value=0.0)
-    k = st.number_input("Discount rate k", key="k_zero", value=0.0, format="%.4f")
-    dur = st.number_input("Duration (years)", key="dur_zero", value=0.0, format="%.2f")
-    use_direct = st.checkbox("Insert PV directly", key="use_direct_pv")
-    pv_a = st.number_input("PV value:", key="pv_a", value=0.0) if use_direct else None
-    if st.button("Calculate Zero Coupon Bond PV"):
         try:
-            res = calc_va_bond_zero(va=pv_a, k=k, vn=vn, dur=dur)
-            st.success(f"PV = {res}")
-            if res > vn:
-                st.info("PV > VN: Above par.")
-            elif res < vn:
-                st.info("PV < VN: Below par.")
-            else:
-                st.info("PV = VN: At par.")
+            res = calc_npv(None, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
+            st.success(f"NPV = {res:.2f}")
+            if res > 0: st.info("The project creates value.")
+            elif res < 0: st.warning("The project destroys value.")
         except ValueError as e:
             st.error(str(e))
+
+# --- PAGE: BOND ---
+elif page == "Bond Evaluation - in progress":
+    st.subheader("Bond Valuation")
+    sub_op = st.selectbox("Type", ["Zero Coupon Bond", "Coupon Bond"])
+    
+    if sub_op == "Zero Coupon Bond":
+        vn = st.number_input("Face Value (VN)", value=100.0)
+        k = st.number_input("Discount Rate", value=0.03, format="%.4f")
+        dur = st.number_input("Duration (years)", value=1.0)
+        if st.button("Calculate VA"):
+            res = calc_va_bond_zero(None, k=k, vn=vn, dur=dur)
+            st.success(f"Bond Present Value = {res:.2f}")
+    
+    else:
+        st.info("Coupon Bond logic implementation pending final review.")
+
+elif page == "Coming Soon...":
+    st.write("Stay tuned for Stock Evaluation, WACC, and Mortgage tools.")
