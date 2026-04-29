@@ -130,7 +130,7 @@ def calc_fcu(fcu, fcgc = None, fcid = None):
 def calc_fce(fce, fcu = None, fcfr = None, fcrf = None, rimb_cap = None, div = None):
     if fce is not None:
         return fce
-    elif fcu is not None and fcfr is not none and rimb_cap is not None and fcrf is not None and div is not None
+    elif fcu is not None and fcfr is not None and rimb_cap is not None and fcrf is not None and div is not None:
         return fcu + fcfr - rimb_cap + fcrf - div
     else:
         raise ValueError("Insufficient Data")
