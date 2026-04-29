@@ -9,7 +9,6 @@ st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
 
 st.title("Corporate Finance Calc")
 st.caption("v2.1 - Fail-Fast Philosophy Implementation")
-st.caption("If the program crashes with a TypeError, it means that the input or the import of the data required for the calculation was unsuccessful (incomplete).")
 
 st.sidebar.markdown("""
 **License:** Apache 2.0  
