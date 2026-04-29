@@ -19,7 +19,7 @@ The current version is a working demo, accessible online, that calculates the ma
 
 Each section accepts either direct values or individual components — the tool calculates what it can with the data available, and flags what is missing.
 
-**Live demo:** [link to Streamlit app]
+**Live demo:** https://corporate-finance-calc.streamlit.app
 
 ---
 
