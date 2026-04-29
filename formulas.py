@@ -109,18 +109,15 @@ def calc_npv(npv, fc, k, i_0, t, cost):
         return npv
     else:
         pv = 0
-
         for i in range(len(fc)):
             fc_net = fc[i] - cost
             pv += fc_net / ((1 + k) ** t[i])
-
         result = pv - i_0
         return result
 
 def calc_va_bond_zero(va, k, vn, dur):
     if va is not None:
         return va
-    
     if k != 0 and vn != 0 and dur != 0:
         return vn / ((1 + k) ** dur)
     else:
@@ -137,7 +134,6 @@ def yield_to_mat_zero(k, va, vn, dur):
 def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk):
     if va_ced is not None:
         return va_ced
-    
     elif vn_ced != 0 and k_ced != 0:
         ced = vn_ced * k_ced
         va_ced = 0.0
