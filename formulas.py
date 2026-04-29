@@ -1,6 +1,6 @@
 import numpy as np # non sembra necessario per ora
 #Tutto il file è impostato con filosofia fail-fast che verifica la corretta e precisa implementazione dei dati, qualora siano necessari.
-#Se il programma crasha con un TypeError, vuol dire che l'input o l'importazione del dato non sono andati a buon fine.
+#Se il programma crasha con un TypeError, vuol dire che l'input o l'importazione dei dati necessari al calcolo non sono andati a buon fine (incompleti).
 
 #Cash Flow and Ratio Analysis
 def calc_fccnogc(fccnogc, ric_op_mon = None, cost_op_mon = None, imp = None, ammort = None, mol = None, rol = None):
