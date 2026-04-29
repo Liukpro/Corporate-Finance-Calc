@@ -195,7 +195,7 @@ elif page == "Ratio Analysis":
         deb_f = st.number_input("Financial Debt", value=0.0)
         liq = st.number_input("Liquidity", value=0.0)
         of_v = st.number_input("Interest Expense", value=0.0)
-        imp_v = st.number_input("Income Taxes", value=0.0)
+        imp_v = st.number_input("Taxes", value=0.0)
 
     if st.button("Run Ratio Analysis"):
         try:
