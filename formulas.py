@@ -30,7 +30,7 @@ def calc_ros(ros, rol = None, ric_op_mon = None):
     if ros is not None:
         return ros
     elif ric_op_mon == 0:
-        raise ValueError("Revenue is zero, division not possible")
+        raise ValueError("Revenue is zero, ROS error, division not possible")
     elif rol is not None and ric_op_mon is not None:
         return rol / ric_op_mon
     else:
@@ -43,7 +43,7 @@ def calc_roi(roi, rol = None, deb_f = None, liq = None, pat_net = None):
         pos_fin_net = deb_f - liq
         cin = pat_net + pos_fin_net
         if cin == 0:
-            raise ValueError("CIN is zero, division not possible")
+            raise ValueError("CIN is zero, ROI error, division not possible")
         return rol / cin
     else:
         raise ValueError("Insufficient Data")
@@ -52,7 +52,7 @@ def calc_roe(roe, rol = None, of = None, imp = None, pat_net = None):
     if roe is not None:
         return roe
     elif pat_net == 0:
-        raise ValueError("Equity is zero, division not possible")
+        raise ValueError("Equity is zero, ROE error, division not possible")
     elif rol is not None and of is not None and imp is not None and pat_net is not None:
         ut_net = rol - of - imp
         return ut_net / pat_net
@@ -93,7 +93,7 @@ def calc_fcid(fcid=None, inv=None, dis=None,
         return 0 - inv_final
     
     else:
-        raise ValueError("Dati insufficienti: fornire almeno gli investimenti o i dati per il disinvestimento")
+        raise ValueError("Investments calculation error, nsufficient data: provide at least the investments or the divestment data.")
 
 def calc_fcfr(fcfr, rimb_cap = None, pat_net = None, deb_f = None):
     if fcfr is not None:
