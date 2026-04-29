@@ -120,11 +120,12 @@ def calc_npv(npv, fc, k, i_0, t, cost):
 def calc_va_bond_zero(va, k, vn, dur):
     if va is not None:
         return va
+    
     if k != 0 and vn != 0 and dur != 0:
         return vn / ((1 + k) ** dur)
     else:
         raise ValueError("Insufficient Data")
-        
+    
 def yield_to_mat_zero(k, va, vn, dur):
     if k is not None:
         return k
@@ -132,3 +133,24 @@ def yield_to_mat_zero(k, va, vn, dur):
         return (vn / va) ** (1/dur) - 1
     else:
         raise ValueError("Insufficient Data")
+
+def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk):
+    if va_ced is not None:
+        return va_ced
+    
+    elif vn_ced != 0 and k_ced != 0:
+        ced = vn_ced * k_ced
+        va_ced = 0.0
+        n = int(t_ced)          
+        f = t_ced - n           
+        for i in range(n):
+            va_ced += ced / ((1 + k_merk) ** (i + 1))
+        if f > 0:
+            va_ced += ced * f / ((1 + k_merk) ** t_ced)
+        va_ced += vn_ced / ((1 + k_merk) ** t_ced)
+        return va_ced
+    else:
+        raise ValueError("Insufficient Data")
+
+
+
