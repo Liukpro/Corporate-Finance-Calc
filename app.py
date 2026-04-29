@@ -5,12 +5,11 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                      calc_roi, calc_roe)
 
 st.title("Corporate Finance Calc")
-st.caption("v2.1")
+st.caption("v2.1 -If the program crashes with a TypeError, it means that the input or the import of the data required for the calculation was unsuccessful (incomplete).")
 st.caption("""
 **License:** Apache 2.0  
 **Source code:** https://github.com/Liukpro/Corporate-Finance-Calc
 """)
-st.caption("If the program crashes with a TypeError, it means that the input or the import of the data required for the calculation was unsuccessful (incomplete).")
 for key in [
     # Risultati
     'fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'fce',
