@@ -46,10 +46,7 @@ def _as_list(value):
     out = [value]
     return out
 
-
-# -----------------------
-# OPERATING AREA
-# -----------------------
+###########################################################################
 
 def resolve_mol(mol=None, ric_op_mon=None, cost_op_mon=None):
     if mol is not None:
@@ -194,9 +191,7 @@ def resolve_roe(roe=None, utile_netto=None, rol=None, oneri_finanz=None, tax=Non
     raise ValueError("Insufficient Data for ROE")
 
 
-# -----------------------
-# CASH FLOW AREA
-# -----------------------
+###########################################################################
 
 def resolve_var_ccno(var_ccno=None, ccno1=None, ccno2=None):
     if var_ccno is not None:
@@ -363,9 +358,7 @@ def resolve_fce(
     raise ValueError("Insufficient Data for FCE")
 
 
-# -----------------------
-# NPV AREA
-# -----------------------
+###########################################################################
 
 def resolve_fc_series(fc=None, fcu=None, fce=None):
     if fc is not None:
@@ -453,9 +446,7 @@ def resolve_npv(
     return npv_value
 
 
-# -----------------------
-# BOND ZERO COUPON AREA
-# -----------------------
+###########################################################################
 
 def resolve_bond_zero_va(va=None, k=None, vn=None, dur=None):
     if va is not None:
