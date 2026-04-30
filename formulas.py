@@ -193,21 +193,18 @@ def calc_stock_price(stock_price=None, dividend=None, k=None, g=None,
 
     if stock_price is not None:
         return stock_price
-
+        
     if retention_ratio is not None and roe is not None and g is None:
         g = retention_ratio * roe
-
+        
     if model == "no_growth":
         if dividend is None or k is None or k == 0:
             raise ValueError("Insufficient Data for no growth model")
-
         stock_price = dividend / k
         return stock_price
-
+        
     elif model == "gordon":
-
         if dividend_1 is None:
-
             if earnings_t0 is not None and payout_ratio is not None and g is not None:
                 earnings_t1 = earnings_t0 * (1 + g)
                 dividend_1 = earnings_t1 * payout_ratio
@@ -216,7 +213,6 @@ def calc_stock_price(stock_price=None, dividend=None, k=None, g=None,
 
         if k is None or g is None or (k - g) == 0:
             raise ValueError("Invalid k or g")
-
         stock_price = dividend_1 / (k - g)
         return stock_price
 
