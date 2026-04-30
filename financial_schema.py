@@ -37,6 +37,14 @@ FINANCIAL_VARIABLES = {
     "fc_net": "Cash Flow Netto",
     "pv": "Present Value",
     "npv": "Net Present Value",
+
+    #Discounting layer for bonds
+    "va": "Valore Attuale",
+    "vn": "Valore nominale",
+    "mont": "Montante",
+    "factor": "Fattore",
+    "bond_zero_yield_to_maturity": "Yield to maturity of the Zero Coupon",
+    
 }
 
 RELATIONSHIPS = {
