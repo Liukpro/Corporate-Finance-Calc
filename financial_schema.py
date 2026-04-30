@@ -1,7 +1,7 @@
 FINANCIAL_VARIABLES = {
     # Profitability
     "mol": "Margine Operativo Lordo",
-    "rol": "Risultato Operativo Lordo",
+    "rol": "Reddito Operativo Lordo",
     "ros": "Return on Sales",
 
     # Cash flow operativo
