@@ -408,4 +408,4 @@ elif page == "Stock Evaluation":
             st.error(str(e))
 
 elif page == "Coming Soon...":
-    st.write("Stay tuned for Stock Evaluation, WACC, and Mortgage tools.")
+    st.write("Stay tuned for WACC, Mortgage, NPV comparision between projects and new tools.")
