@@ -1,5 +1,3 @@
-
-
 FINANCIAL_VARIABLES = {
     # Profitability
     "mol": "Margine Operativo Lordo",
@@ -7,8 +5,8 @@ FINANCIAL_VARIABLES = {
     "ros": "Return on Sales",
 
     # Cash flow operativo
-    "fccnogc": "Flusso di Cassa Gestione Caratteristica",
-    "fcgc": "Flusso di Cassa Gestione Corrente",
+    "fccnogc": "Flusso di Cassa del Capitale Circolante Netto Operativo della Gestione Caratteristica",
+    "fcgc": "Flusso di Cassa Gestione Caratteristica",
 
     # Capital structure
     "cin": "Capitale Investito Netto",
@@ -25,8 +23,8 @@ FINANCIAL_VARIABLES = {
     "fcrf": "Financial Remuneration Cash Flow",
 
     # Working capital
-    "ccno1": "Capitale Circolante Netto Iniziale",
-    "ccno2": "Capitale Circolante Netto Finale",
+    "ccno1": "Capitale Circolante Netto Operativo Iniziale",
+    "ccno2": "Capitale Circolante Netto Operativo Finale",
     "var_ccno": "Variazione CCNO",
 
     # Investments
@@ -41,23 +39,15 @@ FINANCIAL_VARIABLES = {
     "npv": "Net Present Value",
 }
 
-
-###########################################################################
-
 RELATIONSHIPS = {
     "mol -> rol": "rol = mol - amortisation",
-    "rol -> fcgc": "operating cash flow derived from EBIT adjustments",
+    "rol -> fcgc": "operating cash flow derived from RO-L adjustments",
     "fcu -> fce": "equity adjustments from financing structure",
     "fc -> pv": "discounted cash flow transformation",
 }
-
-
-###########################################################################
-
 
 DISCOUNT_RULES = {
     "FCU": "WACC",
     "FCE": "Ke",
     "GENERIC": "custom rate k",
 }
-# To be further configured to add most of the aliases known: chiedere al professore
