@@ -1,4 +1,5 @@
-#IN QUESTO PERCORSO IL RESOLVER-DAG AVRà LA LOGICA DEL FILE FORMULAS
+#In questa sezione cash flow, il resolver avrà la logica del file formulas
+
 #MOL
 def calc_mol(ric_op_mon, cost_op_mon):
   mol = ric_op_mon - cost_op_mon
@@ -98,8 +99,7 @@ def calc_fce(fcu, fcfr, quota_rimbors_capital, fcrf, dividendi):
 
 #NPV con flussi di cassa variabili e costi fissi sui flussi per periodo, multiperiodo.
 
-#sarà da specificare se si tratterà con flussi di cassa unlevered o equity nel resolver
-# Progettare il resolver che trasforma FCU/FCE in FC[t] coerente con WACC/Ke senza ambiguità
+# Progettare il resolver che trasforma FCU/FCE in FC[t] coerente con WACC/Ke senza ambiguità (già scritto nel financial schema)
 
 def calc_fc_net(fc, cost):
   fc_net = fc - cost
