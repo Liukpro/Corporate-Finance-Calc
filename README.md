@@ -1,7 +1,7 @@
 # Corporate Finance Calc - 
-from cal to engine (Architecture v2)
+from calc to engine (Architecture v2)
 
-**Demo on Streamlit:** https://corporate-finance-calc.streamlit.app/
+**Calc demo on Streamlit:** https://corporate-finance-calc.streamlit.app/
 
 ---
 
