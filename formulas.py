@@ -58,6 +58,7 @@ def calc_roe(roe, rol = None, of = None, imp = None, pat_net = None):
     else:
         raise ValueError("Insufficient Data")
 
+#nel nuovo file qui non ho inserito il calcolo della variazione di ccno, attenzione in futuro!!
 def calc_fcgc(fcgc, fccnogc = None, ccno = None):
     if fcgc is not None:
         return fcgc
