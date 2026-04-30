@@ -2,8 +2,8 @@ import streamlit as st
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
                       calc_fce, calc_npv, calc_va_bond_zero, calc_ros, 
-                      calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, 
-calc_vaoc)
+                      calc_roi, calc_roe, calc_va_ced_bond)
+
 
 # Configurazione Pagina
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
