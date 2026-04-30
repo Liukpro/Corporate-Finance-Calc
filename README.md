@@ -239,7 +239,3 @@ The system must function as a financial computation engine where:
 - Python is the deterministic computation layer
 - API is the final interface layer
 - all financial logic is graph-based and fully traceable
-
----
-
-# Global Pipeline
