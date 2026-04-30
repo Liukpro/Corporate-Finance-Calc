@@ -2,7 +2,8 @@ import streamlit as st
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
                       calc_fce, calc_npv, calc_va_bond_zero, calc_ros, 
-                      calc_roi, calc_roe)
+                      calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, 
+calc_vaoc)
 
 # Configurazione Pagina
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
@@ -17,10 +18,17 @@ st.sidebar.markdown("""
 
 # Inizializzazione Session State
 keys_to_init = [
+    # Cash Flow keys
     'fccnogc', 'rol', 'fcgc', 'fcid', 'fcfr', 'fcrf', 'fcu', 'fce',
+    # Ratio keys
     'ros', 'roi', 'roe', 'pat_net', 'deb_f', 'liq', 'pos_fin_net', 'cin',
     'ric_op_mon', 'cost_op_mon', 'ammort', 'mol', 'of', 'imp', 'ut_net',
-    'ccno', 'rimb_cap', 'div'
+    'ccno', 'rimb_cap', 'div',
+    # Bond keys
+    'bond_zero_va', 'bond_zero_ytm', 'bond_coupon_va',
+    # Stock keys
+    'stock_price_gordon', 'stock_price_no_growth', 'vaoc',
+    'dividend_1', 'g', 'retention_ratio', 'payout_ratio'
 ]
 for key in keys_to_init:
     if key not in st.session_state:
@@ -36,11 +44,12 @@ page = st.sidebar.radio("Select one", [
     "Cash Flow Analysis",
     "Ratio Analysis",
     "NPV",
-    "Bond Evaluation - in progress",
+    "Bond Evaluation",
+    "Stock Evaluation",
     "Coming Soon..."
 ])
 
-# --- PAGE: CASH FLOW ANALYSIS ---
+#CASH FLOW ANALYSIS
 if page == "Cash Flow Analysis":
     st.subheader("Cash Flow Calculation")
 
@@ -239,20 +248,164 @@ elif page == "NPV":
             st.error(str(e))
 
 # --- PAGE: BOND ---
-elif page == "Bond Evaluation - in progress":
+elif page == "Bond Evaluation":
     st.subheader("Bond Valuation")
     sub_op = st.selectbox("Type", ["Zero Coupon Bond", "Coupon Bond"])
     
     if sub_op == "Zero Coupon Bond":
-        vn = st.number_input("Face Value (VN)", value=100.0)
-        k = st.number_input("Discount Rate", value=0.03, format="%.4f")
-        dur = st.number_input("Duration (years)", value=1.0)
-        if st.button("Calculate VA"):
-            res = calc_va_bond_zero(None, k=k, vn=vn, dur=dur)
-            st.success(f"Bond Present Value = {res:.2f}")
+        st.markdown("### Zero Coupon Bond Valuation")
+        col1, col2 = st.columns(2)
+        with col1:
+            vn = st.number_input("Face Value (VN)", value=100.0)
+            k = st.number_input("Discount Rate (Market Rate)", value=0.03, format="%.4f")
+        with col2:
+            dur = st.number_input("Duration (years)", value=1.0)
+            
+        if st.button("Calculate Bond Value"):
+            try:
+                res = calc_va_bond_zero(None, k=k, vn=vn, dur=dur)
+                st.success(f"Bond Present Value = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
+        
+        if st.button("Calculate Yield to Maturity"):
+            try:
+                va = st.number_input("Current Bond Price", value=95.0, key="ytm_price")
+                ytm = calc_yield_to_mat_zero(None, va=va, vn=vn, dur=dur)
+                st.success(f"Yield to Maturity = {ytm:.4%}")
+            except ValueError as e:
+                st.error(str(e))
     
-    else:
-        st.info("Coupon Bond logic implementation pending final review.")
+    else:  # Coupon Bond
+        st.markdown("### Coupon Bond Valuation")
+        col1, col2 = st.columns(2)
+        with col1:
+            vn_ced = st.number_input("Face Value (VN)", value=100.0, key="coupon_vn")
+            k_ced = st.number_input("Coupon Rate (annual)", value=0.05, format="%.4f")
+            t_ced = st.number_input("Time to Maturity (years)", value=5.0)
+        with col2:
+            k_merk = st.number_input("Market Discount Rate", value=0.04, format="%.4f")
+            
+        if st.button("Calculate Coupon Bond Value"):
+            try:
+                res = calc_va_ced_bond(None, vn_ced=vn_ced, k_ced=k_ced, t_ced=t_ced, k_merk=k_merk)
+                st.success(f"Coupon Bond Present Value = {res:.2f}")
+                
+                # Mostra anche il valore della cedola annuale
+                annual_coupon = vn_ced * k_ced
+                st.info(f"Annual Coupon Payment = {annual_coupon:.2f}")
+            except ValueError as e:
+                st.error(str(e))
+
+#--- PAGE: stock---
+elif page == "Stock Evaluation":
+    st.subheader("Stock Valuation")
+    
+    model = st.selectbox("Valuation Model", ["Gordon Growth Model", "No Growth Model"])
+    
+    if model == "Gordon Growth Model":
+        st.markdown("### Gordon Growth Model (Dividend Discount Model)")
+        
+        calc_method = st.radio("Input Method", 
+                               ["Direct (Dividend₁, k, g)", 
+                                "From Earnings (E₀, Payout, ROE, k)"])
+        
+        if calc_method == "Direct (Dividend₁, k, g)":
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                dividend_1 = st.number_input("Expected Dividend next year (D₁)", value=2.0)
+            with col2:
+                k = st.number_input("Required Return (k)", value=0.10, format="%.4f")
+            with col3:
+                g = st.number_input("Growth Rate (g)", value=0.05, format="%.4f")
+            
+            earnings_t0 = None
+            payout_ratio = None
+            retention_ratio = None
+            roe = None
+            
+        else:  # From Earnings
+            col1, col2 = st.columns(2)
+            with col1:
+                earnings_t0 = st.number_input("Current Earnings (E₀)", value=5.0)
+                payout_ratio = st.number_input("Payout Ratio (dividends/earnings)", value=0.40, format="%.4f")
+            with col2:
+                k = st.number_input("Required Return (k)", value=0.10, format="%.4f")
+                roe = st.number_input("Return on Equity (ROE)", value=0.15, format="%.4f")
+            
+            retention_ratio = 1 - payout_ratio
+            g = retention_ratio * roe
+            
+            dividend_1 = None
+            
+            st.info(f"Calculated: Retention Ratio = {retention_ratio:.4f}, Growth Rate = {g:.4%}")
+        
+        if st.button("Calculate Stock Price"):
+            try:
+                price = calc_stock_price(
+                    stock_price=None,
+                    dividend=dividend_1,
+                    k=k,
+                    g=g,
+                    dividend_1=dividend_1,
+                    earnings_t0=earnings_t0,
+                    payout_ratio=payout_ratio,
+                    retention_ratio=retention_ratio,
+                    roe=roe,
+                    model="gordon"
+                )
+                st.success(f"Stock Price = {price:.2f}")
+                
+                # Calcolo VAOC se disponibili i dati per il modello no growth
+                if earnings_t0 is not None and k is not None:
+                    no_growth_price = earnings_t0 / k
+                    vaoc = price - no_growth_price
+                    st.info(f"Value of Growth Opportunities (VAOC) = {vaoc:.2f}")
+                    st.caption(f"No-growth value: {no_growth_price:.2f} | Growth premium: {vaoc:.2f}")
+                    
+            except ValueError as e:
+                st.error(str(e))
+    
+    else:  # No Growth Model
+        st.markdown("### No Growth Model (Constant Dividend)")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            dividend = st.number_input("Constant Dividend", value=2.0)
+        with col2:
+            k = st.number_input("Required Return (k)", value=0.10, format="%.4f")
+        
+        if st.button("Calculate Stock Price"):
+            try:
+                price = calc_stock_price(
+                    stock_price=None,
+                    dividend=dividend,
+                    k=k,
+                    g=None,
+                    model="no_growth"
+                )
+                st.success(f"Stock Price = {price:.2f}")
+            except ValueError as e:
+                st.error(str(e))
+    
+    # Sezione separata per VAOC diretto
+    st.markdown("---")
+    st.subheader("Value of Growth Opportunities (VAOC)")
+    st.caption("Calculate the difference between growth and no-growth stock values")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        price_growth = st.number_input("Stock Price (with growth)", value=50.0, key="vaoc_growth")
+    with col2:
+        price_no_growth = st.number_input("Stock Price (no growth)", value=30.0, key="vaoc_no_growth")
+    
+    if st.button("Calculate VAOC"):
+        try:
+            vaoc = calc_vaoc(price_growth, price_no_growth)
+            st.success(f"VAOC = {vaoc:.2f}")
+            st.info("This represents the additional value created by growth opportunities.")
+        except ValueError as e:
+            st.error(str(e))
 
 elif page == "Coming Soon...":
     st.write("Stay tuned for Stock Evaluation, WACC, and Mortgage tools.")
