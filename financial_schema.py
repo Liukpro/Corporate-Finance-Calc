@@ -40,22 +40,53 @@ FINANCIAL_VARIABLES = {
 
     #Discounting layer for bonds
     "va": "Valore Attuale",
-    "vn": "Valore nominale",
+    "vn": "Valore Nominale",
     "mont": "Montante",
-    "factor": "Fattore",
-    "bond_zero_yield_to_maturity": "Yield to maturity of the Zero Coupon",
-    
+    "factor": "Fattore tempo",
+    "bond_zero_yield_to_maturity": "Yield to Maturity Zero Coupon",
 }
+
 
 RELATIONSHIPS = {
-    "mol -> rol": "rol = mol - amortisation",
-    "rol -> fcgc": "operating cash flow derived from RO-L adjustments",
-    "fcu -> fce": "equity adjustments from financing structure",
-    "fc -> pv": "discounted cash flow transformation",
+
+    # Profitability chain
+    "mol -> rol": "ROL deriva da MOL tramite sottrazione ammortamenti",
+    "rol -> ros": "ROS misura redditività su ricavi",
+
+    # Cash flow operating
+    "mol/rol -> fccnogc": "Conversione risultato economico in flussi di cassa operativi",
+    "fccnogc -> fcgc": "Aggiustamento variazione CCNO",
+
+    # Capital structure
+    "rol -> roi": "ROI misura rendimento capitale investito",
+    "cin = equity + debt - liquidity": "Definizione capitale investito netto",
+
+    # Equity
+    "rol -> utile_netto": "Risultato netto dopo oneri finanziari e tasse",
+    "utile_netto -> roe": "Redditività capitale proprio",
+
+    # Investments
+    "investments - disinvestments -> fcid": "Flusso cassa investimenti netto",
+
+    # Cash flow system
+    "fcgc + fcid -> fcu": "Free Cash Flow Unlevered",
+    "fcu + financing adjustments -> fce": "Free Cash Flow Equity",
+
+    # Discounting
+    "fc -> pv": "Attualizzazione flussi",
+    "pv -> npv": "Somma valori attuali meno investimento iniziale",
+
+    # Bonds
+    "vn -> va": "Attualizzazione bond",
+    "va -> ytm": "Yield implicito dal prezzo"
 }
 
+
 DISCOUNT_RULES = {
+
     "FCU": "WACC",
     "FCE": "Ke",
-    "GENERIC": "custom rate k",
+    "GENERIC": "k",
+
+    "RULE": "FCU uses enterprise value logic, FCE uses equity logic"
 }
