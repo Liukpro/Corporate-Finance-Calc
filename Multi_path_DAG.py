@@ -100,36 +100,23 @@ def calc_fce(fcu, fcfr, quota_rimbors_capital, fcrf, dividendi):
 
 #sarà da specificare se si tratterà con flussi di cassa unlevered o equity nel resolver
 # Progettare il resolver che trasforma FCU/FCE in FC[t] coerente con WACC/Ke senza ambiguità
-def fc_direct(fc):
-  return fc
 
-def fc_from_fcu(fcu):
-  return fcu
-
-def calc_from_fce(fce):
-  return fce
-
-#FC-X NET
 def calc_fc_net(fc, cost):
   fc_net = fc - cost
   return fc_net
   
-def calc_fcu_net(fcu, cost):
-  fcu_net = fcu - cost
-  return fcu_net
-  
-def calc_fce_net(fce, cost):
-  fce_net = fce - cost
-  return fce_net
-
+#time value, discount factor  
 def calc_df_constant(k, t):
-  return (1 + k) ** t
+  df = (1 + k) ** t
+  return df
 
 def calc_df_variable(k_t, t):
-  return (1 + k_t) ** t
+  df = (1 + k_t) ** t
+  return df
 
 def calc_pv(fc_net, df):
-  return fc_net / df
+  pv = fc_net / df
+  return pv
 
 #pv_list è prodotto del resolver non del DAG
 def calc_total_pv(pv_list):
@@ -137,7 +124,8 @@ def calc_total_pv(pv_list):
   return total_pv
 
 def calc_npv(total_pv, i_0):
-  return total_pv - i_0
+  npv = total_pv - i_0
+  return npv
 
 
 #BOND ZERO COUPON VA
