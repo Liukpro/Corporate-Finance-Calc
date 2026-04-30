@@ -35,7 +35,6 @@ All results must be:
 - **resolver.py** → selects computation paths and builds results
 - **streamlit_app.py** → final report and user interface
 
-> No financial logic outside DAG and resolver  
-> No data cleaning inside formulas  
+> No financial logic outside DAG and resolver   
 > No ambiguity in variable naming
 
