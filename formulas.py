@@ -1,5 +1,5 @@
 import numpy as np # non sembra necessario per ora
-#Tutto il file è impostato con filosofia fail-fast che verifica la corretta e precisa implementazione dei dati, qualora siano necessari.
+#Tutto il file è impostato con filosofia fail-fast se usato fuori streamlit che verifica la corretta e precisa implementazione dei dati, qualora siano necessari.
 #Se il programma crasha con un TypeError, vuol dire che l'input o l'importazione dei dati necessari al calcolo non sono andati a buon fine (incompleti).
 
 #Cash Flow and Ratio Analysis
