@@ -228,5 +228,5 @@ def calc_vaoc(stock_price_grow=None, stock_price_no_grow=None):
     if stock_price_grow is not None and stock_price_no_grow is not None:
         vaoc = stock_price_grow - stock_price_no_grow
         return vaoc
-
-    raise ValueError("Insufficient Data for VAOC")
+    else:
+        raise ValueError("Insufficient Data for VAOC")
