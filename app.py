@@ -9,7 +9,7 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
 
 st.title("Corporate Finance Calc")
-st.caption("v2.1 - Fail-Fast Philosophy Implementation")
+st.caption("v2.2")
 
 st.sidebar.markdown("""
 **License:** Apache 2.0  
@@ -34,6 +34,7 @@ for key in keys_to_init:
     if key not in st.session_state:
         st.session_state[key] = None
       
+#Reset Session
 if st.sidebar.button("Reset Session"):
     for key in keys_to_init:
         st.session_state[key] = None
@@ -191,7 +192,7 @@ if page == "Cash Flow Analysis":
             except ValueError as e:
                 st.error(str(e))
 
-# --- PAGE: RATIO ANALYSIS ---
+#RATIO ANALYSIS
 elif page == "Ratio Analysis":
     st.subheader("Profitability Ratios")
     c1, c2 = st.columns(2)
@@ -221,7 +222,7 @@ elif page == "Ratio Analysis":
         except ZeroDivisionError:
             st.error("Mathematical Error: Division by zero.")
 
-# --- PAGE: NPV ---
+# NPV
 elif page == "NPV":
     st.subheader("Net Present Value (NPV)")
     k = st.number_input("Discount rate k (decimal, e.g. 0.08)", value=0.0, format="%.4f")
@@ -247,7 +248,7 @@ elif page == "NPV":
         except ValueError as e:
             st.error(str(e))
 
-# --- PAGE: BOND ---
+#BONDs
 elif page == "Bond Evaluation":
     st.subheader("Bond Valuation")
     sub_op = st.selectbox("Type", ["Zero Coupon Bond", "Coupon Bond"])
@@ -297,7 +298,7 @@ elif page == "Bond Evaluation":
             except ValueError as e:
                 st.error(str(e))
 
-#--- PAGE: stock---
+#STOCKs
 elif page == "Stock Evaluation":
     st.subheader("Stock Valuation")
     
@@ -408,4 +409,4 @@ elif page == "Stock Evaluation":
             st.error(str(e))
 
 elif page == "Coming Soon...":
-    st.write("Stay tuned for WACC, Mortgage, NPV comparision between projects and new tools.")
+    st.write("Stay tuned for Mortgage, WACC, NPV & ModifiedTIR comparision between projects and new tools.")
