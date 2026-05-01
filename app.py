@@ -267,7 +267,7 @@ elif page == "Ratio Analysis":
     with col1:
         ric_op = st.number_input("Operating Revenue", value=0.0, min_value=0.0)
         rol_v = st.number_input("RO-L (EBIT)", value=0.0)
-        pat_n = st.number_input("Equity (Patrimonio Netto)", value=0.0, min_value=0.01)  # evita zero
+        pat_n = st.number_input("Equity (Patrimonio Netto)", value=0.0, min_value=0.0)  # ← tolto 0.01
     with col2:
         deb_f = st.number_input("Financial Debt", value=0.0)
         liq = st.number_input("Liquidity", value=0.0)
@@ -294,10 +294,10 @@ elif page == "Ratio Analysis":
         else:
             results["ROI"] = rol_v / cin
         
-        # ROE
+        # ROE - Gestione separata per equity = 0
         ut_net = rol_v - of_v - imp_v
         if pat_n == 0:
-            errors.append("ROE: Equity è zero")
+            errors.append("ROE: Equity è zero, impossibile calcolare")
             results["ROE"] = None
         else:
             results["ROE"] = ut_net / pat_n
@@ -319,19 +319,32 @@ elif page == "Ratio Analysis":
         if results["ROE"] is not None:
             col_c.metric("ROE", f"{results['ROE']:.2%}")
         else:
-            col_c.error("ROE: dati insufficienti")
+            col_c.error("ROE: equity = 0")
         
         if errors:
             for err in errors:
                 st.warning(err)
         
-        # Mostra dettaglio calcoli
+        # Mostra dettaglio calcoli (solo se calcolabili)
         with st.expander("Dettaglio calcoli"):
-            st.write(f"ROS = ROL / Revenue = {rol_v:.2f} / {ric_op:.2f} = {results['ROS']:.2%}" if results["ROS"] else "ROS: non calcolabile")
+            if results["ROS"] is not None:
+                st.write(f"ROS = ROL / Revenue = {rol_v:.2f} / {ric_op:.2f} = {results['ROS']:.2%}")
+            else:
+                st.write("ROS: non calcolabile (Revenue = 0)")
+            
             st.write(f"CIN = Equity + (Debt - Liquidity) = {pat_n:.2f} + ({deb_f:.2f} - {liq:.2f}) = {cin:.2f}")
-            st.write(f"ROI = ROL / CIN = {rol_v:.2f} / {cin:.2f} = {results['ROI']:.2%}" if results["ROI"] else "ROI: non calcolabile")
+            
+            if results["ROI"] is not None:
+                st.write(f"ROI = ROL / CIN = {rol_v:.2f} / {cin:.2f} = {results['ROI']:.2%}")
+            else:
+                st.write("ROI: non calcolabile (CIN = 0)")
+            
             st.write(f"Net Income = ROL - Interest - Taxes = {rol_v:.2f} - {of_v:.2f} - {imp_v:.2f} = {ut_net:.2f}")
-            st.write(f"ROE = Net Income / Equity = {ut_net:.2f} / {pat_n:.2f} = {results['ROE']:.2%}" if results["ROE"] else "ROE: non calcolabile")
+            
+            if results["ROE"] is not None:
+                st.write(f"ROE = Net Income / Equity = {ut_net:.2f} / {pat_n:.2f} = {results['ROE']:.2%}")
+            else:
+                st.write("ROE: non calcolabile (Equity = 0)")
 
 # NPV
 elif page == "NPV":
