@@ -1,4 +1,4 @@
-# Corporate Finance Calc - 
+# Corporate Finance Calc
 
 ## What this project does
 
