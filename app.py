@@ -421,7 +421,7 @@ elif page == "Stock Evaluation":
         except ValueError as e:
             st.error(str(e))
 #MORTGAGE
-elif page == "Mortgage (Italian)":
+elif page == "Mortgage":
     st.subheader("Mutuo - Ammortamento")
     st.caption("Confronto tra ammortamento italiano (quota capitale costante) e francese (rata costante)")
     st.info("📌 **Nota:** I calcoli sono basati su rate MENSILI. Inserisci la durata in anni, il sistema convertirà automaticamente in mesi.")
