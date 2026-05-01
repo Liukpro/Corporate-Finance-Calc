@@ -57,7 +57,7 @@ page = st.sidebar.radio("Select one", [
     "NPV",
     "Bond Evaluation",
     "Stock Evaluation",
-    "MortgagE",
+    "Mortgage",
     "WACC",
     "NPV with FCU/FCE",
     "Coming Soon..."
