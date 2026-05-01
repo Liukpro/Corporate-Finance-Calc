@@ -614,7 +614,7 @@ elif page == "Mortgage":
             st.session_state.mortgage_payment = constant_payment
             
             # Opzione visualizzazione
-            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
+            display_mode = st.radio("Visualizzazione", ["Annuale", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
             
             # Creazione tabella mensile
             monthly_table = []
