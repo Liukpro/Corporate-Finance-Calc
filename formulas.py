@@ -225,146 +225,151 @@ def calc_vaoc(stock_price_grow=None, stock_price_no_grow=None):
         raise ValueError("Insufficient Data for VAOC")
 
 def calc_capital_share(mortgage, years):
-    """Quota capitale costante (ammortamento italiano)"""
-    capital_share = mortgage / years
-    return capital_share
+    if mortgage is not None and years is not None and years != 0:
+        return mortgage / years
+    raise ValueError("Insufficient Data for capital share")
 
 
 def calc_interest_t(debt, n, t, k):
-    """Interessi del periodo t (ammortamento italiano)"""
-    interest_t = (debt * (1 - (t - 1) / n)) * k
-    return interest_t
+    if debt is not None and n is not None and t is not None and k is not None:
+        interest_t = (debt * (1 - (t - 1) / n)) * k
+        return interest_t
+    raise ValueError("Insufficient Data for interest calculation")
 
 
 def calc_residual_debt(mortgage, n, t):
-    """Debito residuo dopo periodo t (ammortamento italiano)"""
-    residual_debt = mortgage * (1 - t / n)
-    return residual_debt
-
-
-def calc_paid_off_debt(mortgage, n, t):
-    """Debito già pagato dopo periodo t (ammortamento italiano)"""
-    paid_off_debt = mortgage - (t * (mortgage / n))
-    return paid_off_debt
+    if mortgage is not None and n is not None and t is not None:
+        residual_debt = mortgage * (1 - t / n)
+        return residual_debt
+    raise ValueError("Insufficient Data for residual debt")
 
 
 def calc_mortgage_payment(capital_share, interests_share):
-    """Rata totale = quota capitale + quota interessi"""
-    mortgage_payment = capital_share + interests_share
-    return mortgage_payment
+    if capital_share is not None and interests_share is not None:
+        return capital_share + interests_share
+    raise ValueError("Insufficient Data for payment")
 
 
 def calc_mortgage_payment_fr(debt, k, n):
-    """Rata costante (ammortamento francese)"""
-    if k == 0:
-        return debt / n
-    mortgage_payment = debt * (k * (1 + k) ** n) / ((1 + k) ** n - 1)
-    return mortgage_payment
+    if debt is not None and n is not None:
+        if k == 0:
+            return debt / n
+        if k is not None:
+            return debt * (k * (1 + k) ** n) / ((1 + k) ** n - 1)
+    raise ValueError("Insufficient Data for French payment")
 
 
 def calc_residual_debt_fr(debt, k, n, t):
-    """Debito residuo dopo periodo t (ammortamento francese)"""
-    residual_debt = debt * ((1 + k) ** n - (1 + k) ** t) / ((1 + k) ** n - 1)
-    return residual_debt
+    if debt is not None and k is not None and n is not None and t is not None:
+        return debt * ((1 + k) ** n - (1 + k) ** t) / ((1 + k) ** n - 1)
+    raise ValueError("Insufficient Data for residual debt")
 
 
-def calc_interest_fr_closed(debt, k, n, t):
-    """Interessi del periodo t (ammortamento francese)"""
-    residual_prev = debt * ((1 + k) ** n - (1 + k) ** (t - 1)) / ((1 + k) ** n - 1)
-    interest = residual_prev * k
-    return interest
+def calc_interest_fr(debt, k, n, t):
+    if debt is not None and k is not None and n is not None and t is not None:
+        residual_prev = debt * ((1 + k) ** n - (1 + k) ** (t - 1)) / ((1 + k) ** n - 1)
+        return residual_prev * k
+    raise ValueError("Insufficient Data for interest")
 
 
-def calc_capital_share_fr(mortgage_payment, interest):
-    """Quota capitale del periodo t (ammortamento francese)"""
-    capital_share = mortgage_payment - interest
-    return capital_share
+def calc_capital_share_fr(payment, interest):
+    if payment is not None and interest is not None:
+        return payment - interest
+    raise ValueError("Insufficient Data for capital share")
 
 
-def calc_paid_off_debt_fr(debt, residual_debt):
-    """Debito già pagato (ammortamento francese)"""
-    paid_off_debt = debt - residual_debt
-    return paid_off_debt
+def build_italian_table(debt, annual_rate, years):
+    """Restituisce lista di dizionari con tabella completa"""
+    months = years * 12
+    monthly_rate = annual_rate / 12
+    capital_share_monthly = debt / months
+    
+    table = []
+    residual = debt
+    
+    for t in range(1, months + 1):
+        interest = (debt * (1 - (t - 1) / months)) * monthly_rate
+        capital = capital_share_monthly if t < months else residual
+        payment = capital + interest
+        residual = debt * (1 - t / months)
+        
+        table.append({
+            "month": t,
+            "year": (t - 1) // 12 + 1,
+            "capital": round(capital, 2),
+            "interest": round(interest, 2),
+            "payment": round(payment, 2),
+            "residual": round(max(residual, 0), 2)
+        })
+    
+    return table
+
+
+def build_french_table(debt, annual_rate, years):
+    """Restituisce lista di dizionari con tabella completa"""
+    months = years * 12
+    monthly_rate = annual_rate / 12
+    
+    if monthly_rate == 0:
+        constant_payment = debt / months
+    else:
+        constant_payment = debt * (monthly_rate * (1 + monthly_rate) ** months) / ((1 + monthly_rate) ** months - 1)
+    
+    table = []
+    residual = debt
+    
+    for t in range(1, months + 1):
+        interest = residual * monthly_rate
+        capital = constant_payment - interest
+        
+        if t == months:
+            capital = residual
+            constant_payment = capital + interest
+        
+        residual = debt * ((1 + monthly_rate) ** months - (1 + monthly_rate) ** t) / ((1 + monthly_rate) ** months - 1)
+        
+        table.append({
+            "month": t,
+            "year": (t - 1) // 12 + 1,
+            "capital": round(capital, 2),
+            "interest": round(interest, 2),
+            "payment": round(constant_payment, 2),
+            "residual": round(max(residual, 0), 2)
+        })
+    
+    return table
+
+
+# ============ WACC ============
 
 def calc_wacc(re, rd, tc, equity, debt):
     if re is None or rd is None or tc is None or equity is None or debt is None:
         raise ValueError("Insufficient Data for WACC")
-    w = equity + debt
-    if w == 0:
-        raise ValueError("Total capital (equity + debt) cannot be zero")
-    wacc = re * (equity / w) + rd * (1 - tc) * (debt / w)
-    return wacc
-
-def calc_fc_net_fcu(fcu, cost):
-    if fcu is None:
-        raise ValueError("FCU value required")
-    fc_net_fcu = fcu - cost
-    return fc_net_fcu
+    total = equity + debt
+    if total == 0:
+        raise ValueError("Total capital cannot be zero")
+    return re * (equity / total) + rd * (1 - tc) * (debt / total)
 
 
-def calc_df_wacc_fcu(wacc, t):
-    if wacc is None or t is None:
-        raise ValueError("WACC and time required")
-    if wacc == -1:
-        raise ValueError("WACC cannot be -1")
-    df_wacc = (1 + wacc) ** t
-    return df_wacc
+# ============ NPV FCU/FCE ============
+
+def calc_npv_fcu(cash_flows, wacc, initial_investment, fixed_cost=0):
+    """cash_flows è lista di float, wacc è float"""
+    if not cash_flows:
+        raise ValueError("No cash flows provided")
+    pv = 0
+    for t, cf in enumerate(cash_flows, start=1):
+        net_cf = cf - fixed_cost
+        pv += net_cf / ((1 + wacc) ** t)
+    return pv - initial_investment
 
 
-def calc_pv_fcu(fc_net_fcu, df_wacc):
-    if df_wacc == 0:
-        raise ValueError("Division by zero")
-    pv_fcu = fc_net_fcu / df_wacc
-    return pv_fcu
-
-
-def calc_total_pv_fcu(pv_list_fcu):
-    if pv_list_fcu is None or len(pv_list_fcu) == 0:
-        raise ValueError("PV list cannot be empty")
-    total_pv_fcu = sum(pv_list_fcu)
-    return total_pv_fcu
-
-
-def calc_npv_fcu(total_pv_fcu, i0_fcu):
-    if total_pv_fcu is None or i0_fcu is None:
-        raise ValueError("Total PV and initial investment required")
-    npv_fcu = total_pv_fcu - i0_fcu
-    return npv_fcu
-
-
-def calc_fc_net_fce(fce, cost):
-    if fce is None:
-        raise ValueError("FCE value required")
-    fc_net_fce = fce - cost
-    return fc_net_fce
-
-
-def calc_df_ke_fce(ke, t):
-    if ke is None or t is None:
-        raise ValueError("Ke and time required")
-    if ke == -1:
-        raise ValueError("Ke cannot be -1")
-    df_ke = (1 + ke) ** t
-    return df_ke
-
-
-def calc_pv_fce(fc_net_fce, df_ke):
-    if df_ke == 0:
-        raise ValueError("Division by zero")
-    pv_fce = fc_net_fce / df_ke
-    return pv_fce
-
-
-def calc_total_pv_fce(pv_list_fce):
-    if pv_list_fce is None or len(pv_list_fce) == 0:
-        raise ValueError("PV list cannot be empty")
-    total_pv_fce = sum(pv_list_fce)
-    return total_pv_fce
-
-
-def calc_npv_fce(total_pv_fce, equity0):
-    if total_pv_fce is None or equity0 is None:
-        raise ValueError("Total PV and initial equity required")
-    npv_fce = total_pv_fce - equity0
-    return npv_fce
-
+def calc_npv_fce(cash_flows, ke, initial_equity, fixed_cost=0):
+    """cash_flows è lista di float, ke è float"""
+    if not cash_flows:
+        raise ValueError("No cash flows provided")
+    pv = 0
+    for t, cf in enumerate(cash_flows, start=1):
+        net_cf = cf - fixed_cost
+        pv += net_cf / ((1 + ke) ** t)
+    return pv - initial_equity
