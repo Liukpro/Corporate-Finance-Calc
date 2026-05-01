@@ -74,23 +74,34 @@ def calc_fcid(fcid=None, inv=None, dis=None,
     if fcid is not None:
         return fcid
 
-    inv_final = inv if inv is not None else ((acqui_1 or 0) + (acqui_2 or 0))
-
-
-    if dis is None:
-        temp_vnc = vnc
-        if temp_vnc is None and val_sto is not None and ammo_ti is not None and n_ammo is not None:
-            temp_vnc = val_sto - (ammo_ti * n_ammo)      
-        if temp_vnc is not None:
-            dis = temp_vnc + (plus or 0) - (minus or 0)
-
-    if dis is not None:
-        return dis - inv_final  
-    elif inv is not None or acqui_1 is not None or acqui_2 is not None:
-        return 0 - inv_final
-    
+    # Calcolo investimenti totali
+    if inv is not None:
+        inv_final = inv
     else:
-        raise ValueError("Investments calculation error, nsufficient data: provide at least the investments or the divestment data.")
+        inv_final = (acqui_1 or 0) + (acqui_2 or 0)
+
+    # Calcolo disinvestimenti - SOLO SE ESPLICITAMENTE RICHIESTO
+    if dis is not None:
+        # dis già fornito direttamente
+        pass
+    elif vnc is not None:
+        # dis calcolato da vnc
+        dis = vnc + (plus or 0) - (minus or 0)
+    elif val_sto is not None and ammo_ti is not None and n_ammo is not None:
+        # dis calcolato da valore storico
+        vnc_calc = val_sto - (ammo_ti * n_ammo)
+        dis = vnc_calc + (plus or 0) - (minus or 0)
+    else:
+        # Nessun dato sui disinvestimenti
+        dis = None
+
+    # Risultato finale
+    if dis is not None:
+        return dis - inv_final
+    elif inv_final != 0:
+        return 0 - inv_final
+    else:
+        raise ValueError("Insufficient data: provide at least investments or divestments")
 
 def calc_fcfr(fcfr, rimb_cap = None, pat_net = None, deb_f = None):
     if fcfr is not None:
