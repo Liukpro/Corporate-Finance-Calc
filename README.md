@@ -34,6 +34,16 @@ Please read License files
 
 ---
 
+## System Status (Work in Progress)
+
+This project is not a finished application.
+
+It is a **financial computation engine under active development**, currently in a transitional stage between:
+- a functional prototype (Streamlit-based calculator)
+- and a modular financial analytics system with formal architecture (DAG + resolver design)
+
+---
+
 ## Goal
 
 Build a **deterministic corporate finance engine** that imports data from Excel and transforms financial statements into:
