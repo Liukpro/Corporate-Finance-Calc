@@ -421,9 +421,10 @@ elif page == "Stock Evaluation":
         except ValueError as e:
             st.error(str(e))
 #MORTGAGE
-elif page == "Mortgage":
+elif page == "Mortgage (Italian)":
     st.subheader("Mutuo - Ammortamento")
     st.caption("Confronto tra ammortamento italiano (quota capitale costante) e francese (rata costante)")
+    st.info("📌 **Nota:** I calcoli sono basati su rate MENSILI. Inserisci la durata in anni, il sistema convertirà automaticamente in mesi.")
     
     mortgage_type = st.radio("Tipo di ammortamento", ["Italiano (Quota Capitale Costante)", "Francese (Rata Costante)"])
     
@@ -432,74 +433,123 @@ elif page == "Mortgage":
         mortgage_debt = st.number_input("Debito iniziale (€)", value=100000.0, min_value=0.0, step=10000.0)
     with col2:
         annual_rate = st.number_input("Tasso di interesse annuo (%)", value=3.0, min_value=0.0, step=0.5) / 100
+        monthly_rate = annual_rate / 12  # Tasso mensile
+        st.caption(f"Tasso mensile equivalente: {monthly_rate:.4%}")
     with col3:
         years = st.number_input("Durata (anni)", value=20, min_value=1, max_value=50, step=1)
+        months = years * 12
+        st.caption(f"Durata in mesi: {months}")
     
     st.markdown("---")
     
     if mortgage_type == "Italiano (Quota Capitale Costante)":
-        st.markdown("### Piano di Ammortamento Italiano")
-        st.caption("Formula: Quota capitale costante = Debito / Anni")
+        st.markdown("### Piano di Ammortamento Italiano (Quota Capitale Costante)")
+        st.caption(f"**Formula:** Quota capitale costante = Debito / {months} mesi")
+        st.caption("Ogni mese paghi la stessa quota di capitale + interessi sul residuo")
         
         if st.button("Calcola Ammortamento Italiano"):
-            # Calcoli base
-            capital_share = mortgage_debt / years
-            st.session_state.mortgage_capital_share = capital_share
+            # Quota capitale costante (mensile)
+            capital_share_monthly = mortgage_debt / months
+            st.session_state.mortgage_capital_share = capital_share_monthly
             
-            # Creazione tabella
-            table_data = []
+            # Opzione: mostrare solo alcuni anni o tutti i mesi?
+            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
+            
+            # Creazione tabella mensile
+            monthly_table = []
             residual_debt = mortgage_debt
             
-            for t in range(1, years + 1):
-                # Interessi del periodo
-                interest_t = residual_debt * annual_rate
-                # Quota capitale (costante, ma calcolata sul residuo per precisione)
-                capital_t = capital_share if t < years else residual_debt
-                # Rata totale
+            for t in range(1, months + 1):
+                # Interessi del mese sul debito residuo
+                interest_t = residual_debt * monthly_rate
+                # Quota capitale (costante, ultimo mese aggiusta arrotondamenti)
+                capital_t = capital_share_monthly if t < months else residual_debt
+                # Rata totale del mese
                 payment_t = capital_t + interest_t
-                # Nuovo residuo
+                # Nuovo debito residuo
                 residual_debt -= capital_t
                 
-                table_data.append({
-                    "Anno": t,
-                    "Residuo Iniziale": residual_debt + capital_t if t > 1 else mortgage_debt,
+                monthly_table.append({
+                    "Mese": t,
+                    "Anno": (t - 1) // 12 + 1,
+                    "Residuo Iniziale": round(residual_debt + capital_t, 2),
                     "Quota Capitale": round(capital_t, 2),
                     "Quota Interessi": round(interest_t, 2),
                     "Rata": round(payment_t, 2),
-                    "Residuo Finale": round(residual_debt, 2)
+                    "Residuo Finale": round(max(residual_debt, 0), 2)
                 })
             
-            st.session_state.mortgage_amortization_table = table_data
+            # RIEPILOGO ANNUALE (sintesi per anno)
+            annual_summary = []
+            for year in range(1, years + 1):
+                year_months = [m for m in monthly_table if m["Anno"] == year]
+                annual_summary.append({
+                    "Anno": year,
+                    "Capitale Pagato": sum(m["Quota Capitale"] for m in year_months),
+                    "Interessi Pagati": sum(m["Quota Interessi"] for m in year_months),
+                    "Totale Rata Annua": sum(m["Rata"] for m in year_months),
+                    "Debito Residuo Fine Anno": year_months[-1]["Residuo Finale"] if year_months else 0
+                })
             
-            # Riepilogo
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("Quota Capitale Costante", f"€{capital_share:,.2f}")
-            total_interest = sum(row["Quota Interessi"] for row in table_data)
-            col_b.metric("Totale Interessi", f"€{total_interest:,.2f}")
+            st.session_state.mortgage_amortization_table = monthly_table
+            
+            # RIEOLOGO GENERALE
+            total_interest = sum(m["Quota Interessi"] for m in monthly_table)
             total_paid = mortgage_debt + total_interest
-            col_c.metric("Totale Pagato", f"€{total_paid:,.2f}")
+            first_payment = monthly_table[0]["Rata"]
+            last_payment = monthly_table[-1]["Rata"]
             
-            # Tabella
-            st.dataframe(table_data, use_container_width=True)
+            st.markdown("### 📊 Riepilogo Generale")
+            col_a, col_b, col_c, col_d = st.columns(4)
+            col_a.metric("Quota Capitale Mensile", f"€{capital_share_monthly:,.2f}")
+            col_b.metric("Prima Rata (max interessi)", f"€{first_payment:,.2f}")
+            col_c.metric("Ultima Rata (solo capitale)", f"€{last_payment:,.2f}")
+            col_d.metric("Totale Interessi", f"€{total_interest:,.2f}")
+            st.info(f"💰 **Totale pagato:** €{total_paid:,.2f} (Capitale €{mortgage_debt:,.2f} + Interessi €{total_interest:,.2f})")
             
-            # Grafico (opzionale)
-            st.markdown("### Andamento Rata e Debito Residuo")
-            chart_data = {
-                "Anno": [row["Anno"] for row in table_data],
-                "Rata": [row["Rata"] for row in table_data],
-                "Debito Residuo": [row["Residuo Finale"] for row in table_data]
+            # VISUALIZZAZIONE IN BASE ALLA SCELTA
+            if display_mode == "Resa annuale (sintesi)":
+                st.markdown("### 📅 Riepilogo Annuale")
+                st.dataframe(annual_summary, use_container_width=True)
+                
+                # Grafico dell'andamento annuale
+                chart_data = {
+                    "Anno": [a["Anno"] for a in annual_summary],
+                    "Interessi Pagati": [a["Interessi Pagati"] for a in annual_summary],
+                    "Debito Residuo": [a["Debito Residuo Fine Anno"] for a in annual_summary]
+                }
+                st.line_chart(chart_data, x="Anno", y=["Interessi Pagati", "Debito Residuo"])
+                
+            elif display_mode == "Mensile (primi 12 mesi)":
+                st.markdown("### 📆 Primi 12 mesi (dettaglio mensile)")
+                st.dataframe(monthly_table[:12], use_container_width=True)
+                
+            else:  # Completa
+                st.markdown(f"### 📆 Piano completo ({months} mesi)")
+                st.warning(f"Mostrando tutti i {months} mesi. Puoi usare la ricerca nella tabella.")
+                st.dataframe(monthly_table, use_container_width=True)
+            
+            # Grafico dell'andamento della rata nel tempo (campione ogni 12 mesi)
+            st.markdown("### 📉 Andamento della Rata nel tempo")
+            sample_months = monthly_table[::12]  # Una rata ogni 12 mesi
+            sample_data = {
+                "Mese": [m["Mese"] for m in sample_months],
+                "Rata": [m["Rata"] for m in sample_months],
+                "Quota Interessi": [m["Quota Interessi"] for m in sample_months],
+                "Quota Capitale": [m["Quota Capitale"] for m in sample_months]
             }
-            st.line_chart(chart_data, x="Anno", y=["Rata", "Debito Residuo"])
+            st.line_chart(sample_data, x="Mese", y=["Rata", "Quota Interessi", "Quota Capitale"])
     
-    else:  # Francese
-        st.markdown("### Piano di Ammortamento Francese")
-        st.caption("Formula: Rata costante = Debito × [k(1+k)^n] / [(1+k)^n - 1]")
+    else:  # FRANCESE - RATA COSTANTE MENSILE
+        st.markdown("### Piano di Ammortamento Francese (Rata Costante)")
+        st.caption(f"**Formula:** Rata mensile costante = Debito × [k(1+k)^{months}] / [(1+k)^{months} - 1]")
+        st.caption("Ogni mese paghi la stessa rata, ma cambia la composizione tra interessi e capitale")
         
         if st.button("Calcola Ammortamento Francese"):
-            # Calcolo rata costante
-            k = annual_rate
-            n = years
+            k = monthly_rate
+            n = months
             
+            # Calcolo rata mensile costante
             if k == 0:
                 constant_payment = mortgage_debt / n
             else:
@@ -507,54 +557,98 @@ elif page == "Mortgage":
             
             st.session_state.mortgage_payment = constant_payment
             
-            # Creazione tabella
-            table_data = []
+            # Opzione visualizzazione
+            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
+            
+            # Creazione tabella mensile
+            monthly_table = []
             residual_debt = mortgage_debt
             
-            for t in range(1, years + 1):
-                # Interessi sul residuo precedente
+            for t in range(1, months + 1):
+                # Interessi sul debito residuo del mese precedente
                 interest_t = residual_debt * k
-                # Quota capitale = rata - interessi
+                # Quota capitale = rata costante - interessi
                 capital_t = constant_payment - interest_t
-                # Nuovo residuo
-                residual_debt -= capital_t
-                # Gestione ultimo anno (arrotondamenti)
-                if t == years and abs(residual_debt) > 0.01:
-                    capital_t += residual_debt
+                # Gestione ultimo mese (arrotondamenti)
+                if t == months:
+                    capital_t = residual_debt  # Chiudi esattamente il debito
                     constant_payment = capital_t + interest_t
-                    residual_debt = 0
                 
-                table_data.append({
-                    "Anno": t,
-                    "Residuo Iniziale": residual_debt + capital_t if t > 1 else mortgage_debt,
+                residual_debt -= capital_t
+                
+                monthly_table.append({
+                    "Mese": t,
+                    "Anno": (t - 1) // 12 + 1,
+                    "Residuo Iniziale": round(residual_debt + capital_t, 2),
                     "Quota Capitale": round(capital_t, 2),
                     "Quota Interessi": round(interest_t, 2),
                     "Rata": round(constant_payment, 2),
                     "Residuo Finale": round(max(residual_debt, 0), 2)
                 })
             
-            st.session_state.mortgage_amortization_table = table_data
+            # RIEPILOGO ANNUALE
+            annual_summary = []
+            for year in range(1, years + 1):
+                year_months = [m for m in monthly_table if m["Anno"] == year]
+                annual_summary.append({
+                    "Anno": year,
+                    "Capitale Pagato": sum(m["Quota Capitale"] for m in year_months),
+                    "Interessi Pagati": sum(m["Quota Interessi"] for m in year_months),
+                    "Totale Rata Annua": sum(m["Rata"] for m in year_months),
+                    "Debito Residuo Fine Anno": year_months[-1]["Residuo Finale"] if year_months else 0
+                })
             
-            # Riepilogo
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("Rata Costante", f"€{constant_payment:,.2f}")
-            total_interest = sum(row["Quota Interessi"] for row in table_data)
-            col_b.metric("Totale Interessi", f"€{total_interest:,.2f}")
+            st.session_state.mortgage_amortization_table = monthly_table
+            
+            # RIEPILOGO GENERALE
+            total_interest = sum(m["Quota Interessi"] for m in monthly_table)
             total_paid = mortgage_debt + total_interest
-            col_c.metric("Totale Pagato", f"€{total_paid:,.2f}")
             
-            # Tabella
-            st.dataframe(table_data, use_container_width=True)
+            st.markdown("### 📊 Riepilogo Generale")
+            col_a, col_b, col_c, col_d = st.columns(4)
+            col_a.metric("Rata Mensile Costante", f"€{constant_payment:,.2f}")
+            col_b.metric("Prima Rata (max interessi)", f"€{constant_payment:,.2f}")
+            col_c.metric("Ultima Rata (min interessi)", f"€{constant_payment:,.2f}")
+            col_d.metric("Totale Interessi", f"€{total_interest:,.2f}")
+            st.info(f"💰 **Totale pagato:** €{total_paid:,.2f} (Capitale €{mortgage_debt:,.2f} + Interessi €{total_interest:,.2f})")
             
-            # Grafico
-            st.markdown("### Andamento Debito Residuo")
-            chart_data = {
-                "Anno": [row["Anno"] for row in table_data],
-                "Quota Capitale": [row["Quota Capitale"] for row in table_data],
-                "Quota Interessi": [row["Quota Interessi"] for row in table_data],
-                "Debito Residuo": [row["Residuo Finale"] for row in table_data]
-            }
-            st.bar_chart(chart_data, x="Anno", y=["Quota Capitale", "Quota Interessi"])
+            # VISUALIZZAZIONE
+            if display_mode == "Resa annuale (sintesi)":
+                st.markdown("### 📅 Riepilogo Annuale")
+                st.dataframe(annual_summary, use_container_width=True)
+                
+                chart_data = {
+                    "Anno": [a["Anno"] for a in annual_summary],
+                    "Interessi Pagati": [a["Interessi Pagati"] for a in annual_summary],
+                    "Debito Residuo": [a["Debito Residuo Fine Anno"] for a in annual_summary]
+                }
+                st.line_chart(chart_data, x="Anno", y=["Interessi Pagati", "Debito Residuo"])
+                
+            elif display_mode == "Mensile (primi 12 mesi)":
+                st.markdown("### 📆 Primi 12 mesi (dettaglio mensile)")
+                st.dataframe(monthly_table[:12], use_container_width=True)
+                
+                # Grafico della composizione della rata nel primo anno
+                import pandas as pd
+                df_first_year = pd.DataFrame(monthly_table[:12])
+                st.markdown("### Composizione rata - Primo anno")
+                st.bar_chart(df_first_year.set_index("Mese")[["Quota Capitale", "Quota Interessi"]])
+                
+            else:  # Completa
+                st.markdown(f"### 📆 Piano completo ({months} mesi)")
+                st.warning(f"Mostrando tutti i {months} mesi. Puoi usare la ricerca nella tabella.")
+                st.dataframe(monthly_table, use_container_width=True)
+            
+            # Grafico dell'evoluzione della composizione rata (campione annuale)
+            st.markdown("### 📉 Evoluzione della composizione della rata")
+            sample_months = monthly_table[::12]  # Una rata ogni 12 mesi
+            if sample_months:
+                sample_data = {
+                    "Anno": [(m["Mese"] - 1) // 12 + 1 for m in sample_months],
+                    "Quota Capitale": [m["Quota Capitale"] for m in sample_months],
+                    "Quota Interessi": [m["Quota Interessi"] for m in sample_months]
+                }
+                st.bar_chart(sample_data, x="Anno", y=["Quota Capitale", "Quota Interessi"])
 #WACC
 elif page == "WACC":
     st.subheader("WACC - Weighted Average Cost of Capital")
