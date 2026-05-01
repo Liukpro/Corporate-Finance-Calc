@@ -80,65 +80,102 @@ if page == "Cash Flow Analysis":
             st.warning(f"{label} not calculated yet.")
             return st.number_input(f"Insert {label} manually", value=0.0, key=f"manual_{key_name}")
 
+   if page == "Cash Flow Analysis":
+    st.subheader("Cash Flow Calculation")
+
+    op = st.selectbox("Select the Cash Flow to calculate:", 
+                      ["FCCNOGC", "RO-L", "FCGC", "FCID", "FCFR", "FCRf", "Variazione Liquidità", "FCU", "FCE"])
+    
+    # Helper per mostrare valori calcolati in precedenza
+    def show_dependency(key_name, label):
+        if st.session_state[key_name] is not None:
+            st.info(f"{label} from previous calculation: {st.session_state[key_name]:.2f}")
+            return st.session_state[key_name]
+        else:
+            st.warning(f"{label} not calculated yet.")
+            return st.number_input(f"Insert {label} manually", value=0.0, key=f"manual_{key_name}")
+
     if op == "FCCNOGC":
         st.write("Formula: Multiple paths")
-        st.caption("Inserisci i dati per UNO dei seguenti metodi (gli altri lasciali a 0)")
-        
+        st.caption("Inserisci i dati per UNO dei seguenti metodi (gli altri lasciali vuoti)")
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("**Metodo 1: Revenue - Costs - Taxes**")
-            ric = st.number_input("Operating Revenue", value=0.0, key="fccnogc_ric")
-            cost = st.number_input("Operating Costs", value=0.0, key="fccnogc_cost")
-            imp = st.number_input("Taxes (Income)", value=0.0, key="fccnogc_imp")
-        with col2:
+            use_metodo1 = st.checkbox("Usa Metodo 1", key="fccnogc_use_met1")
+            
+            if use_metodo1:
+                ric = st.number_input("Operating Revenue", value=0.0, key="fccnogc_ric")
+                cost = st.number_input("Operating Costs", value=0.0, key="fccnogc_cost")
+                imp = st.number_input("Taxes (Income)", value=0.0, key="fccnogc_imp")
+            else:
+                ric = cost = imp = None
+                
             st.markdown("**Metodo 2: MOL - Taxes**")
-            mol = st.number_input("MOL (EBITDA)", value=0.0, key="fccnogc_mol")
+            use_metodo2 = st.checkbox("Usa Metodo 2", key="fccnogc_use_met2")
+            
+            if use_metodo2:
+                mol = st.number_input("MOL (EBITDA)", value=0.0, key="fccnogc_mol")
+                imp2 = st.number_input("Taxes (Income)", value=0.0, key="fccnogc_imp2")
+            else:
+                mol = imp2 = None
+                
+        with col2:
             st.markdown("**Metodo 3: ROL - Taxes + Ammort**")
-            rol_input = st.number_input("RO-L (EBIT)", value=0.0, key="fccnogc_rol")
-            ammort = st.number_input("Amortisation", value=0.0, key="fccnogc_amm")
-
-        if st.button("Calculate FCCNOGC"):
+            use_metodo3 = st.checkbox("Usa Metodo 3", key="fccnogc_use_met3")
+            if use_metodo3:
+                rol_input = st.number_input("RO-L (EBIT)", value=0.0, key="fccnogc_rol")
+                ammort = st.number_input("Amortisation", value=0.0, key="fccnogc_amm")
+                imp3 = st.number_input("Taxes (Income)", value=0.0, key="fccnogc_imp3")
+            else:
+                rol_input = ammort = imp3 = None
+                
+        if st.button("Calculate FCCNOGC", key="btn_fccnogc"):
             try:
-                # Determina quale metodo usare in base a valori non-zero
-                if ric != 0 and cost != 0 and imp != 0:
-                    res = ric - cost - imp
-                    st.info("Usato metodo: Revenue - Costs - Taxes")
-                elif mol != 0 and imp != 0:
-                    res = mol - imp
-                    st.info("Usato metodo: MOL - Taxes")
-                elif rol_input != 0 and ammort != 0 and imp != 0:
-                    res = rol_input - imp + ammort
-                    st.info("Usato metodo: ROL - Taxes + Ammort")
-                else:
-                    raise ValueError("Inserisci dati validi per almeno un metodo di calcolo")
-                    
+                res = calc_fccnogc(
+                    ric_op_mon=ric,
+                    cost_op_mon=cost,
+                    imp=imp or imp2 or imp3,
+                    ammort=ammort,
+                    mol=mol,
+                    rol=rol_input
+                    )
                 st.session_state.fccnogc = res
                 st.success(f"FCCNOGC = {res:.2f}")
+                
             except ValueError as e:
                 st.error(f"Error: {e}")
 
     elif op == "RO-L":
         st.write("Formula: Revenue - Costs - Ammort  OR  MOL - Ammort")
+        st.caption("Inserisci i dati per UNO dei seguenti metodi")
         
         col1, col2 = st.columns(2)
         with col1:
-            ric = st.number_input("Operating Revenue", value=0.0, key="rol_ric")
-            cost = st.number_input("Operating Costs", value=0.0, key="rol_cost")
+            use_metodo1 = st.checkbox("Usa Metodo 1: Revenue - Costs - Ammort", key="rol_use_met1")
+            if use_metodo1:
+                ric = st.number_input("Operating Revenue", value=0.0, key="rol_ric")
+                cost = st.number_input("Operating Costs", value=0.0, key="rol_cost")
+                ammort = st.number_input("Amortisation", value=0.0, key="rol_amm")
+            else:
+                ric = cost = ammort = None
+                
         with col2:
-            ammort = st.number_input("Amortisation", value=0.0, key="rol_amm")
-            mol = st.number_input("MOL (EBITDA)", value=0.0, key="rol_mol")
-
-        if st.button("Calculate RO-L"):
+            use_metodo2 = st.checkbox("Usa Metodo 2: MOL - Ammort", key="rol_use_met2") 
+            if use_metodo2:
+                mol = st.number_input("MOL (EBITDA)", value=0.0, key="rol_mol")
+                ammort2 = st.number_input("Amortisation", value=0.0, key="rol_amm2")
+                
+            else:
+                mol = ammort2 = None
+                
+        if st.button("Calculate RO-L", key="btn_rol"):
             try:
-                if ric != 0 and cost != 0 and ammort != 0:
-                    res = ric - cost - ammort
-                    st.info("Usato metodo: Revenue - Costs - Ammort")
-                elif mol != 0 and ammort != 0:
-                    res = mol - ammort
-                    st.info("Usato metodo: MOL - Ammort")
-                else:
-                    raise ValueError("Inserisci dati validi per almeno un metodo")
-                    
+                res = calc_rol(
+                ric_op_mon=ric,
+                cost_op_mon=cost,
+                ammort=ammort or ammort2,
+                mol=mol
+            )
                 st.session_state.rol = res
                 st.success(f"RO-L = {res:.2f}")
             except ValueError as e:
@@ -148,13 +185,14 @@ if page == "Cash Flow Analysis":
         st.caption("Formula: FCGC = FCCNOGC - ΔCCNO")
         
         fccnogc_v = show_dependency('fccnogc', 'FCCNOGC')
-        ccno = st.number_input("Delta CCNO (Working Capital Variation)", value=0.0)
-        
-        if st.button("Calculate FCGC"):
-            res = fccnogc_v - ccno
-            st.session_state.fcgc = res
-            st.success(f"FCGC = {res:.2f}")
-            st.caption(f"Calcolo: {fccnogc_v:.2f} - {ccno:.2f} = {res:.2f}")
+        ccno = st.number_input("Delta CCNO (Working Capital Variation)", value=0.0, key="fcgc_ccno")
+        if st.button("Calculate FCGC", key="btn_fcgc"):
+            try:
+                res = calc_fcgc(fccnogc=fccnogc_v, ccno=ccno)
+                st.session_state.fcgc = res
+                st.success(f"FCGC = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
 
     elif op == "FCID":
         st.write("Cash Flow from Investing Activities")
@@ -246,43 +284,70 @@ if page == "Cash Flow Analysis":
         
         col1, col2 = st.columns(2)
         with col1:
-            of = st.number_input("Interest Expense (Oneri Finanziari)", value=0.0)
+            of = st.number_input("Interest Expense (Oneri Finanziari)", value=0.0, key="fcrf_of")
         with col2:
-            div = st.number_input("Dividends", value=0.0)
+            div = st.number_input("Dividends", value=0.0, key="fcrf_div")
+            
+        if st.button("Calculate FCRf", key="btn_fcrf"):
+            try:
+                res = calc_fcrf(of=of, div=div)
+                st.session_state.fcrf = res
+                st.success(f"FCRf = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
+
+
+    elif op == "FCFR":
+        st.caption("Formula: FCRf = - Interest Expense - Dividends")
         
-        if st.button("Calculate FCRf"):
-            res = -of - div
-            st.session_state.fcrf = res
-            st.success(f"FCRf = {res:.2f}")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            pat_net = st.number_input("Equity (Patrimonio Netto)", value=0.0, key="fcfr_pat_net")       
+        with col2:
+            deb_f = st.number_input("Financial Debt", value=0.0, key="fcfr_deb_f")
+        with col3:
+            rimb_cap = st.number_input("Capital Repayment", value=0.0, key="fcfr_rimb_cap")
+        if st.button("Calculate FCFR", key="btn_fcfr"):
+            try:
+                res = calc_fcfr(pat_net=pat_net, deb_f=deb_f, rimb_cap=rimb_cap)
+                st.session_state.fcfr = res
+                st.success(f"FCFR = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
 
     elif op == "FCU":
         st.caption("Formula: FCU = FCGC + FCID")
-        
         fcgc_val = show_dependency('fcgc', 'FCGC')
         fcid_val = show_dependency('fcid', 'FCID')
         
-        if st.button("Calculate FCU"):
-            res = fcgc_val + fcid_val
-            st.session_state.fcu = res
-            st.success(f"FCU = {res:.2f}")
+        if st.button("Calculate FCU", key="btn_fcu"):
+            try:
+                res = calc_fcu(fcgc=fcgc_val, fcid=fcid_val)
+                st.session_state.fcu = res
+                st.success(f"FCU = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
 
     elif op == "FCE":
         st.caption("Formula: FCE = FCU + FCFR - RimborsoCapitale + FCRf - Dividends")
-        
         fcu_val = show_dependency('fcu', 'FCU')
         fcfr_val = show_dependency('fcfr', 'FCFR')
         fcrf_val = show_dependency('fcrf', 'FCRf')
         
         col1, col2 = st.columns(2)
         with col1:
-            rimb_cap = st.number_input("Capital Repayment", value=0.0)
+            rimb_cap = st.number_input("Capital Repayment", value=0.0, key="fce_rimb_cap")
         with col2:
-            div = st.number_input("Dividends Paid", value=0.0)
+            div = st.number_input("Dividends Paid", value=0.0, key="fce_div")
         
-        if st.button("Calculate FCE"):
-            res = fcu_val + fcfr_val - rimb_cap + fcrf_val - div
-            st.session_state.fce = res
-            st.success(f"FCE = {res:.2f}")
+        if st.button("Calculate FCE", key="btn_fce"):
+            
+            try:
+                res = calc_fce(fcu=fcu_val, fcfr=fcfr_val, fcrf=fcrf_val, rimb_cap=rimb_cap, div=div)
+                st.session_state.fce = res
+                st.success(f"FCE = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
 
     elif op == "Variazione Liquidità":
         st.caption("Formula: ΔCash = FCGC + FCID + FCFR + FCRf")
@@ -292,9 +357,12 @@ if page == "Cash Flow Analysis":
         fcfr_val = show_dependency('fcfr', 'FCFR')
         fcrf_val = show_dependency('fcrf', 'FCRf')
         
-        if st.button("Calculate Delta Cash"):
-            res = fcgc_val + fcid_val + fcfr_val + fcrf_val
-            st.success(f"Total Liquidity Variation = {res:.2f}")
+        if st.button("Calculate Delta Cash", key="btn_var_liq"):
+            try:
+                res = calc_var_liq(fcgc=fcgc_val, fcid=fcid_val, fcfr=fcfr_val, fcrf=fcrf_val)
+                st.success(f"Total Liquidity Variation = {res:.2f}")
+            except ValueError as e:
+                st.error(str(e))
 #RATIO ANALYSIS
 elif page == "Ratio Analysis":
     st.subheader("Profitability Ratios")
