@@ -2,7 +2,8 @@ import streamlit as st
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
                       calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero, calc_ros, 
-                      calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, calc_vaoc, build_italian_table)
+                      calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, calc_vaoc, 
+                      build_italian_table, build_french_table )
 
 
 # Configurazione Pagina
