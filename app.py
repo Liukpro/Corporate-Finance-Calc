@@ -669,7 +669,7 @@ elif page == "Mortgage":
             st.info(f"💰 **Totale pagato:** €{total_paid:,.2f} (Capitale €{mortgage_debt:,.2f} + Interessi €{total_interest:,.2f})")
             
             # VISUALIZZAZIONE
-            if display_mode == "Resa annuale (sintesi)":
+            if display_mode == "Annuale":
                 st.markdown("### 📅 Riepilogo Annuale")
                 st.dataframe(annual_summary, use_container_width=True)
                 
