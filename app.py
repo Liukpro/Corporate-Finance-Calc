@@ -9,7 +9,7 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
 
 st.title("Corporate Finance Calc")
-st.caption("v2.2")
+st.caption("v3.0")
 
 st.sidebar.markdown("""
 **License:** Apache 2.0  
@@ -972,4 +972,4 @@ elif page == "NPV with FCU/FCE":
                 st.error(f"Errore nel calcolo: {e}")
 
 elif page == "Coming Soon...":
-    st.write("Stay tuned for Mortgage, WACC, NPV & ModifiedTIR comparision between projects and new tools.")
+    st.write("Stay tuned for Risk Analysis and Portfolio")
