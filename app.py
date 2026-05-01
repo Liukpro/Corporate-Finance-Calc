@@ -158,7 +158,7 @@ if page == "Cash Flow Analysis":
 
     elif op == "FCID":
         st.write("Cash Flow from Investing Activities")
-        st.warning("⚠️ Scegli UNO dei seguenti metodi (gli altri lasciali vuoti)")
+        st.warning("Scegli UNO dei seguenti metodi (gli altri lasciali vuoti)")
         
         metodo = st.radio("Seleziona metodo:", 
                           ["FCID diretto", "Disinvestimenti - Investimenti", "Solo Investimenti (negativo)"],
