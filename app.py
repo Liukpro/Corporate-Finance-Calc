@@ -80,21 +80,6 @@ if page == "Cash Flow Analysis":
             st.warning(f"{label} not calculated yet.")
             return st.number_input(f"Insert {label} manually", value=0.0, key=f"manual_{key_name}")
 
-   if page == "Cash Flow Analysis":
-    st.subheader("Cash Flow Calculation")
-
-    op = st.selectbox("Select the Cash Flow to calculate:", 
-                      ["FCCNOGC", "RO-L", "FCGC", "FCID", "FCFR", "FCRf", "Variazione Liquidità", "FCU", "FCE"])
-    
-    # Helper per mostrare valori calcolati in precedenza
-    def show_dependency(key_name, label):
-        if st.session_state[key_name] is not None:
-            st.info(f"{label} from previous calculation: {st.session_state[key_name]:.2f}")
-            return st.session_state[key_name]
-        else:
-            st.warning(f"{label} not calculated yet.")
-            return st.number_input(f"Insert {label} manually", value=0.0, key=f"manual_{key_name}")
-
     if op == "FCCNOGC":
         st.write("Formula: Multiple paths")
         st.caption("Inserisci i dati per UNO dei seguenti metodi (gli altri lasciali vuoti)")
