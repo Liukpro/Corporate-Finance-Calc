@@ -476,408 +476,79 @@ elif page == "Stock Evaluation":
             st.warning("Negative VAOC = growth destroys value")
         else:
             st.info("VAOC = 0 = growth adds no value")
-#MORTGAGE
+          
 elif page == "Mortgage":
     st.subheader("Mutuo - Ammortamento")
-    st.caption("Confronto tra ammortamento italiano (quota capitale costante) e francese (rata costante)")
-    st.info("📌 **Nota:** I calcoli sono basati su rate MENSILI. Inserisci la durata in anni, il sistema convertirà automaticamente in mesi.")
     
-    mortgage_type = st.radio("Tipo di ammortamento", ["Italiano (Quota Capitale Costante)", "Francese (Rata Costante)"])
+    mortgage_type = st.radio("Tipo", ["Italiano", "Francese"])
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        mortgage_debt = st.number_input("Debito iniziale (€)", value=100000.0, min_value=0.0, step=10000.0)
+        debt = st.number_input("Debito (€)", value=100000.0)
     with col2:
-        annual_rate = st.number_input("Tasso di interesse annuo (%)", value=3.0, min_value=0.0, step=0.5) / 100
-        monthly_rate = annual_rate / 12  # Tasso mensile
-        st.caption(f"Tasso mensile equivalente: {monthly_rate:.4%}")
+        annual_rate = st.number_input("Tasso annuo (%)", value=3.0) / 100
     with col3:
-        years = st.number_input("Durata (anni)", value=20, min_value=1, max_value=50, step=1)
-        months = years * 12
-        st.caption(f"Durata in mesi: {months}")
+        years = st.number_input("Anni", value=20, min_value=1)
     
-    st.markdown("---")
-    
-    if mortgage_type == "Italiano (Quota Capitale Costante)":
-        st.markdown("### Piano di Ammortamento Italiano (Quota Capitale Costante)")
-        st.caption(f"**Formula:** Quota capitale costante = Debito / {months} mesi")
-        st.caption("Ogni mese paghi la stessa quota di capitale + interessi sul residuo")
+    if st.button("Calcola"):
+        if mortgage_type == "Italiano":
+            table = build_italian_table(debt, annual_rate, years)
+        else:
+            table = build_french_table(debt, annual_rate, years)
         
-        if st.button("Calcola Ammortamento Italiano"):
-            # Quota capitale costante (mensile)
-            capital_share_monthly = mortgage_debt / months
-            st.session_state.mortgage_capital_share = capital_share_monthly
-            
-            # Opzione: mostrare solo alcuni anni o tutti i mesi?
-            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
-            
-            # Creazione tabella mensile
-            monthly_table = []
-            residual_debt = mortgage_debt
-            
-            for t in range(1, months + 1):
-                # Interessi del mese sul debito residuo
-                interest_t = residual_debt * monthly_rate
-                # Quota capitale (costante, ultimo mese aggiusta arrotondamenti)
-                capital_t = capital_share_monthly if t < months else residual_debt
-                # Rata totale del mese
-                payment_t = capital_t + interest_t
-                # Nuovo debito residuo
-                residual_debt -= capital_t
-                
-                monthly_table.append({
-                    "Mese": t,
-                    "Anno": (t - 1) // 12 + 1,
-                    "Residuo Iniziale": round(residual_debt + capital_t, 2),
-                    "Quota Capitale": round(capital_t, 2),
-                    "Quota Interessi": round(interest_t, 2),
-                    "Rata": round(payment_t, 2),
-                    "Residuo Finale": round(max(residual_debt, 0), 2)
-                })
-            
-            # RIEPILOGO ANNUALE (sintesi per anno)
-            annual_summary = []
-            for year in range(1, years + 1):
-                year_months = [m for m in monthly_table if m["Anno"] == year]
-                annual_summary.append({
-                    "Anno": year,
-                    "Capitale Pagato": sum(m["Quota Capitale"] for m in year_months),
-                    "Interessi Pagati": sum(m["Quota Interessi"] for m in year_months),
-                    "Totale Rata Annua": sum(m["Rata"] for m in year_months),
-                    "Debito Residuo Fine Anno": year_months[-1]["Residuo Finale"] if year_months else 0
-                })
-            
-            st.session_state.mortgage_amortization_table = monthly_table
-            
-            # RIEOLOGO GENERALE
-            total_interest = sum(m["Quota Interessi"] for m in monthly_table)
-            total_paid = mortgage_debt + total_interest
-            first_payment = monthly_table[0]["Rata"]
-            last_payment = monthly_table[-1]["Rata"]
-            
-            st.markdown("### 📊 Riepilogo Generale")
-            col_a, col_b, col_c, col_d = st.columns(4)
-            col_a.metric("Quota Capitale Mensile", f"€{capital_share_monthly:,.2f}")
-            col_b.metric("Prima Rata (max interessi)", f"€{first_payment:,.2f}")
-            col_c.metric("Ultima Rata (solo capitale)", f"€{last_payment:,.2f}")
-            col_d.metric("Totale Interessi", f"€{total_interest:,.2f}")
-            st.info(f"💰 **Totale pagato:** €{total_paid:,.2f} (Capitale €{mortgage_debt:,.2f} + Interessi €{total_interest:,.2f})")
-            
-            # VISUALIZZAZIONE IN BASE ALLA SCELTA
-            if display_mode == "Resa annuale (sintesi)":
-                st.markdown("### 📅 Riepilogo Annuale")
-                st.dataframe(annual_summary, use_container_width=True)
-                
-                # Grafico dell'andamento annuale
-                chart_data = {
-                    "Anno": [a["Anno"] for a in annual_summary],
-                    "Interessi Pagati": [a["Interessi Pagati"] for a in annual_summary],
-                    "Debito Residuo": [a["Debito Residuo Fine Anno"] for a in annual_summary]
-                }
-                st.line_chart(chart_data, x="Anno", y=["Interessi Pagati", "Debito Residuo"])
-                
-            elif display_mode == "Mensile (primi 12 mesi)":
-                st.markdown("### 📆 Primi 12 mesi (dettaglio mensile)")
-                st.dataframe(monthly_table[:12], use_container_width=True)
-                
-            else:  # Completa
-                st.markdown(f"### 📆 Piano completo ({months} mesi)")
-                st.warning(f"Mostrando tutti i {months} mesi. Puoi usare la ricerca nella tabella.")
-                st.dataframe(monthly_table, use_container_width=True)
-            
-            # Grafico dell'andamento della rata nel tempo (campione ogni 12 mesi)
-            st.markdown("### 📉 Andamento della Rata nel tempo")
-            sample_months = monthly_table[::12]  # Una rata ogni 12 mesi
-            sample_data = {
-                "Mese": [m["Mese"] for m in sample_months],
-                "Rata": [m["Rata"] for m in sample_months],
-                "Quota Interessi": [m["Quota Interessi"] for m in sample_months],
-                "Quota Capitale": [m["Quota Capitale"] for m in sample_months]
-            }
-            st.line_chart(sample_data, x="Mese", y=["Rata", "Quota Interessi", "Quota Capitale"])
-    
-    else:  # FRANCESE - RATA COSTANTE MENSILE
-        st.markdown("### Piano di Ammortamento Francese (Rata Costante)")
-        st.caption(f"**Formula:** Rata mensile costante = Debito × [k(1+k)^{months}] / [(1+k)^{months} - 1]")
-        st.caption("Ogni mese paghi la stessa rata, ma cambia la composizione tra interessi e capitale")
-        
-        if st.button("Calcola Ammortamento Francese"):
-            k = monthly_rate
-            n = months
-            
-            # Calcolo rata mensile costante
-            if k == 0:
-                constant_payment = mortgage_debt / n
-            else:
-                constant_payment = mortgage_debt * (k * (1 + k) ** n) / ((1 + k) ** n - 1)
-            
-            st.session_state.mortgage_payment = constant_payment
-            
-            # Opzione visualizzazione
-            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
-            
-            # Creazione tabella mensile
-            monthly_table = []
-            residual_debt = mortgage_debt
-            
-            for t in range(1, months + 1):
-                # Interessi sul debito residuo del mese precedente
-                interest_t = residual_debt * k
-                # Quota capitale = rata costante - interessi
-                capital_t = constant_payment - interest_t
-                # Gestione ultimo mese (arrotondamenti)
-                if t == months:
-                    capital_t = residual_debt  # Chiudi esattamente il debito
-                    constant_payment = capital_t + interest_t
-                
-                residual_debt -= capital_t
-                
-                monthly_table.append({
-                    "Mese": t,
-                    "Anno": (t - 1) // 12 + 1,
-                    "Residuo Iniziale": round(residual_debt + capital_t, 2),
-                    "Quota Capitale": round(capital_t, 2),
-                    "Quota Interessi": round(interest_t, 2),
-                    "Rata": round(constant_payment, 2),
-                    "Residuo Finale": round(max(residual_debt, 0), 2)
-                })
-            
-            # RIEPILOGO ANNUALE
-            annual_summary = []
-            for year in range(1, years + 1):
-                year_months = [m for m in monthly_table if m["Anno"] == year]
-                annual_summary.append({
-                    "Anno": year,
-                    "Capitale Pagato": sum(m["Quota Capitale"] for m in year_months),
-                    "Interessi Pagati": sum(m["Quota Interessi"] for m in year_months),
-                    "Totale Rata Annua": sum(m["Rata"] for m in year_months),
-                    "Debito Residuo Fine Anno": year_months[-1]["Residuo Finale"] if year_months else 0
-                })
-            
-            st.session_state.mortgage_amortization_table = monthly_table
-            
-            # RIEPILOGO GENERALE
-            total_interest = sum(m["Quota Interessi"] for m in monthly_table)
-            total_paid = mortgage_debt + total_interest
-            
-            st.markdown("### 📊 Riepilogo Generale")
-            col_a, col_b, col_c, col_d = st.columns(4)
-            col_a.metric("Rata Mensile Costante", f"€{constant_payment:,.2f}")
-            col_b.metric("Prima Rata (max interessi)", f"€{constant_payment:,.2f}")
-            col_c.metric("Ultima Rata (min interessi)", f"€{constant_payment:,.2f}")
-            col_d.metric("Totale Interessi", f"€{total_interest:,.2f}")
-            st.info(f"💰 **Totale pagato:** €{total_paid:,.2f} (Capitale €{mortgage_debt:,.2f} + Interessi €{total_interest:,.2f})")
-            
-            # VISUALIZZAZIONE
-            if display_mode == "Resa annuale (sintesi)":
-                st.markdown("### 📅 Riepilogo Annuale")
-                st.dataframe(annual_summary, use_container_width=True)
-                
-                chart_data = {
-                    "Anno": [a["Anno"] for a in annual_summary],
-                    "Interessi Pagati": [a["Interessi Pagati"] for a in annual_summary],
-                    "Debito Residuo": [a["Debito Residuo Fine Anno"] for a in annual_summary]
-                }
-                st.line_chart(chart_data, x="Anno", y=["Interessi Pagati", "Debito Residuo"])
-                
-            elif display_mode == "Mensile (primi 12 mesi)":
-                st.markdown("### 📆 Primi 12 mesi (dettaglio mensile)")
-                st.dataframe(monthly_table[:12], use_container_width=True)
-                
-                # Grafico della composizione della rata nel primo anno
-                import pandas as pd
-                df_first_year = pd.DataFrame(monthly_table[:12])
-                st.markdown("### Composizione rata - Primo anno")
-                st.bar_chart(df_first_year.set_index("Mese")[["Quota Capitale", "Quota Interessi"]])
-                
-            else:  # Completa
-                st.markdown(f"### 📆 Piano completo ({months} mesi)")
-                st.warning(f"Mostrando tutti i {months} mesi. Puoi usare la ricerca nella tabella.")
-                st.dataframe(monthly_table, use_container_width=True)
-            
-            # Grafico dell'evoluzione della composizione rata (campione annuale)
-            st.markdown("### 📉 Evoluzione della composizione della rata")
-            sample_months = monthly_table[::12]  # Una rata ogni 12 mesi
-            if sample_months:
-                sample_data = {
-                    "Anno": [(m["Mese"] - 1) // 12 + 1 for m in sample_months],
-                    "Quota Capitale": [m["Quota Capitale"] for m in sample_months],
-                    "Quota Interessi": [m["Quota Interessi"] for m in sample_months]
-                }
-                st.bar_chart(sample_data, x="Anno", y=["Quota Capitale", "Quota Interessi"])
-#WACC
-elif page == "WACC":
-    st.subheader("WACC - Weighted Average Cost of Capital")
-    st.caption("Formula: WACC = r_e × (E/V) + r_d × (1 - t_c) × (D/V)")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("**Costo del Capitale Proprio**")
-        cost_of_equity = st.number_input("r_e (Costo dell'Equity)", value=0.12, min_value=0.0, max_value=1.0, step=0.01, format="%.4f")
-        equity = st.number_input("E (Equity - Patrimonio Netto)", value=500000.0, min_value=0.0, step=10000.0)
-    
-    with col2:
-        st.markdown("**Costo del Debito**")
-        cost_of_debt = st.number_input("r_d (Costo del Debito)", value=0.05, min_value=0.0, max_value=1.0, step=0.01, format="%.4f")
-        debt = st.number_input("D (Debito Finanziario)", value=300000.0, min_value=0.0, step=10000.0)
-        tax_rate = st.number_input("t_c (Aliquota Fiscale)", value=0.24, min_value=0.0, max_value=0.5, step=0.01, format="%.4f")
-    
-    if st.button("Calcola WACC"):
-        try:
-            # Validazione base
-            if equity + debt == 0:
-                st.error("La somma di Equity e Debito non può essere zero")
-            else:
-                wacc = (cost_of_equity * (equity / (equity + debt))) + (cost_of_debt * (1 - tax_rate) * (debt / (equity + debt)))
-                st.session_state.wacc = wacc
-                st.session_state.cost_of_equity = cost_of_equity
-                st.session_state.cost_of_debt = cost_of_debt
-                st.session_state.tax_rate = tax_rate
-                
-                st.markdown("---")
-                st.metric("WACC", f"{wacc:.2%}")
-                
-                # Spiegazione dettagliata
-                with st.expander("Vedi calcolo dettagliato"):
-                    st.write(f"E/V = {equity:,.0f} / {equity + debt:,.0f} = {equity/(equity+debt):.2%}")
-                    st.write(f"D/V = {debt:,.0f} / {equity + debt:,.0f} = {debt/(equity+debt):.2%}")
-                    st.write(f"r_e × (E/V) = {cost_of_equity:.2%} × {equity/(equity+debt):.2%} = {cost_of_equity * equity/(equity+debt):.2%}")
-                    st.write(f"r_d × (1-t_c) × (D/V) = {cost_of_debt:.2%} × {1-tax_rate:.2%} × {debt/(equity+debt):.2%} = {cost_of_debt * (1-tax_rate) * debt/(equity+debt):.2%}")
-        except Exception as e:
-            st.error(f"Errore nel calcolo: {e}")
+        total_interest = sum(row["interest"] for row in table)
+        st.metric("Totale Interessi", f"€{total_interest:,.2f}")
+        st.dataframe(table, use_container_width=True)
 
-# NPV con FCU/FCE
+
+# WACC
+elif page == "WACC":
+    st.subheader("WACC")
+    
+    re = st.number_input("r_e", value=0.12, format="%.4f")
+    rd = st.number_input("r_d", value=0.05, format="%.4f")
+    tc = st.number_input("t_c", value=0.24, format="%.4f")
+    equity = st.number_input("Equity", value=500000.0)
+    debt = st.number_input("Debt", value=300000.0)
+    
+    if st.button("Calcola"):
+        res = calc_wacc(re, rd, tc, equity, debt)
+        st.success(f"WACC = {res:.2%}")
+
+
+# NPV with FCU/FCE
 elif page == "NPV with FCU/FCE":
-    st.subheader("NPV - Due Approcci")
-    st.caption("NPV con logica del capitale investito (FCU) vs logica dell'azionista (FCE)")
+    st.subheader("NPV")
     
-    approach = st.radio("Seleziona approccio", ["FCU (Free Cash Flow to Firm)", "FCE (Free Cash Flow to Equity)"])
+    approach = st.radio("Approccio", ["FCU (WACC)", "FCE (Ke)"])
     
-    if approach == "FCU (Free Cash Flow to Firm)":
-        st.markdown("### NPV con FCU (WACC come tasso di sconto)")
+    if approach == "FCU (WACC)":
+        wacc = st.number_input("WACC", value=0.08, format="%.4f")
+        i0 = st.number_input("Investimento I₀", value=100000.0)
+        fixed = st.number_input("Costo fisso/periodo", value=0.0)
+        n = st.number_input("Periodi", min_value=1, value=5)
         
-        col1, col2 = st.columns(2)
-        with col1:
-            # WACC automatico o manuale
-            if st.session_state.wacc is not None:
-                st.info(f"WACC calcolato in precedenza: {st.session_state.wacc:.2%}")
-                use_saved_wacc = st.checkbox("Usa WACC salvato", value=True)
-                if use_saved_wacc:
-                    wacc = st.session_state.wacc
-                else:
-                    wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.5) / 100
-            else:
-                wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.5) / 100
-            
-            i0_fcu = st.number_input("Investimento Iniziale I₀ (€)", value=100000.0, min_value=0.0, step=10000.0)
-            cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
+        flows = []
+        for i in range(n):
+            flows.append(st.number_input(f"FCU periodo {i+1}", key=f"fcu_{i}", value=10000.0))
         
-        with col2:
-            n = st.number_input("Numero di periodi", min_value=1, step=1, value=5)
-        
-        st.markdown("**Flussi di Cassa (FCU) per periodo**")
-        fcu_list = []
-        for i in range(int(n)):
-            fcu_list.append(st.number_input(f"FCU periodo {i+1}", key=f"fcu_{i}", value=10000.0, step=1000.0))
-        
-        if st.button("Calcola NPV (FCU)"):
-            try:
-                total_pv = 0
-                pv_list = []
-                
-                for t, fcu in enumerate(fcu_list, start=1):
-                    fc_net = fcu - cost
-                    df = (1 + wacc) ** t
-                    pv = fc_net / df
-                    pv_list.append(pv)
-                    total_pv += pv
-                
-                npv_fcu = total_pv - i0_fcu
-                
-                st.session_state.total_pv_fcu = total_pv
-                st.session_state.npv_fcu = npv_fcu
-                
-                st.markdown("---")
-                col_a, col_b, col_c = st.columns(3)
-                col_a.metric("Valore Attuale Totale", f"€{total_pv:,.2f}")
-                col_b.metric("Investimento Iniziale", f"€{i0_fcu:,.2f}")
-                col_c.metric("NPV", f"€{npv_fcu:,.2f}", 
-                             delta="Positivo" if npv_fcu > 0 else "Negativo" if npv_fcu < 0 else "Neutro")
-                
-                # Tabella dettagliata
-                with st.expander("Vedi calcolo dettagliato"):
-                    detail_data = []
-                    for t, (fcu, pv) in enumerate(zip(fcu_list, pv_list), start=1):
-                        detail_data.append({
-                            "Periodo": t,
-                            "FCU": f"€{fcu:,.2f}",
-                            "Costo Fisso": f"€{cost:,.2f}",
-                            "FC Netto": f"€{fcu - cost:,.2f}",
-                            "DF (1+WACC)^t": f"{(1+wacc)**t:.4f}",
-                            "PV": f"€{pv:,.2f}"
-                        })
-                    st.dataframe(detail_data, use_container_width=True)
-                    
-            except Exception as e:
-                st.error(f"Errore nel calcolo: {e}")
+        if st.button("Calcola"):
+            npv = calc_npv_fcu(flows, wacc, i0, fixed)
+            st.success(f"NPV = €{npv:,.2f}")
     
-    else:  # FCE
-        st.markdown("### NPV con FCE (Ke come tasso di sconto)")
+    else:
+        ke = st.number_input("Ke", value=0.10, format="%.4f")
+        eq0 = st.number_input("Equity iniziale", value=50000.0)
+        fixed = st.number_input("Costo fisso/periodo", value=0.0)
+        n = st.number_input("Periodi", min_value=1, value=5)
         
-        col1, col2 = st.columns(2)
-        with col1:
-            ke = st.number_input("Ke (Costo dell'Equity/Required Return) (%)", value=10.0, min_value=0.0, step=0.5) / 100
-            equity0 = st.number_input("Equity Iniziale (€)", value=50000.0, min_value=0.0, step=10000.0)
-            cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
+        flows = []
+        for i in range(n):
+            flows.append(st.number_input(f"FCE periodo {i+1}", key=f"fce_{i}", value=8000.0))
         
-        with col2:
-            n = st.number_input("Numero di periodi", min_value=1, step=1, value=5)
-        
-        st.markdown("**Flussi di Cassa (FCE) per periodo**")
-        fce_list = []
-        for i in range(int(n)):
-            fce_list.append(st.number_input(f"FCE periodo {i+1}", key=f"fce_{i}", value=8000.0, step=1000.0))
-        
-        if st.button("Calcola NPV (FCE)"):
-            try:
-                total_pv = 0
-                pv_list = []
-                
-                for t, fce in enumerate(fce_list, start=1):
-                    fc_net = fce - cost
-                    df = (1 + ke) ** t
-                    pv = fc_net / df
-                    pv_list.append(pv)
-                    total_pv += pv
-                
-                npv_fce = total_pv - equity0
-                
-                st.session_state.total_pv_fce = total_pv
-                st.session_state.npv_fce = npv_fce
-                
-                st.markdown("---")
-                col_a, col_b, col_c = st.columns(3)
-                col_a.metric("Valore Attuale Totale", f"€{total_pv:,.2f}")
-                col_b.metric("Equity Iniziale", f"€{equity0:,.2f}")
-                col_c.metric("NPV (FCE)", f"€{npv_fce:,.2f}",
-                             delta="Positivo" if npv_fce > 0 else "Negativo" if npv_fce < 0 else "Neutro")
-                
-                with st.expander("Vedi calcolo dettagliato"):
-                    detail_data = []
-                    for t, (fce, pv) in enumerate(zip(fce_list, pv_list), start=1):
-                        detail_data.append({
-                            "Periodo": t,
-                            "FCE": f"€{fce:,.2f}",
-                            "Costo Fisso": f"€{cost:,.2f}",
-                            "FC Netto": f"€{fce - cost:,.2f}",
-                            "DF (1+Ke)^t": f"{(1+ke)**t:.4f}",
-                            "PV": f"€{pv:,.2f}"
-                        })
-                    st.dataframe(detail_data, use_container_width=True)
-                    
-            except Exception as e:
-                st.error(f"Errore nel calcolo: {e}")
+        if st.button("Calcola"):
+            npv = calc_npv_fce(flows, ke, eq0, fixed)
+            st.success(f"NPV = €{npv:,.2f}")
 
 elif page == "Coming Soon...":
     st.write("Stay tuned for Risk Analysis and Portfolio")
