@@ -477,7 +477,7 @@ elif page == "Stock Evaluation":
         else:
             st.info("VAOC = 0 = growth adds no value")
 #MORTGAGE
-elif page == "Mortgage":
+elif page == "Mortgage (Italian)":
     st.subheader("Mutuo - Ammortamento")
     st.caption("Confronto tra ammortamento italiano (quota capitale costante) e francese (rata costante)")
     st.info("📌 **Nota:** I calcoli sono basati su rate MENSILI. Inserisci la durata in anni, il sistema convertirà automaticamente in mesi.")
@@ -509,7 +509,7 @@ elif page == "Mortgage":
             st.session_state.mortgage_capital_share = capital_share_monthly
             
             # Opzione: mostrare solo alcuni anni o tutti i mesi?
-            display_mode = st.radio("Visualizzazione", ["Annuale", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
+            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
             
             # Creazione tabella mensile
             monthly_table = []
@@ -564,7 +564,7 @@ elif page == "Mortgage":
             st.info(f"💰 **Totale pagato:** €{total_paid:,.2f} (Capitale €{mortgage_debt:,.2f} + Interessi €{total_interest:,.2f})")
             
             # VISUALIZZAZIONE IN BASE ALLA SCELTA
-            if display_mode == "Annuale":
+            if display_mode == "Resa annuale (sintesi)":
                 st.markdown("### 📅 Riepilogo Annuale")
                 st.dataframe(annual_summary, use_container_width=True)
                 
@@ -614,7 +614,7 @@ elif page == "Mortgage":
             st.session_state.mortgage_payment = constant_payment
             
             # Opzione visualizzazione
-            display_mode = st.radio("Visualizzazione", ["Annuale", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
+            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
             
             # Creazione tabella mensile
             monthly_table = []
@@ -669,7 +669,7 @@ elif page == "Mortgage":
             st.info(f"💰 **Totale pagato:** €{total_paid:,.2f} (Capitale €{mortgage_debt:,.2f} + Interessi €{total_interest:,.2f})")
             
             # VISUALIZZAZIONE
-            if display_mode == "Annuale":
+            if display_mode == "Resa annuale (sintesi)":
                 st.markdown("### 📅 Riepilogo Annuale")
                 st.dataframe(annual_summary, use_container_width=True)
                 
