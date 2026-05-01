@@ -36,7 +36,7 @@ Please read License files
 
 ## Goal
 
-Build a **deterministic corporate finance engine** that transforms financial statements into:
+Build a **deterministic corporate finance engine** that imports data from Excel and transforms financial statements into:
 - profitability metrics
 - cash flow analysis
 - valuation outputs (NPV, bonds)
