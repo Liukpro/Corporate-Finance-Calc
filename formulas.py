@@ -169,18 +169,16 @@ def calc_yield_to_mat_zero(k, va, vn, dur):
 def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk):
     if va_ced is not None:
         return va_ced
-    elif vn_ced is not None and k_ced !=0:
+    elif vn_ced is not None and k_ced is not None and t_ced is not None and k_merk is not None:
         ced = vn_ced * k_ced
         va_ced = 0.0
-        n = int(t_ced)          
-        f = t_ced - n           
+        n = int(t_ced)
+        f = t_ced - n
         for i in range(n):
             va_ced += ced / ((1 + k_merk) ** (i + 1))
         if f > 0:
-            if k_merk != -1: 
+            if k_merk != -1:
                 va_ced += ced * f / ((1 + k_merk) ** t_ced)
-            else:
-                raise ValueError("market rate must be 0 or higher")
         va_ced += vn_ced / ((1 + k_merk) ** t_ced)
         return va_ced
     else:
@@ -190,7 +188,7 @@ def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk):
 def calc_stock_price(stock_price=None, dividend=None, k=None, g=None,
                      dividend_1=None, earnings_t0=None, payout_ratio=None,
                      retention_ratio=None, roe=None, model="gordon"):
-
+    
     if stock_price is not None:
         return stock_price
         
@@ -220,9 +218,153 @@ def calc_stock_price(stock_price=None, dividend=None, k=None, g=None,
         raise ValueError("Unknown model")
     
 def calc_vaoc(stock_price_grow=None, stock_price_no_grow=None):
-
     if stock_price_grow is not None and stock_price_no_grow is not None:
         vaoc = stock_price_grow - stock_price_no_grow
         return vaoc
     else:
         raise ValueError("Insufficient Data for VAOC")
+
+def calc_capital_share(mortgage, years):
+    """Quota capitale costante (ammortamento italiano)"""
+    capital_share = mortgage / years
+    return capital_share
+
+
+def calc_interest_t(debt, n, t, k):
+    """Interessi del periodo t (ammortamento italiano)"""
+    interest_t = (debt * (1 - (t - 1) / n)) * k
+    return interest_t
+
+
+def calc_residual_debt(mortgage, n, t):
+    """Debito residuo dopo periodo t (ammortamento italiano)"""
+    residual_debt = mortgage * (1 - t / n)
+    return residual_debt
+
+
+def calc_paid_off_debt(mortgage, n, t):
+    """Debito già pagato dopo periodo t (ammortamento italiano)"""
+    paid_off_debt = mortgage - (t * (mortgage / n))
+    return paid_off_debt
+
+
+def calc_mortgage_payment(capital_share, interests_share):
+    """Rata totale = quota capitale + quota interessi"""
+    mortgage_payment = capital_share + interests_share
+    return mortgage_payment
+
+
+def calc_mortgage_payment_fr(debt, k, n):
+    """Rata costante (ammortamento francese)"""
+    if k == 0:
+        return debt / n
+    mortgage_payment = debt * (k * (1 + k) ** n) / ((1 + k) ** n - 1)
+    return mortgage_payment
+
+
+def calc_residual_debt_fr(debt, k, n, t):
+    """Debito residuo dopo periodo t (ammortamento francese)"""
+    residual_debt = debt * ((1 + k) ** n - (1 + k) ** t) / ((1 + k) ** n - 1)
+    return residual_debt
+
+
+def calc_interest_fr_closed(debt, k, n, t):
+    """Interessi del periodo t (ammortamento francese)"""
+    residual_prev = debt * ((1 + k) ** n - (1 + k) ** (t - 1)) / ((1 + k) ** n - 1)
+    interest = residual_prev * k
+    return interest
+
+
+def calc_capital_share_fr(mortgage_payment, interest):
+    """Quota capitale del periodo t (ammortamento francese)"""
+    capital_share = mortgage_payment - interest
+    return capital_share
+
+
+def calc_paid_off_debt_fr(debt, residual_debt):
+    """Debito già pagato (ammortamento francese)"""
+    paid_off_debt = debt - residual_debt
+    return paid_off_debt
+
+def calc_wacc(re, rd, tc, equity, debt):
+    if re is None or rd is None or tc is None or equity is None or debt is None:
+        raise ValueError("Insufficient Data for WACC")
+    w = equity + debt
+    if w == 0:
+        raise ValueError("Total capital (equity + debt) cannot be zero")
+    wacc = re * (equity / w) + rd * (1 - tc) * (debt / w)
+    return wacc
+
+def calc_fc_net_fcu(fcu, cost):
+    if fcu is None:
+        raise ValueError("FCU value required")
+    fc_net_fcu = fcu - cost
+    return fc_net_fcu
+
+
+def calc_df_wacc_fcu(wacc, t):
+    if wacc is None or t is None:
+        raise ValueError("WACC and time required")
+    if wacc == -1:
+        raise ValueError("WACC cannot be -1")
+    df_wacc = (1 + wacc) ** t
+    return df_wacc
+
+
+def calc_pv_fcu(fc_net_fcu, df_wacc):
+    if df_wacc == 0:
+        raise ValueError("Division by zero")
+    pv_fcu = fc_net_fcu / df_wacc
+    return pv_fcu
+
+
+def calc_total_pv_fcu(pv_list_fcu):
+    if pv_list_fcu is None or len(pv_list_fcu) == 0:
+        raise ValueError("PV list cannot be empty")
+    total_pv_fcu = sum(pv_list_fcu)
+    return total_pv_fcu
+
+
+def calc_npv_fcu(total_pv_fcu, i0_fcu):
+    if total_pv_fcu is None or i0_fcu is None:
+        raise ValueError("Total PV and initial investment required")
+    npv_fcu = total_pv_fcu - i0_fcu
+    return npv_fcu
+
+
+def calc_fc_net_fce(fce, cost):
+    if fce is None:
+        raise ValueError("FCE value required")
+    fc_net_fce = fce - cost
+    return fc_net_fce
+
+
+def calc_df_ke_fce(ke, t):
+    if ke is None or t is None:
+        raise ValueError("Ke and time required")
+    if ke == -1:
+        raise ValueError("Ke cannot be -1")
+    df_ke = (1 + ke) ** t
+    return df_ke
+
+
+def calc_pv_fce(fc_net_fce, df_ke):
+    if df_ke == 0:
+        raise ValueError("Division by zero")
+    pv_fce = fc_net_fce / df_ke
+    return pv_fce
+
+
+def calc_total_pv_fce(pv_list_fce):
+    if pv_list_fce is None or len(pv_list_fce) == 0:
+        raise ValueError("PV list cannot be empty")
+    total_pv_fce = sum(pv_list_fce)
+    return total_pv_fce
+
+
+def calc_npv_fce(total_pv_fce, equity0):
+    if total_pv_fce is None or equity0 is None:
+        raise ValueError("Total PV and initial equity required")
+    npv_fce = total_pv_fce - equity0
+    return npv_fce
+
