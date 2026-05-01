@@ -77,171 +77,273 @@ if page == "Cash Flow Analysis":
             return st.session_state[key_name]
         else:
             st.warning(f"{label} not calculated yet.")
-            return st.number_input(f"Insert {label} manually", value=0.0)
+            return st.number_input(f"Insert {label} manually", value=0.0, key=f"manual_{key_name}")
 
     if op == "FCCNOGC":
-        st.write("Formula: Multiple paths (Revenue-Costs-Taxes / MOL-Taxes / ROL-Taxes+Ammort)")
-        c1, c2 = st.columns(2)
-        with c1:
-            ric = st.number_input("Operating Revenue", value=0.0)
-            cost = st.number_input("Operating Costs", value=0.0)
-            imp = st.number_input("Taxes (Income)", value=0.0)
-        with c2:
-            ammort = st.number_input("Amortisation", value=0.0)
-            mol = st.number_input("MOL (EBITDA)", value=0.0)
-            rol_input = st.number_input("RO-L (EBIT)", value=0.0)
+        st.write("Formula: Multiple paths")
+        st.caption("Inserisci i dati per UNO dei seguenti metodi (gli altri lasciali a 0)")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Metodo 1: Revenue - Costs - Taxes**")
+            ric = st.number_input("Operating Revenue", value=0.0, key="fccnogc_ric")
+            cost = st.number_input("Operating Costs", value=0.0, key="fccnogc_cost")
+            imp = st.number_input("Taxes (Income)", value=0.0, key="fccnogc_imp")
+        with col2:
+            st.markdown("**Metodo 2: MOL - Taxes**")
+            mol = st.number_input("MOL (EBITDA)", value=0.0, key="fccnogc_mol")
+            st.markdown("**Metodo 3: ROL - Taxes + Ammort**")
+            rol_input = st.number_input("RO-L (EBIT)", value=0.0, key="fccnogc_rol")
+            ammort = st.number_input("Amortisation", value=0.0, key="fccnogc_amm")
 
         if st.button("Calculate FCCNOGC"):
             try:
-                # Passiamo i valori. Se l'utente lascia 0.0, calc_fccnogc userà le sue logiche elif
-                res = calc_fccnogc(None, ric_op_mon=ric, cost_op_mon=cost, imp=imp, ammort=ammort, mol=mol, rol=rol_input)
+                # Determina quale metodo usare in base a valori non-zero
+                if ric != 0 and cost != 0 and imp != 0:
+                    res = ric - cost - imp
+                    st.info("Usato metodo: Revenue - Costs - Taxes")
+                elif mol != 0 and imp != 0:
+                    res = mol - imp
+                    st.info("Usato metodo: MOL - Taxes")
+                elif rol_input != 0 and ammort != 0 and imp != 0:
+                    res = rol_input - imp + ammort
+                    st.info("Usato metodo: ROL - Taxes + Ammort")
+                else:
+                    raise ValueError("Inserisci dati validi per almeno un metodo di calcolo")
+                    
                 st.session_state.fccnogc = res
                 st.success(f"FCCNOGC = {res:.2f}")
             except ValueError as e:
                 st.error(f"Error: {e}")
 
     elif op == "RO-L":
-        c1, c2 = st.columns(2)
-        with c1:
-            ric = st.number_input("Operating Revenue", value=0.0)
-            cost = st.number_input("Operating Costs", value=0.0)
-        with c2:
-            ammort = st.number_input("Amortisation", value=0.0)
-            mol = st.number_input("MOL (EBITDA)", value=0.0)
+        st.write("Formula: Revenue - Costs - Ammort  OR  MOL - Ammort")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            ric = st.number_input("Operating Revenue", value=0.0, key="rol_ric")
+            cost = st.number_input("Operating Costs", value=0.0, key="rol_cost")
+        with col2:
+            ammort = st.number_input("Amortisation", value=0.0, key="rol_amm")
+            mol = st.number_input("MOL (EBITDA)", value=0.0, key="rol_mol")
 
         if st.button("Calculate RO-L"):
             try:
-                res = calc_rol(None, ric_op_mon=ric, cost_op_mon=cost, ammort=ammort, mol=mol)
+                if ric != 0 and cost != 0 and ammort != 0:
+                    res = ric - cost - ammort
+                    st.info("Usato metodo: Revenue - Costs - Ammort")
+                elif mol != 0 and ammort != 0:
+                    res = mol - ammort
+                    st.info("Usato metodo: MOL - Ammort")
+                else:
+                    raise ValueError("Inserisci dati validi per almeno un metodo")
+                    
                 st.session_state.rol = res
                 st.success(f"RO-L = {res:.2f}")
             except ValueError as e:
                 st.error(f"Error: {e}")
 
     elif op == "FCGC":
+        st.caption("Formula: FCGC = FCCNOGC - ΔCCNO")
+        
         fccnogc_v = show_dependency('fccnogc', 'FCCNOGC')
         ccno = st.number_input("Delta CCNO (Working Capital Variation)", value=0.0)
+        
         if st.button("Calculate FCGC"):
-            res = calc_fcgc(None, fccnogc=fccnogc_v, ccno=ccno)
+            res = fccnogc_v - ccno
             st.session_state.fcgc = res
             st.success(f"FCGC = {res:.2f}")
+            st.caption(f"Calcolo: {fccnogc_v:.2f} - {ccno:.2f} = {res:.2f}")
 
     elif op == "FCID":
-        st.write("Calculation of Cash Flow from Investing Activities")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown("**Disinvestment Data**")
-            val_sto = st.number_input("Historical Value", value=0.0)
-            ammo_ti = st.number_input("Annual Amort. Quota", value=0.0)
-            n_ammo = st.number_input("Years of Amort.", value=0, step=1)
-            plus = st.number_input("Capital Gain (Plusvalenza)", value=0.0)
-            minus = st.number_input("Capital Loss (Minusvalenza)", value=0.0)
-            dis_manual = st.number_input("Direct Disinvestment Value (if known)", value=0.0)
-        with c2:
-            st.markdown("**Investment Data**")
-            inv_manual = st.number_input("Direct Investment Value", value=0.0)
-            acq1 = st.number_input("Acquisition 1", value=0.0)
-            acq2 = st.number_input("Acquisition 2", value=0.0)
-
-        if st.button("Calculate FCID"):
-            try:
-                res = calc_fcid(fcid=None, inv=inv_manual if inv_manual != 0 else None, 
-                                dis=dis_manual if dis_manual != 0 else None,
-                                val_sto=val_sto if val_sto != 0 else None, 
-                                ammo_ti=ammo_ti, n_ammo=n_ammo,
-                                plus=plus, minus=minus, acqui_1=acq1, acqui_2=acq2)
+        st.write("Cash Flow from Investing Activities")
+        st.warning("⚠️ Scegli UNO dei seguenti metodi (gli altri lasciali vuoti)")
+        
+        metodo = st.radio("Seleziona metodo:", 
+                          ["Direct Input", "Divestments - Investments", "Only Investments (negative)"])
+        
+        if metodo == "Direct Input":
+            direct_val = st.number_input("Direct FCID value", value=0.0)
+            if st.button("Calculate FCID"):
+                st.session_state.fcid = direct_val
+                st.success(f"FCID = {direct_val:.2f}")
+        
+        elif metodo == "Divestments - Investments":
+            col1, col2 = st.columns(2)
+            with col1:
+                divestments = st.number_input("Divestments (sale of assets)", value=0.0)
+            with col2:
+                investments = st.number_input("Investments (purchase of assets)", value=0.0)
+            
+            if st.button("Calculate FCID"):
+                res = divestments - investments
                 st.session_state.fcid = res
                 st.success(f"FCID = {res:.2f}")
-            except ValueError as e:
-                st.error(str(e))
+                st.caption(f"Calcolo: {divestments:.2f} - {investments:.2f} = {res:.2f}")
+        
+        else:  # Only Investments
+            investments = st.number_input("Investment Amount", value=0.0)
+            if st.button("Calculate FCID"):
+                res = -abs(investments)
+                st.session_state.fcid = res
+                st.success(f"FCID = {res:.2f}")
+                st.caption(f"Calcolo: -{abs(investments):.2f} (nessun disinvestimento)")
 
     elif op == "FCFR":
-        rimb_cap = st.number_input("Repayment of Capital (Rimborso Quota Capitale)", value=0.0)
-        pat_net = st.number_input("Equity (Patrimonio Netto)", value=0.0)
-        deb_f = st.number_input("Financial Debt", value=0.0)
+        st.caption("Formula: FCFR = Equity + Debt - Capital Repayment")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            pat_net = st.number_input("Equity (Patrimonio Netto)", value=0.0)
+        with col2:
+            deb_f = st.number_input("Financial Debt", value=0.0)
+        with col3:
+            rimb_cap = st.number_input("Capital Repayment", value=0.0)
+        
         if st.button("Calculate FCFR"):
-            res = calc_fcfr(None, rimb_cap=rimb_cap, pat_net=pat_net, deb_f=deb_f)
+            res = pat_net + deb_f - rimb_cap
             st.session_state.fcfr = res
             st.success(f"FCFR = {res:.2f}")
 
     elif op == "FCRf":
-        of = st.number_input("Interest Expense (Oneri Finanziari)", value=0.0)
-        div = st.number_input("Dividends", value=0.0)
+        st.caption("Formula: FCRf = - Interest Expense - Dividends")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            of = st.number_input("Interest Expense (Oneri Finanziari)", value=0.0)
+        with col2:
+            div = st.number_input("Dividends", value=0.0)
+        
         if st.button("Calculate FCRf"):
-            res = calc_fcrf(None, of=of, div=div)
+            res = -of - div
             st.session_state.fcrf = res
             st.success(f"FCRf = {res:.2f}")
 
     elif op == "FCU":
-        v1 = show_dependency('fcgc', 'FCGC')
-        v2 = show_dependency('fcid', 'FCID')
+        st.caption("Formula: FCU = FCGC + FCID")
+        
+        fcgc_val = show_dependency('fcgc', 'FCGC')
+        fcid_val = show_dependency('fcid', 'FCID')
+        
         if st.button("Calculate FCU"):
-            res = calc_fcu(None, fcgc=v1, fcid=v2)
+            res = fcgc_val + fcid_val
             st.session_state.fcu = res
             st.success(f"FCU = {res:.2f}")
 
     elif op == "FCE":
-        fcu_v = show_dependency('fcu', 'FCU')
-        fcfr_v = show_dependency('fcfr', 'FCFR')
-        fcrf_v = show_dependency('fcrf', 'FCRf')
-        rimb_cap = st.number_input("Capital Repayment", value=0.0)
-        div = st.number_input("Dividends Paid", value=0.0)
+        st.caption("Formula: FCE = FCU + FCFR - RimborsoCapitale + FCRf - Dividends")
+        
+        fcu_val = show_dependency('fcu', 'FCU')
+        fcfr_val = show_dependency('fcfr', 'FCFR')
+        fcrf_val = show_dependency('fcrf', 'FCRf')
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            rimb_cap = st.number_input("Capital Repayment", value=0.0)
+        with col2:
+            div = st.number_input("Dividends Paid", value=0.0)
+        
         if st.button("Calculate FCE"):
-            try:
-                res = calc_fce(None, fcu=fcu_v, fcfr=fcfr_v, fcrf=fcrf_v, rimb_cap=rimb_cap, div=div)
-                st.session_state.fce = res
-                st.success(f"FCE = {res:.2f}")
-            except ValueError as e:
-                st.error(str(e))
+            res = fcu_val + fcfr_val - rimb_cap + fcrf_val - div
+            st.session_state.fce = res
+            st.success(f"FCE = {res:.2f}")
 
     elif op == "Variazione Liquidità":
-        v1 = show_dependency('fcgc', 'FCGC')
-        v2 = show_dependency('fcid', 'FCID')
-        v3 = show_dependency('fcfr', 'FCFR')
-        v4 = show_dependency('fcrf', 'FCRf')
+        st.caption("Formula: ΔCash = FCGC + FCID + FCFR + FCRf")
+        
+        fcgc_val = show_dependency('fcgc', 'FCGC')
+        fcid_val = show_dependency('fcid', 'FCID')
+        fcfr_val = show_dependency('fcfr', 'FCFR')
+        fcrf_val = show_dependency('fcrf', 'FCRf')
+        
         if st.button("Calculate Delta Cash"):
-            try:
-                res = calc_var_liq(None, fcgc=v1, fcid=v2, fcfr=v3, fcrf=v4)
-                st.success(f"Total Liquidity Variation = {res:.2f}")
-            except ValueError as e:
-                st.error(str(e))
-
+            res = fcgc_val + fcid_val + fcfr_val + fcrf_val
+            st.success(f"Total Liquidity Variation = {res:.2f}")
 #RATIO ANALYSIS
 elif page == "Ratio Analysis":
     st.subheader("Profitability Ratios")
-    c1, c2 = st.columns(2)
-    with c1:
-        ric_op = st.number_input("Operating Revenue", value=0.0)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        ric_op = st.number_input("Operating Revenue", value=0.0, min_value=0.0)
         rol_v = st.number_input("RO-L (EBIT)", value=0.0)
-        pat_n = st.number_input("Equity (Patrimonio Netto)", value=0.0)
-    with c2:
+        pat_n = st.number_input("Equity (Patrimonio Netto)", value=0.0, min_value=0.01)  # evita zero
+    with col2:
         deb_f = st.number_input("Financial Debt", value=0.0)
         liq = st.number_input("Liquidity", value=0.0)
         of_v = st.number_input("Interest Expense", value=0.0)
         imp_v = st.number_input("Taxes", value=0.0)
 
     if st.button("Run Ratio Analysis"):
-        try:
-            ros = calc_ros(None, rol=rol_v, ric_op_mon=ric_op)
-            roi = calc_roi(None, rol=rol_v, deb_f=deb_f, liq=liq, pat_net=pat_n)
-            roe = calc_roe(None, rol=rol_v, of=of_v, imp=imp_v, pat_net=pat_n)
-            
-            st.markdown("---")
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("ROS", f"{ros:.2%}")
-            col_b.metric("ROI", f"{roi:.2%}")
-            col_c.metric("ROE", f"{roe:.2%}")
-        except ValueError as e:
-            st.error(str(e))
-        except ZeroDivisionError:
-            st.error("Mathematical Error: Division by zero.")
+        results = {}
+        errors = []
+        
+        # ROS
+        if ric_op == 0:
+            errors.append("ROS: Revenue è zero, impossibile calcolare")
+            results["ROS"] = None
+        else:
+            results["ROS"] = rol_v / ric_op
+        
+        # ROI
+        pos_fin_net = deb_f - liq
+        cin = pat_n + pos_fin_net
+        if cin == 0:
+            errors.append("ROI: CIN (Capitale Investito Netto) è zero")
+            results["ROI"] = None
+        else:
+            results["ROI"] = rol_v / cin
+        
+        # ROE
+        ut_net = rol_v - of_v - imp_v
+        if pat_n == 0:
+            errors.append("ROE: Equity è zero")
+            results["ROE"] = None
+        else:
+            results["ROE"] = ut_net / pat_n
+        
+        # Mostra risultati
+        st.markdown("---")
+        col_a, col_b, col_c = st.columns(3)
+        
+        if results["ROS"] is not None:
+            col_a.metric("ROS", f"{results['ROS']:.2%}")
+        else:
+            col_a.error("ROS: dati insufficienti")
+        
+        if results["ROI"] is not None:
+            col_b.metric("ROI", f"{results['ROI']:.2%}")
+        else:
+            col_b.error("ROI: dati insufficienti")
+        
+        if results["ROE"] is not None:
+            col_c.metric("ROE", f"{results['ROE']:.2%}")
+        else:
+            col_c.error("ROE: dati insufficienti")
+        
+        if errors:
+            for err in errors:
+                st.warning(err)
+        
+        # Mostra dettaglio calcoli
+        with st.expander("Dettaglio calcoli"):
+            st.write(f"ROS = ROL / Revenue = {rol_v:.2f} / {ric_op:.2f} = {results['ROS']:.2%}" if results["ROS"] else "ROS: non calcolabile")
+            st.write(f"CIN = Equity + (Debt - Liquidity) = {pat_n:.2f} + ({deb_f:.2f} - {liq:.2f}) = {cin:.2f}")
+            st.write(f"ROI = ROL / CIN = {rol_v:.2f} / {cin:.2f} = {results['ROI']:.2%}" if results["ROI"] else "ROI: non calcolabile")
+            st.write(f"Net Income = ROL - Interest - Taxes = {rol_v:.2f} - {of_v:.2f} - {imp_v:.2f} = {ut_net:.2f}")
+            st.write(f"ROE = Net Income / Equity = {ut_net:.2f} / {pat_n:.2f} = {results['ROE']:.2%}" if results["ROE"] else "ROE: non calcolabile")
 
 # NPV
 elif page == "NPV":
     st.subheader("Net Present Value (NPV)")
-    k = st.number_input("Discount rate k (decimal, e.g. 0.08)", value=0.0, format="%.4f")
-    i_0 = st.number_input("Initial investment I₀", value=0.0)
-    cost = st.number_input("Fixed cost per period", value=0.0)
-    n = st.number_input("Number of periods", min_value=1, step=1, value=1)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        k = st.number_input("Discount rate k (decimal, e.g. 0.08)", value=0.08, format="%.4f", min_value=-0.99)
+        i_0 = st.number_input("Initial investment I₀", value=0.0)
+    with col2:
+        cost = st.number_input("Fixed cost per period", value=0.0)
+        n = st.number_input("Number of periods", min_value=1, step=1, value=1)
 
     fc_list = []
     t_list = []
@@ -250,17 +352,38 @@ elif page == "NPV":
         with col1:
             fc_list.append(st.number_input(f"Cash flow period {i+1}", key=f"fc_{i}", value=0.0))
         with col2:
-            t_list.append(st.number_input(f"Time period {i+1}", key=f"t_{i}", value=float(i+1)))
+            t_list.append(st.number_input(f"Time period {i+1}", key=f"t_{i}", value=float(i+1), min_value=0.01))
 
     if st.button("Calculate NPV"):
         try:
-            res = calc_npv(None, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
-            st.success(f"NPV = {res:.2f}")
-            if res > 0: st.info("The project creates value.")
-            elif res < 0: st.warning("The project destroys value.")
+            if k == -1:
+                raise ValueError("Discount rate cannot be -1 (division by zero)")
+            
+            pv = 0
+            for i in range(len(fc_list)):
+                fc_net = fc_list[i] - cost
+                pv += fc_net / ((1 + k) ** t_list[i])
+            
+            npv = pv - i_0
+            
+            st.success(f"NPV = {npv:,.2f}")
+            
+            if npv > 0:
+                st.info("The project creates value. NPV > 0")
+            elif npv < 0:
+                st.warning("The project destroys value. NPV < 0")
+            else:
+                st.info("NPV = 0. The project breaks even")
+            
+            with st.expander("Dettaglio calcolo"):
+                st.write(f"PV totale = {pv:,.2f}")
+                st.write(f"Investimento iniziale = {i_0:,.2f}")
+                st.write(f"NPV = {pv:,.2f} - {i_0:,.2f} = {npv:,.2f}")
+                
+        except ZeroDivisionError:
+            st.error("Division by zero: check discount rate or time periods")
         except ValueError as e:
             st.error(str(e))
-
 #BONDs
 elif page == "Bond Evaluation":
     st.subheader("Bond Valuation")
@@ -270,22 +393,26 @@ elif page == "Bond Evaluation":
         st.markdown("### Zero Coupon Bond Valuation")
         col1, col2 = st.columns(2)
         with col1:
-            vn = st.number_input("Face Value (VN)", value=100.0)
-            k = st.number_input("Discount Rate (Market Rate)", value=0.03, format="%.4f")
+            vn = st.number_input("Face Value (VN)", value=100.0, min_value=0.01)
+            k = st.number_input("Discount Rate (Market Rate)", value=0.03, format="%.4f", min_value=0.0)
         with col2:
-            dur = st.number_input("Duration (years)", value=1.0)
+            dur = st.number_input("Duration (years)", value=1.0, min_value=0.01)
             
         if st.button("Calculate Bond Value"):
             try:
-                res = calc_va_bond_zero(None, k=k, vn=vn, dur=dur)
+                if k < 0:
+                    raise ValueError("Discount rate cannot be negative")
+                res = vn / ((1 + k) ** dur)
                 st.success(f"Bond Present Value = {res:.2f}")
             except ValueError as e:
                 st.error(str(e))
         
         if st.button("Calculate Yield to Maturity"):
             try:
-                va = st.number_input("Current Bond Price", value=95.0, key="ytm_price")
-                ytm = calc_yield_to_mat_zero(None, va=va, vn=vn, dur=dur)
+                va = st.number_input("Current Bond Price", value=95.0, min_value=0.01, key="ytm_price")
+                if va <= 0 or vn <= 0 or dur <= 0:
+                    raise ValueError("Invalid inputs")
+                ytm = (vn / va) ** (1/dur) - 1
                 st.success(f"Yield to Maturity = {ytm:.4%}")
             except ValueError as e:
                 st.error(str(e))
@@ -294,20 +421,30 @@ elif page == "Bond Evaluation":
         st.markdown("### Coupon Bond Valuation")
         col1, col2 = st.columns(2)
         with col1:
-            vn_ced = st.number_input("Face Value (VN)", value=100.0, key="coupon_vn")
-            k_ced = st.number_input("Coupon Rate (annual)", value=0.05, format="%.4f")
-            t_ced = st.number_input("Time to Maturity (years)", value=5.0)
+            vn_ced = st.number_input("Face Value (VN)", value=100.0, min_value=0.01, key="coupon_vn")
+            k_ced = st.number_input("Coupon Rate (annual)", value=0.05, format="%.4f", min_value=0.0, max_value=1.0)
+            t_ced = st.number_input("Time to Maturity (years)", value=5.0, min_value=0.01)
         with col2:
-            k_merk = st.number_input("Market Discount Rate", value=0.04, format="%.4f")
+            k_merk = st.number_input("Market Discount Rate", value=0.04, format="%.4f", min_value=0.0)
             
         if st.button("Calculate Coupon Bond Value"):
             try:
-                res = calc_va_ced_bond(None, vn_ced=vn_ced, k_ced=k_ced, t_ced=t_ced, k_merk=k_merk)
-                st.success(f"Coupon Bond Present Value = {res:.2f}")
+                coupon = vn_ced * k_ced
+                n_years = int(t_ced)
+                fractional = t_ced - n_years
                 
-                # Mostra anche il valore della cedola annuale
-                annual_coupon = vn_ced * k_ced
-                st.info(f"Annual Coupon Payment = {annual_coupon:.2f}")
+                pv = 0.0
+                for i in range(n_years):
+                    pv += coupon / ((1 + k_merk) ** (i + 1))
+                
+                if fractional > 0:
+                    pv += coupon * fractional / ((1 + k_merk) ** t_ced)
+                
+                pv += vn_ced / ((1 + k_merk) ** t_ced)
+                
+                st.success(f"Coupon Bond Present Value = {pv:.2f}")
+                st.info(f"Annual Coupon Payment = {coupon:.2f}")
+                
             except ValueError as e:
                 st.error(str(e))
 
@@ -319,6 +456,7 @@ elif page == "Stock Evaluation":
     
     if model == "Gordon Growth Model":
         st.markdown("### Gordon Growth Model (Dividend Discount Model)")
+        st.warning("⚠️ Richiede k > g (required return > growth rate)")
         
         calc_method = st.radio("Input Method", 
                                ["Direct (Dividend₁, k, g)", 
@@ -327,11 +465,11 @@ elif page == "Stock Evaluation":
         if calc_method == "Direct (Dividend₁, k, g)":
             col1, col2, col3 = st.columns(3)
             with col1:
-                dividend_1 = st.number_input("Expected Dividend next year (D₁)", value=2.0)
+                dividend_1 = st.number_input("Expected Dividend next year (D₁)", value=2.0, min_value=0.0)
             with col2:
-                k = st.number_input("Required Return (k)", value=0.10, format="%.4f")
+                k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.01)
             with col3:
-                g = st.number_input("Growth Rate (g)", value=0.05, format="%.4f")
+                g = st.number_input("Growth Rate (g)", value=0.05, format="%.4f", min_value=0.0)
             
             earnings_t0 = None
             payout_ratio = None
@@ -341,41 +479,41 @@ elif page == "Stock Evaluation":
         else:  # From Earnings
             col1, col2 = st.columns(2)
             with col1:
-                earnings_t0 = st.number_input("Current Earnings (E₀)", value=5.0)
-                payout_ratio = st.number_input("Payout Ratio (dividends/earnings)", value=0.40, format="%.4f")
+                earnings_t0 = st.number_input("Current Earnings (E₀)", value=5.0, min_value=0.0)
+                payout_ratio = st.number_input("Payout Ratio", value=0.40, format="%.4f", min_value=0.0, max_value=1.0)
             with col2:
-                k = st.number_input("Required Return (k)", value=0.10, format="%.4f")
-                roe = st.number_input("Return on Equity (ROE)", value=0.15, format="%.4f")
+                k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.01)
+                roe = st.number_input("Return on Equity (ROE)", value=0.15, format="%.4f", min_value=0.0)
             
             retention_ratio = 1 - payout_ratio
             g = retention_ratio * roe
-            
             dividend_1 = None
             
-            st.info(f"Calculated: Retention Ratio = {retention_ratio:.4f}, Growth Rate = {g:.4%}")
+            st.info(f"Retention Ratio = {retention_ratio:.4f} | Growth Rate = {g:.4%}")
         
         if st.button("Calculate Stock Price"):
             try:
-                price = calc_stock_price(
-                    stock_price=None,
-                    dividend=dividend_1,
-                    k=k,
-                    g=g,
-                    dividend_1=dividend_1,
-                    earnings_t0=earnings_t0,
-                    payout_ratio=payout_ratio,
-                    retention_ratio=retention_ratio,
-                    roe=roe,
-                    model="gordon"
-                )
-                st.success(f"Stock Price = {price:.2f}")
-                
-                # Calcolo VAOC se disponibili i dati per il modello no growth
-                if earnings_t0 is not None and k is not None:
-                    no_growth_price = earnings_t0 / k
-                    vaoc = price - no_growth_price
-                    st.info(f"Value of Growth Opportunities (VAOC) = {vaoc:.2f}")
-                    st.caption(f"No-growth value: {no_growth_price:.2f} | Growth premium: {vaoc:.2f}")
+                # Verifica condizione Gordon
+                if g >= k:
+                    st.error(f"❌ Gordon model requires k > g. Got k={k:.2%}, g={g:.2%}")
+                else:
+                    # Calcola D1 se necessario
+                    if dividend_1 is None and earnings_t0 is not None:
+                        earnings_t1 = earnings_t0 * (1 + g)
+                        dividend_1 = earnings_t1 * payout_ratio
+                    
+                    if dividend_1 is None:
+                        raise ValueError("Dividend cannot be calculated from given inputs")
+                    
+                    price = dividend_1 / (k - g)
+                    st.success(f"Stock Price = {price:.2f}")
+                    
+                    # VAOC
+                    if earnings_t0 is not None and k is not None:
+                        no_growth_price = earnings_t0 / k
+                        vaoc = price - no_growth_price
+                        st.info(f"VAOC = {vaoc:.2f} (Growth premium)")
+                        st.caption(f"No-growth value: {no_growth_price:.2f} | Growth premium: {vaoc:.2f}")
                     
             except ValueError as e:
                 st.error(str(e))
@@ -385,41 +523,38 @@ elif page == "Stock Evaluation":
         
         col1, col2 = st.columns(2)
         with col1:
-            dividend = st.number_input("Constant Dividend", value=2.0)
+            dividend = st.number_input("Constant Dividend", value=2.0, min_value=0.0)
         with col2:
-            k = st.number_input("Required Return (k)", value=0.10, format="%.4f")
+            k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.01)
         
         if st.button("Calculate Stock Price"):
             try:
-                price = calc_stock_price(
-                    stock_price=None,
-                    dividend=dividend,
-                    k=k,
-                    g=None,
-                    model="no_growth"
-                )
+                if k <= 0:
+                    raise ValueError("Required return must be positive")
+                price = dividend / k
                 st.success(f"Stock Price = {price:.2f}")
             except ValueError as e:
                 st.error(str(e))
     
-    # Sezione separata per VAOC diretto
+    # VAOC diretto
     st.markdown("---")
     st.subheader("Value of Growth Opportunities (VAOC)")
-    st.caption("Calculate the difference between growth and no-growth stock values")
     
     col1, col2 = st.columns(2)
     with col1:
-        price_growth = st.number_input("Stock Price (with growth)", value=50.0, key="vaoc_growth")
+        price_growth = st.number_input("Stock Price (with growth)", value=50.0, min_value=0.0, key="vaoc_growth")
     with col2:
-        price_no_growth = st.number_input("Stock Price (no growth)", value=30.0, key="vaoc_no_growth")
+        price_no_growth = st.number_input("Stock Price (no growth)", value=30.0, min_value=0.0, key="vaoc_no_growth")
     
     if st.button("Calculate VAOC"):
-        try:
-            vaoc = calc_vaoc(price_growth, price_no_growth)
-            st.success(f"VAOC = {vaoc:.2f}")
-            st.info("This represents the additional value created by growth opportunities.")
-        except ValueError as e:
-            st.error(str(e))
+        vaoc = price_growth - price_no_growth
+        st.success(f"VAOC = {vaoc:.2f}")
+        if vaoc > 0:
+            st.info("Positive VAOC = growth creates value")
+        elif vaoc < 0:
+            st.warning("Negative VAOC = growth destroys value")
+        else:
+            st.info("VAOC = 0 = growth adds no value")
 #MORTGAGE
 elif page == "Mortgage":
     st.subheader("Mutuo - Ammortamento")
