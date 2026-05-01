@@ -416,7 +416,7 @@ elif page == "Stock Evaluation":
             try:
                 # Verifica condizione Gordon
                 if g >= k:
-                    st.error(f"❌ Gordon model requires k > g. Got k={k:.2%}, g={g:.2%}")
+                    st.error(f"Gordon model requires k > g. Got k={k:.2%}, g={g:.2%}")
                 else:
                     # Calcola D1 se necessario
                     if dividend_1 is None and earnings_t0 is not None:
@@ -509,7 +509,7 @@ elif page == "Mortgage":
             st.session_state.mortgage_capital_share = capital_share_monthly
             
             # Opzione: mostrare solo alcuni anni o tutti i mesi?
-            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
+            display_mode = st.radio("Visualizzazione", ["Annuale", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
             
             # Creazione tabella mensile
             monthly_table = []
@@ -564,7 +564,7 @@ elif page == "Mortgage":
             st.info(f"💰 **Totale pagato:** €{total_paid:,.2f} (Capitale €{mortgage_debt:,.2f} + Interessi €{total_interest:,.2f})")
             
             # VISUALIZZAZIONE IN BASE ALLA SCELTA
-            if display_mode == "Resa annuale (sintesi)":
+            if display_mode == "Annuale":
                 st.markdown("### 📅 Riepilogo Annuale")
                 st.dataframe(annual_summary, use_container_width=True)
                 
