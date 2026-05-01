@@ -161,50 +161,85 @@ if page == "Cash Flow Analysis":
         st.warning("⚠️ Scegli UNO dei seguenti metodi (gli altri lasciali vuoti)")
         
         metodo = st.radio("Seleziona metodo:", 
-                          ["Direct Input", "Divestments - Investments", "Only Investments (negative)"])
+                          ["FCID diretto", "Disinvestimenti - Investimenti", "Solo Investimenti (negativo)"],
+                          key="fcid_method")
         
-        if metodo == "Direct Input":
-            direct_val = st.number_input("Direct FCID value", value=0.0)
-            if st.button("Calculate FCID"):
-                st.session_state.fcid = direct_val
-                st.success(f"FCID = {direct_val:.2f}")
+        if metodo == "FCID diretto":
+            fcid_val = st.number_input("Valore FCID diretto", value=0.0, key="fcid_direct")
+            
+            if st.button("Calculate FCID", key="btn_fcid_direct"):
+                try:
+                    res = calc_fcid(fcid=fcid_val)
+                    st.session_state.fcid = res
+                    st.success(f"FCID = {res:.2f}")
+                except ValueError as e:
+                    st.error(str(e))
         
-        elif metodo == "Divestments - Investments":
+        elif metodo == "Disinvestimenti - Investimenti":
             col1, col2 = st.columns(2)
             with col1:
-                divestments = st.number_input("Divestments (sale of assets)", value=0.0)
-            with col2:
-                investments = st.number_input("Investments (purchase of assets)", value=0.0)
+                st.markdown("**Dati Disinvestimenti**")
+                dis = st.number_input("Disinvestimenti (valore diretto)", value=0.0, key="dis_direct")
+                
+                st.markdown("---")
+                st.markdown("**Oppure calcola disinvestimento da:**")
+                vnc = st.number_input("VNC (Valore Netto Contabile)", value=0.0, key="vnc")
+                val_sto = st.number_input("Valore storico", value=0.0, key="val_sto")
+                ammo_ti = st.number_input("Quota ammortamento annuale", value=0.0, key="ammo_ti")
+                n_ammo = st.number_input("Anni di ammortamento", value=0, step=1, key="n_ammo")
+                plus = st.number_input("Plusvalenza", value=0.0, key="plus")
+                minus = st.number_input("Minusvalenza", value=0.0, key="minus")
             
-            if st.button("Calculate FCID"):
-                res = divestments - investments
-                st.session_state.fcid = res
-                st.success(f"FCID = {res:.2f}")
-                st.caption(f"Calcolo: {divestments:.2f} - {investments:.2f} = {res:.2f}")
+            with col2:
+                st.markdown("**Dati Investimenti**")
+                inv = st.number_input("Investimenti (valore diretto)", value=0.0, key="inv_direct")
+                
+                st.markdown("---")
+                st.markdown("**Oppure somma di acquisizioni:**")
+                acqui_1 = st.number_input("Acquisizione 1", value=0.0, key="acqui_1")
+                acqui_2 = st.number_input("Acquisizione 2", value=0.0, key="acqui_2")
+            
+            if st.button("Calculate FCID", key="btn_fcid_dis_inv"):
+                try:
+                    params = {}
+                    if inv != 0:
+                        params["inv"] = inv
+                    if dis != 0:
+                        params["dis"] = dis
+                    if vnc != 0:
+                        params["vnc"] = vnc
+                    if val_sto != 0:
+                        params["val_sto"] = val_sto
+                    if ammo_ti != 0:
+                        params["ammo_ti"] = ammo_ti
+                    if n_ammo != 0:
+                        params["n_ammo"] = n_ammo
+                    if plus != 0:
+                        params["plus"] = plus
+                    if minus != 0:
+                        params["minus"] = minus
+                    if acqui_1 != 0:
+                        params["acqui_1"] = acqui_1
+                    if acqui_2 != 0:
+                        params["acqui_2"] = acqui_2
+                    
+                    res = calc_fcid(**params)
+                    st.session_state.fcid = res
+                    st.success(f"FCID = {res:.2f}")
+                except ValueError as e:
+                    st.error(str(e))
         
-        else:  # Only Investments
-            investments = st.number_input("Investment Amount", value=0.0)
-            if st.button("Calculate FCID"):
-                res = -abs(investments)
-                st.session_state.fcid = res
-                st.success(f"FCID = {res:.2f}")
-                st.caption(f"Calcolo: -{abs(investments):.2f} (nessun disinvestimento)")
-
-    elif op == "FCFR":
-        st.caption("Formula: FCFR = Equity + Debt - Capital Repayment")
-        
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            pat_net = st.number_input("Equity (Patrimonio Netto)", value=0.0)
-        with col2:
-            deb_f = st.number_input("Financial Debt", value=0.0)
-        with col3:
-            rimb_cap = st.number_input("Capital Repayment", value=0.0)
-        
-        if st.button("Calculate FCFR"):
-            res = pat_net + deb_f - rimb_cap
-            st.session_state.fcfr = res
-            st.success(f"FCFR = {res:.2f}")
+        else:  # Solo Investimenti
+            inv = st.number_input("Investimenti", value=0.0, key="inv_only")
+            
+            if st.button("Calculate FCID", key="btn_fcid_inv_only"):
+                try:
+                    res = calc_fcid(inv=inv)
+                    st.session_state.fcid = res
+                    st.success(f"FCID = {res:.2f}")
+                    st.caption(f"Calcolo: -{inv} (nessun disinvestimento)")
+                except ValueError as e:
+                    st.error(str(e))
 
     elif op == "FCRf":
         st.caption("Formula: FCRf = - Interest Expense - Dividends")
