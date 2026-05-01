@@ -262,101 +262,41 @@ if page == "Cash Flow Analysis":
 #RATIO ANALYSIS
 elif page == "Ratio Analysis":
     st.subheader("Profitability Ratios")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        ric_op = st.number_input("Operating Revenue", value=0.0, min_value=0.0)
+    c1, c2 = st.columns(2)
+    with c1:
+        ric_op = st.number_input("Operating Revenue", value=0.0)
         rol_v = st.number_input("RO-L (EBIT)", value=0.0)
-        pat_n = st.number_input("Equity (Patrimonio Netto)", value=0.0, min_value=0.0)  # ← tolto 0.01
-    with col2:
+        pat_n = st.number_input("Equity (Patrimonio Netto)", value=0.0)
+    with c2:
         deb_f = st.number_input("Financial Debt", value=0.0)
         liq = st.number_input("Liquidity", value=0.0)
         of_v = st.number_input("Interest Expense", value=0.0)
         imp_v = st.number_input("Taxes", value=0.0)
 
     if st.button("Run Ratio Analysis"):
-        results = {}
-        errors = []
-        
-        # ROS
-        if ric_op == 0:
-            errors.append("ROS: Revenue è zero, impossibile calcolare")
-            results["ROS"] = None
-        else:
-            results["ROS"] = rol_v / ric_op
-        
-        # ROI
-        pos_fin_net = deb_f - liq
-        cin = pat_n + pos_fin_net
-        if cin == 0:
-            errors.append("ROI: CIN (Capitale Investito Netto) è zero")
-            results["ROI"] = None
-        else:
-            results["ROI"] = rol_v / cin
-        
-        # ROE - Gestione separata per equity = 0
-        ut_net = rol_v - of_v - imp_v
-        if pat_n == 0:
-            errors.append("ROE: Equity è zero, impossibile calcolare")
-            results["ROE"] = None
-        else:
-            results["ROE"] = ut_net / pat_n
-        
-        # Mostra risultati
-        st.markdown("---")
-        col_a, col_b, col_c = st.columns(3)
-        
-        if results["ROS"] is not None:
-            col_a.metric("ROS", f"{results['ROS']:.2%}")
-        else:
-            col_a.error("ROS: dati insufficienti")
-        
-        if results["ROI"] is not None:
-            col_b.metric("ROI", f"{results['ROI']:.2%}")
-        else:
-            col_b.error("ROI: dati insufficienti")
-        
-        if results["ROE"] is not None:
-            col_c.metric("ROE", f"{results['ROE']:.2%}")
-        else:
-            col_c.error("ROE: equity = 0")
-        
-        if errors:
-            for err in errors:
-                st.warning(err)
-        
-        # Mostra dettaglio calcoli (solo se calcolabili)
-        with st.expander("Dettaglio calcoli"):
-            if results["ROS"] is not None:
-                st.write(f"ROS = ROL / Revenue = {rol_v:.2f} / {ric_op:.2f} = {results['ROS']:.2%}")
-            else:
-                st.write("ROS: non calcolabile (Revenue = 0)")
+        try:
+            # Chiama le funzioni di formulas.py - NON riscrivere la logica
+            ros = calc_ros(None, rol=rol_v, ric_op_mon=ric_op)
+            roi = calc_roi(None, rol=rol_v, deb_f=deb_f, liq=liq, pat_net=pat_n)
+            roe = calc_roe(None, rol=rol_v, of=of_v, imp=imp_v, pat_net=pat_n)
             
-            st.write(f"CIN = Equity + (Debt - Liquidity) = {pat_n:.2f} + ({deb_f:.2f} - {liq:.2f}) = {cin:.2f}")
-            
-            if results["ROI"] is not None:
-                st.write(f"ROI = ROL / CIN = {rol_v:.2f} / {cin:.2f} = {results['ROI']:.2%}")
-            else:
-                st.write("ROI: non calcolabile (CIN = 0)")
-            
-            st.write(f"Net Income = ROL - Interest - Taxes = {rol_v:.2f} - {of_v:.2f} - {imp_v:.2f} = {ut_net:.2f}")
-            
-            if results["ROE"] is not None:
-                st.write(f"ROE = Net Income / Equity = {ut_net:.2f} / {pat_n:.2f} = {results['ROE']:.2%}")
-            else:
-                st.write("ROE: non calcolabile (Equity = 0)")
+            st.markdown("---")
+            col_a, col_b, col_c = st.columns(3)
+            col_a.metric("ROS", f"{ros:.2%}")
+            col_b.metric("ROI", f"{roi:.2%}")
+            col_c.metric("ROE", f"{roe:.2%}")
+        except ValueError as e:
+            st.error(str(e))
+        except ZeroDivisionError:
+            st.error("Mathematical Error: Division by zero.")
 
 # NPV
 elif page == "NPV":
     st.subheader("Net Present Value (NPV)")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        k = st.number_input("Discount rate k (decimal, e.g. 0.08)", value=0.08, format="%.4f", min_value=-0.99)
-        i_0 = st.number_input("Initial investment I₀", value=0.0)
-    with col2:
-        cost = st.number_input("Fixed cost per period", value=0.0)
-        n = st.number_input("Number of periods", min_value=1, step=1, value=1)
+    k = st.number_input("Discount rate k (decimal, e.g. 0.08)", value=0.0, format="%.4f")
+    i_0 = st.number_input("Initial investment I₀", value=0.0)
+    cost = st.number_input("Fixed cost per period", value=0.0)
+    n = st.number_input("Number of periods", min_value=1, step=1, value=1)
 
     fc_list = []
     t_list = []
@@ -365,36 +305,17 @@ elif page == "NPV":
         with col1:
             fc_list.append(st.number_input(f"Cash flow period {i+1}", key=f"fc_{i}", value=0.0))
         with col2:
-            t_list.append(st.number_input(f"Time period {i+1}", key=f"t_{i}", value=float(i+1), min_value=0.01))
+            t_list.append(st.number_input(f"Time period {i+1}", key=f"t_{i}", value=float(i+1)))
 
     if st.button("Calculate NPV"):
         try:
-            if k == -1:
-                raise ValueError("Discount rate cannot be -1 (division by zero)")
-            
-            pv = 0
-            for i in range(len(fc_list)):
-                fc_net = fc_list[i] - cost
-                pv += fc_net / ((1 + k) ** t_list[i])
-            
-            npv = pv - i_0
-            
-            st.success(f"NPV = {npv:,.2f}")
-            
-            if npv > 0:
-                st.info("The project creates value. NPV > 0")
-            elif npv < 0:
-                st.warning("The project destroys value. NPV < 0")
-            else:
-                st.info("NPV = 0. The project breaks even")
-            
-            with st.expander("Dettaglio calcolo"):
-                st.write(f"PV totale = {pv:,.2f}")
-                st.write(f"Investimento iniziale = {i_0:,.2f}")
-                st.write(f"NPV = {pv:,.2f} - {i_0:,.2f} = {npv:,.2f}")
-                
-        except ZeroDivisionError:
-            st.error("Division by zero: check discount rate or time periods")
+            # Chiama la funzione di formulas.py - NON riscrivere il ciclo
+            res = calc_npv(None, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
+            st.success(f"NPV = {res:.2f}")
+            if res > 0: 
+                st.info("The project creates value.")
+            elif res < 0: 
+                st.warning("The project destroys value.")
         except ValueError as e:
             st.error(str(e))
 #BONDs
@@ -406,26 +327,24 @@ elif page == "Bond Evaluation":
         st.markdown("### Zero Coupon Bond Valuation")
         col1, col2 = st.columns(2)
         with col1:
-            vn = st.number_input("Face Value (VN)", value=100.0, min_value=0.01)
-            k = st.number_input("Discount Rate (Market Rate)", value=0.03, format="%.4f", min_value=0.0)
+            vn = st.number_input("Face Value (VN)", value=100.0)
+            k = st.number_input("Discount Rate (Market Rate)", value=0.03, format="%.4f")
         with col2:
-            dur = st.number_input("Duration (years)", value=1.0, min_value=0.01)
+            dur = st.number_input("Duration (years)", value=1.0)
             
         if st.button("Calculate Bond Value"):
             try:
-                if k < 0:
-                    raise ValueError("Discount rate cannot be negative")
-                res = vn / ((1 + k) ** dur)
+                # Chiama la funzione
+                res = calc_va_bond_zero(None, k=k, vn=vn, dur=dur)
                 st.success(f"Bond Present Value = {res:.2f}")
             except ValueError as e:
                 st.error(str(e))
         
         if st.button("Calculate Yield to Maturity"):
             try:
-                va = st.number_input("Current Bond Price", value=95.0, min_value=0.01, key="ytm_price")
-                if va <= 0 or vn <= 0 or dur <= 0:
-                    raise ValueError("Invalid inputs")
-                ytm = (vn / va) ** (1/dur) - 1
+                va = st.number_input("Current Bond Price", value=95.0, key="ytm_price")
+                # Chiama la funzione appena aggiunta
+                ytm = calc_yield_to_mat_zero(None, va=va, vn=vn, dur=dur)
                 st.success(f"Yield to Maturity = {ytm:.4%}")
             except ValueError as e:
                 st.error(str(e))
@@ -434,30 +353,19 @@ elif page == "Bond Evaluation":
         st.markdown("### Coupon Bond Valuation")
         col1, col2 = st.columns(2)
         with col1:
-            vn_ced = st.number_input("Face Value (VN)", value=100.0, min_value=0.01, key="coupon_vn")
-            k_ced = st.number_input("Coupon Rate (annual)", value=0.05, format="%.4f", min_value=0.0, max_value=1.0)
-            t_ced = st.number_input("Time to Maturity (years)", value=5.0, min_value=0.01)
+            vn_ced = st.number_input("Face Value (VN)", value=100.0, key="coupon_vn")
+            k_ced = st.number_input("Coupon Rate (annual)", value=0.05, format="%.4f")
+            t_ced = st.number_input("Time to Maturity (years)", value=5.0)
         with col2:
-            k_merk = st.number_input("Market Discount Rate", value=0.04, format="%.4f", min_value=0.0)
+            k_merk = st.number_input("Market Discount Rate", value=0.04, format="%.4f")
             
         if st.button("Calculate Coupon Bond Value"):
             try:
-                coupon = vn_ced * k_ced
-                n_years = int(t_ced)
-                fractional = t_ced - n_years
-                
-                pv = 0.0
-                for i in range(n_years):
-                    pv += coupon / ((1 + k_merk) ** (i + 1))
-                
-                if fractional > 0:
-                    pv += coupon * fractional / ((1 + k_merk) ** t_ced)
-                
-                pv += vn_ced / ((1 + k_merk) ** t_ced)
-                
-                st.success(f"Coupon Bond Present Value = {pv:.2f}")
-                st.info(f"Annual Coupon Payment = {coupon:.2f}")
-                
+                # Chiama la funzione
+                res = calc_va_ced_bond(None, vn_ced=vn_ced, k_ced=k_ced, t_ced=t_ced, k_merk=k_merk)
+                st.success(f"Coupon Bond Present Value = {res:.2f}")
+                annual_coupon = vn_ced * k_ced
+                st.info(f"Annual Coupon Payment = {annual_coupon:.2f}")
             except ValueError as e:
                 st.error(str(e))
 
