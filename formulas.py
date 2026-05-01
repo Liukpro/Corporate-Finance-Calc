@@ -158,7 +158,7 @@ def calc_va_bond_zero(va, k, vn, dur):
 
     return vn / ((1 + k) ** dur)
     
-def yield_to_mat_zero(k, va, vn, dur):
+def calc_yield_to_mat_zero(k, va, vn, dur):
     if k is not None:
         return k
     if va !=0 and vn != 0 and dur != 0:
