@@ -407,34 +407,37 @@ elif page == "Stock Evaluation":
                 roe = st.number_input("Return on Equity (ROE)", value=0.15, format="%.4f", min_value=0.0)
             
             retention_ratio = 1 - payout_ratio
-            g = retention_ratio * roe
+            g = None  # sarà calcolato dalla funzione
             dividend_1 = None
             
-            st.info(f"Retention Ratio = {retention_ratio:.4f} | Growth Rate = {g:.4%}")
+            st.info(f"Retention Ratio = {retention_ratio:.4f}")
         
         if st.button("Calculate Stock Price"):
             try:
-                # Verifica condizione Gordon
-                if g >= k:
-                    st.error(f"Gordon model requires k > g. Got k={k:.2%}, g={g:.2%}")
-                else:
-                    # Calcola D1 se necessario
-                    if dividend_1 is None and earnings_t0 is not None:
-                        earnings_t1 = earnings_t0 * (1 + g)
-                        dividend_1 = earnings_t1 * payout_ratio
-                    
-                    if dividend_1 is None:
-                        raise ValueError("Dividend cannot be calculated from given inputs")
-                    
-                    price = dividend_1 / (k - g)
-                    st.success(f"Stock Price = {price:.2f}")
-                    
-                    # VAOC
-                    if earnings_t0 is not None and k is not None:
-                        no_growth_price = earnings_t0 / k
-                        vaoc = price - no_growth_price
-                        st.info(f"VAOC = {vaoc:.2f} (Growth premium)")
-                        st.caption(f"No-growth value: {no_growth_price:.2f} | Growth premium: {vaoc:.2f}")
+                price = calc_stock_price(
+                    stock_price=None,
+                    k=k,
+                    g=g,
+                    dividend_1=dividend_1,
+                    earnings_t0=earnings_t0,
+                    payout_ratio=payout_ratio,
+                    retention_ratio=retention_ratio,
+                    roe=roe,
+                    model="gordon"
+                )
+                st.success(f"Stock Price = {price:.2f}")
+                
+                # VAOC usando calc_vaoc e calc_stock_price per no-growth
+                if earnings_t0 is not None and k is not None:
+                    no_growth_price = calc_stock_price(
+                        stock_price=None,
+                        dividend=earnings_t0,
+                        k=k,
+                        model="no_growth"
+                    )
+                    vaoc = calc_vaoc(price, no_growth_price)
+                    st.info(f"VAOC = {vaoc:.2f} (Growth premium)")
+                    st.caption(f"No-growth value: {no_growth_price:.2f} | Growth premium: {vaoc:.2f}")
                     
             except ValueError as e:
                 st.error(str(e))
@@ -450,9 +453,12 @@ elif page == "Stock Evaluation":
         
         if st.button("Calculate Stock Price"):
             try:
-                if k <= 0:
-                    raise ValueError("Required return must be positive")
-                price = dividend / k
+                price = calc_stock_price(
+                    stock_price=None,
+                    dividend=dividend,
+                    k=k,
+                    model="no_growth"
+                )
                 st.success(f"Stock Price = {price:.2f}")
             except ValueError as e:
                 st.error(str(e))
@@ -460,6 +466,7 @@ elif page == "Stock Evaluation":
     # VAOC diretto
     st.markdown("---")
     st.subheader("Value of Growth Opportunities (VAOC)")
+    st.caption("Calculate the difference between growth and no-growth stock values")
     
     col1, col2 = st.columns(2)
     with col1:
@@ -468,16 +475,19 @@ elif page == "Stock Evaluation":
         price_no_growth = st.number_input("Stock Price (no growth)", value=30.0, min_value=0.0, key="vaoc_no_growth")
     
     if st.button("Calculate VAOC"):
-        vaoc = price_growth - price_no_growth
-        st.success(f"VAOC = {vaoc:.2f}")
-        if vaoc > 0:
-            st.info("Positive VAOC = growth creates value")
-        elif vaoc < 0:
-            st.warning("Negative VAOC = growth destroys value")
-        else:
-            st.info("VAOC = 0 = growth adds no value")
+        try:
+            vaoc = calc_vaoc(price_growth, price_no_growth)
+            st.success(f"VAOC = {vaoc:.2f}")
+            if vaoc > 0:
+                st.info("Positive VAOC = growth creates value")
+            elif vaoc < 0:
+                st.warning("Negative VAOC = growth destroys value")
+            else:
+                st.info("VAOC = 0 = growth adds no value")
+        except ValueError as e:
+            st.error(str(e))
           
-elif page == "Mortgage (Italian)":
+elif page == "Mortgage":
     st.subheader("Mutuo - Ammortamento")
     st.caption("Confronto tra ammortamento italiano (quota capitale costante) e francese (rata costante)")
     st.info("📌 **Nota:** I calcoli sono basati su rate MENSILI.")
