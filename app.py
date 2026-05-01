@@ -477,7 +477,7 @@ elif page == "Stock Evaluation":
         else:
             st.info("VAOC = 0 = growth adds no value")
 #MORTGAGE
-elif page == "Mortgage (Italian)":
+elif page == "Mortgage":
     st.subheader("Mutuo - Ammortamento")
     st.caption("Confronto tra ammortamento italiano (quota capitale costante) e francese (rata costante)")
     st.info("📌 **Nota:** I calcoli sono basati su rate MENSILI. Inserisci la durata in anni, il sistema convertirà automaticamente in mesi.")
