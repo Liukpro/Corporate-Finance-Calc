@@ -491,31 +491,41 @@ elif page == "Stock Evaluation":
 elif page == "Mortgage":
     st.subheader("Mutuo - Ammortamento")
     st.caption("Confronto tra ammortamento italiano (quota capitale costante) e francese (rata costante)")
-    st.info("📌 **Nota:** I calcoli sono basati su rate MENSILI.")
+    st.info("**Nota:** I calcoli sono basati su rate MENSILI.")
     
     mortgage_type = st.radio("Tipo di ammortamento", ["Italiano (Quota Capitale Costante)", "Francese (Rata Costante)"])
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        mortgage_debt = st.number_input("Debito iniziale (€)", value=100000.0, min_value=0.0, step=10000.0)
+        mortgage_debt = st.number_input("Debito iniziale (€)", value=100000.0, min_value=0.0, step=10000.0, key="mortgage_debt")
     with col2:
-        annual_rate = st.number_input("Tasso di interesse annuo (%)", value=3.0, min_value=0.0, step=0.5) / 100
+        annual_rate = st.number_input("Tasso di interesse annuo (%)", value=3.0, min_value=0.0, step=0.5, key="annual_rate") / 100
         monthly_rate = annual_rate / 12
         st.caption(f"Tasso mensile equivalente: {monthly_rate:.4%}")
     with col3:
-        years = st.number_input("Durata (anni)", value=20, min_value=1, max_value=50, step=1)
+        years = st.number_input("Durata (anni)", value=20, min_value=1, max_value=50, step=1, key="years")
         months = years * 12
         st.caption(f"Durata in mesi: {months}")
     
     st.markdown("---")
     
+    # Display mode fuori dal bottone (con key per mantenere lo stato)
+    display_mode = st.radio(
+        "Visualizzazione", 
+        ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"],
+        key="mortgage_display_mode"
+    )
+    
     if mortgage_type == "Italiano (Quota Capitale Costante)":
         st.markdown("### Piano di Ammortamento Italiano")
         
-        if st.button("Calcola Ammortamento Italiano"):
-            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
-            
+        if st.button("Calcola Ammortamento Italiano", key="btn_italian"):
             table = build_italian_table(mortgage_debt, annual_rate, years)
+            st.session_state['italian_table'] = table
+        
+        # Mostra la tabella se esiste in session_state
+        if 'italian_table' in st.session_state:
+            table = st.session_state['italian_table']
             
             total_interest = sum(row["interest"] for row in table)
             first_payment = table[0]["payment"]
@@ -549,10 +559,13 @@ elif page == "Mortgage":
     else:
         st.markdown("### Piano di Ammortamento Francese")
         
-        if st.button("Calcola Ammortamento Francese"):
-            display_mode = st.radio("Visualizzazione", ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"])
-            
+        if st.button("Calcola Ammortamento Francese", key="btn_french"):
             table = build_french_table(mortgage_debt, annual_rate, years)
+            st.session_state['french_table'] = table
+        
+        # Mostra la tabella se esiste in session_state
+        if 'french_table' in st.session_state:
+            table = st.session_state['french_table']
             
             total_interest = sum(row["interest"] for row in table)
             constant_payment = table[0]["payment"] if table else 0
