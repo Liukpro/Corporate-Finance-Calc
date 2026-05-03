@@ -404,11 +404,6 @@ elif page == "NPV":
             res = calc_npv(None, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
             st.success(f"NPV = {res:.2f}")
           
-            k_values = np.arange(0,0.5, 0.01)
-            
-            chart_npv = pd.DataFrame({"k": k_values, "Cash Flows": fc_list})
-            st.line_chart(chart_npv, x = "k", y= "Cash Flows")
-          
             if res > 0: 
                 st.info("The project creates value.")
             elif res < 0: 
