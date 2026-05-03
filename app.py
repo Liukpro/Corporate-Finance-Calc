@@ -380,38 +380,113 @@ elif page == "Ratio Analysis":
             st.error(str(e))
         except ZeroDivisionError:
             st.error("Mathematical Error: Division by zero.")
-
-# NPV
-elif page == "NPV":
-    st.subheader("Net Present Value (NPV)")
-    k = st.number_input("Discount rate k (decimal, e.g. 0.08)", value=0.0, format="%.4f")
-    i_0 = st.number_input("Initial investment I₀", value=0.0)
-    cost = st.number_input("Fixed cost per period", value=0.0)
-    n = st.number_input("Number of periods", min_value=1, step=1, value=1)
-
-    fc_list = []
-    t_list = []
-    for i in range(int(n)):
+          
+# NPV with FCU/FCE
+elif page == "NPV with FCU/FCE":
+    st.subheader("NPV - Due Approcci")
+    st.caption("NPV con logica del capitale investito (FCU) vs logica dell'azionista (FCE)")
+    
+    approach = st.radio("Seleziona approccio", ["FCU (Free Cash Flow to Firm)", "FCE (Free Cash Flow to Equity)"])
+    
+    if approach == "FCU (Free Cash Flow to Firm)":
+        st.markdown("### NPV con FCU (WACC come tasso di sconto)")
+        t_fcu_list = []
         col1, col2 = st.columns(2)
         with col1:
-            fc_list.append(st.number_input(f"Cash flow period {i+1}", key=f"fc_{i}", value=0.0))
+            if st.session_state.get('wacc') is not None:
+                st.info(f"WACC calcolato in precedenza: {st.session_state.wacc:.2%}")
+                use_saved_wacc = st.checkbox("Usa WACC salvato", value=True)
+                if use_saved_wacc:
+                    wacc = st.session_state.wacc
+                else:
+                    wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.5) / 100
+            else:
+                wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.5) / 100
+            
+            i0_fcu = st.number_input("Investimento Iniziale I₀ (€)", value=100000.0, min_value=0.0, step=10000.0)
+            cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
+        
         with col2:
-            t_list.append(st.number_input(f"Time period {i+1}", key=f"t_{i}", value=float(i+1)))
+            t_fcu = st.number_input("Numero di periodi", min_value=1, step=1, value=5)
+        
+        st.markdown("**Flussi di Cassa (FCU) per periodo**")
+        fcu_list = []
+        npv_fcu_values = []
+        for i in range(t_fcu):
+            fcu_list.append(st.number_input(f"FCU periodo {i+1}", key=f"fcu_{i}", value=10000.0, step=1000.0))
+        
+        if st.button("Calcola NPV (FCU)"):
+            try:
+                npv = calc_npv_fcu(fcu_list, wacc, i0_fcu, cost)
+                st.session_state.npv_fcu = npv
+                
+                st.markdown("---")
+                st.metric("NPV", f"€{npv:,.2f}", 
+                          delta="Positivo" if npv > 0 else "Negativo" if npv < 0 else "Neutro")
 
-    if st.button("Calculate NPV"):
-        try:
-            # Chiama la funzione di formulas.py - NON riscrivere il ciclo
-            res = calc_npv(None, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
-            st.success(f"NPV = {res:.2f}")
-          
-            if res > 0: 
-                st.info("The project creates value.")
-            elif res < 0: 
-                st.warning("The project destroys value.")
-        except ValueError as e:
-            st.error(str(e))
+                wacc_values = np.arange(0,0.5, 0.01)
+                npv_fcu_values = []
+                for wacc_val in wacc_values:
+                  npv_at_wacc = calc_npv_fcu(fcu_list, wacc_val, i0_fcu, cost)
+                  npv_fcu_values.append(npv_at_wacc)
 
+                chart_npv_fcu = pd.DataFrame({"WACC": wacc_values, "NPV": npv_fcu_values})
+                st.line_chart(chart_npv_fcu, x="WACC", y="NPV")
 
+              
+                if npv > 0:
+                    st.info("Il progetto crea valore")
+                elif npv < 0:
+                    st.warning("Il progetto distrugge valore")
+                else:
+                    st.info("NPV = 0")
+            except ValueError as e:
+                st.error(str(e))
+    
+    else:
+        st.markdown("### NPV con FCE (Ke come tasso di sconto)")
+        t_fce_list = []
+        col1, col2 = st.columns(2)
+        with col1:
+            ke = st.number_input("Ke (Costo dell'Equity/Required Return) (%)", value=10.0, min_value=0.0, step=0.5) / 100
+            equity0 = st.number_input("Equity Iniziale (€)", value=50000.0, min_value=0.0, step=10000.0)
+            cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
+        
+        with col2:
+            t_fce = st.number_input("Numero di periodi", min_value=1, step=1, value=5)
+        
+        st.markdown("**Flussi di Cassa (FCE) per periodo**")
+        fce_list = []
+        npv_fce_values = []
+        for i in range(t_fce):
+            fce_list.append(st.number_input(f"FCE periodo {i+1}", key=f"fce_{i}", value=8000.0, step=1000.0))
+        
+        if st.button("Calcola NPV (FCE)"):
+            try:
+                npv = calc_npv_fce(fce_list, ke, equity0, cost)
+                st.session_state.npv_fce = npv
+                
+                st.markdown("---")
+                st.metric("NPV (FCE)", f"€{npv:,.2f}", delta="Positivo" if npv > 0 else "Negativo" if npv < 0 else "Neutro")
+                
+                ke_values = np.arange(0,0.5, 0.01)
+                npv_fce_values = []
+                for ke_val in ke_values:
+                  npv_at_ke = calc_npv_fce(fce_list, ke_val, equity0, cost)
+                  npv_fce_values.append(npv_at_ke)
+
+                chart_npv_fce = pd.DataFrame({"Ke": ke_values, "NPV": npv_fce_values})
+                st.line_chart(chart_npv_fce, x="Ke", y="NPV")
+              
+                if npv > 0:
+                    st.info("Il progetto crea valore per l'azionista")
+                elif npv < 0:
+                    st.warning("Il progetto distrugge valore per l'azionista")
+                else:
+                    st.info("NPV = 0, è indifferente")
+            except ValueError as e:
+                st.error(str(e)
+                         
 #BONDs
 elif page == "Bond Evaluation":
     st.subheader("Bond Valuation")
@@ -720,93 +795,6 @@ elif page == "WACC":
                 st.write(f"r_d × (1-t_c) × (D/V) = {cost_of_debt:.2%} × {1-tax_rate:.2%} × {debt/total:.2%} = {cost_of_debt * (1-tax_rate) * debt/total:.2%}")
         except ValueError as e:
             st.error(str(e))
-
-
-# NPV with FCU/FCE
-elif page == "NPV with FCU/FCE":
-    st.subheader("NPV - Due Approcci")
-    st.caption("NPV con logica del capitale investito (FCU) vs logica dell'azionista (FCE)")
-    
-    approach = st.radio("Seleziona approccio", ["FCU (Free Cash Flow to Firm)", "FCE (Free Cash Flow to Equity)"])
-    
-    if approach == "FCU (Free Cash Flow to Firm)":
-        st.markdown("### NPV con FCU (WACC come tasso di sconto)")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.session_state.get('wacc') is not None:
-                st.info(f"WACC calcolato in precedenza: {st.session_state.wacc:.2%}")
-                use_saved_wacc = st.checkbox("Usa WACC salvato", value=True)
-                if use_saved_wacc:
-                    wacc = st.session_state.wacc
-                else:
-                    wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.5) / 100
-            else:
-                wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.5) / 100
-            
-            i0_fcu = st.number_input("Investimento Iniziale I₀ (€)", value=100000.0, min_value=0.0, step=10000.0)
-            cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
-        
-        with col2:
-            n = st.number_input("Numero di periodi", min_value=1, step=1, value=5)
-        
-        st.markdown("**Flussi di Cassa (FCU) per periodo**")
-        fcu_list = []
-        for i in range(int(n)):
-            fcu_list.append(st.number_input(f"FCU periodo {i+1}", key=f"fcu_{i}", value=10000.0, step=1000.0))
-        
-        if st.button("Calcola NPV (FCU)"):
-            try:
-                npv = calc_npv_fcu(fcu_list, wacc, i0_fcu, cost)
-                st.session_state.npv_fcu = npv
-                
-                st.markdown("---")
-                st.metric("NPV", f"€{npv:,.2f}", 
-                          delta="Positivo" if npv > 0 else "Negativo" if npv < 0 else "Neutro")
-                
-                if npv > 0:
-                    st.info("Il progetto crea valore")
-                elif npv < 0:
-                    st.warning("Il progetto distrugge valore")
-                else:
-                    st.info("NPV = 0")
-            except ValueError as e:
-                st.error(str(e))
-    
-    else:
-        st.markdown("### NPV con FCE (Ke come tasso di sconto)")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            ke = st.number_input("Ke (Costo dell'Equity/Required Return) (%)", value=10.0, min_value=0.0, step=0.5) / 100
-            equity0 = st.number_input("Equity Iniziale (€)", value=50000.0, min_value=0.0, step=10000.0)
-            cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
-        
-        with col2:
-            n = st.number_input("Numero di periodi", min_value=1, step=1, value=5)
-        
-        st.markdown("**Flussi di Cassa (FCE) per periodo**")
-        fce_list = []
-        for i in range(int(n)):
-            fce_list.append(st.number_input(f"FCE periodo {i+1}", key=f"fce_{i}", value=8000.0, step=1000.0))
-        
-        if st.button("Calcola NPV (FCE)"):
-            try:
-                npv = calc_npv_fce(fce_list, ke, equity0, cost)
-                st.session_state.npv_fce = npv
-                
-                st.markdown("---")
-                st.metric("NPV (FCE)", f"€{npv:,.2f}",
-                          delta="Positivo" if npv > 0 else "Negativo" if npv < 0 else "Neutro")
-                
-                if npv > 0:
-                    st.info("Il progetto crea valore per l'azionista")
-                elif npv < 0:
-                    st.warning("Il progetto distrugge valore per l'azionista")
-                else:
-                    st.info("NPV = 0")
-            except ValueError as e:
-                st.error(str(e))
 
 elif page == "Coming Soon...":
     st.write("Stay tuned for Risk Analysis and Portfolio")
