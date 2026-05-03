@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-from numpy as np
+import numpy as np
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
                       calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero, calc_ros, 
