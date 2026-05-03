@@ -385,7 +385,7 @@ elif page == "NPV with FCU/FCE":
     st.subheader("NPV - Due Approcci")
     st.caption("NPV con logica del capitale investito (FCU) vs logica dell'azionista (FCE)")
     
-    approach = st.radio("Seleziona approccio", ["FCU (Free Cash Flow to Firm)", "FCE (Free Cash Flow to Equity)"])
+    approach = st.radio("Seleziona approccio", ["FCU (Free Cash Flow Unlevered)", "FCE (Free Cash Flow to Equity)"])
     
     if approach == "FCU (Free Cash Flow to Firm)":
         st.markdown("### NPV con FCU (WACC come tasso di sconto)")
