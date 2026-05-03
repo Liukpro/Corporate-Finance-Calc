@@ -423,7 +423,7 @@ elif page == "NPV with FCU/FCE":
                 st.metric("NPV", f"€{npv:,.2f}", 
                           delta="Positivo" if npv > 0 else "Negativo" if npv < 0 else "Neutro")
 
-                wacc_values = np.arange(0, 0.5, 0.0005)
+                wacc_values = np.arange(0, 0.5, 0.00005)
                 npv_fcu_values = []
                 for wacc_val in wacc_values:
                   npv_at_wacc = calc_npv_fcu(fcu_list, wacc_val, i0_fcu, cost)
@@ -470,7 +470,7 @@ elif page == "NPV with FCU/FCE":
                 st.markdown("---")
                 st.metric("NPV (FCE)", f"€{npv:,.2f}", delta="Positivo" if npv > 0 else "Negativo" if npv < 0 else "Neutro")
                 
-                ke_values = np.arange(0, 0.5, 0.0005)
+                ke_values = np.arange(0, 0.5, 0.00005)
                 npv_fce_values = []
                 for ke_val in ke_values:
                   npv_at_ke = calc_npv_fce(fce_list, ke_val, equity0, cost)
