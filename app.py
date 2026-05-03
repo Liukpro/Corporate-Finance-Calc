@@ -431,7 +431,9 @@ elif page == "NPV with FCU/FCE":
 
                 chart_npv_fcu = pd.DataFrame({"WACC": wacc_values, "NPV": npv_fcu_values})
                 st.line_chart(chart_npv_fcu, x="WACC", y="NPV")
-
+                zero_crossing = wacc_values[np.where(np.array(npv_fcu_values) <= 0)[0][0]] if any(np.array(npv_fcu_values) <= 0) else None
+                if zero_crossing:
+                  st.caption(f"⚫ NPV = 0 con WACC ≈ {zero_crossing:.2%}")
               
                 if npv > 0:
                     st.info("Il progetto crea valore")
@@ -476,6 +478,10 @@ elif page == "NPV with FCU/FCE":
 
                 chart_npv_fce = pd.DataFrame({"Ke": ke_values, "NPV": npv_fce_values})
                 st.line_chart(chart_npv_fce, x="Ke", y="NPV")
+
+                zero_crossing = ke_values[np.where(np.array(npv_fce_values) <= 0)[0][0]] if any(np.array(npv_fce_values) <= 0) else None
+                if zero_crossing:
+                  st.caption(f"⚫ NPV = 0 con Ke ≈ {zero_crossing:.2%}")
               
                 if npv > 0:
                     st.info("Il progetto crea valore per l'azionista")
