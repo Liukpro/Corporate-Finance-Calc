@@ -485,7 +485,7 @@ elif page == "NPV with FCU/FCE":
                 else:
                     st.info("NPV = 0, è indifferente")
             except ValueError as e:
-                st.error(str(e)
+                st.error(str(e))
                          
 #BONDs
 elif page == "Bond Evaluation":
