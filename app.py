@@ -423,7 +423,7 @@ elif page == "NPV with FCU/FCE":
                 st.metric("NPV", f"€{npv:,.2f}", 
                           delta="Positivo" if npv > 0 else "Negativo" if npv < 0 else "Neutro")
 
-                wacc_values = np.arange(0, 1.01, 0.01)
+                wacc_values = np.arange(0, 1, 0.005)
                 npv_fcu_values = []
                 for wacc_val in wacc_values:
                   npv_at_wacc = calc_npv_fcu(fcu_list, wacc_val, i0_fcu, cost)
@@ -433,7 +433,7 @@ elif page == "NPV with FCU/FCE":
                 st.line_chart(chart_npv_fcu, x="WACC", y="NPV")
                 zero_crossing = wacc_values[np.where(np.array(npv_fcu_values) <= 0)[0][0]] if any(np.array(npv_fcu_values) <= 0) else None
                 if zero_crossing:
-                  st.caption(f"⚫ NPV = 0 con WACC ≈ {zero_crossing:.2%}")
+                  st.caption(f"NPV = 0 con WACC ≈ {zero_crossing:.2%}")
               
                 if npv > 0:
                     st.info("Il progetto crea valore")
@@ -470,7 +470,7 @@ elif page == "NPV with FCU/FCE":
                 st.markdown("---")
                 st.metric("NPV (FCE)", f"€{npv:,.2f}", delta="Positivo" if npv > 0 else "Negativo" if npv < 0 else "Neutro")
                 
-                ke_values = np.arange(0, 1.01, 0.01)
+                ke_values = np.arange(0, 1, 0.005)
                 npv_fce_values = []
                 for ke_val in ke_values:
                   npv_at_ke = calc_npv_fce(fce_list, ke_val, equity0, cost)
@@ -481,7 +481,7 @@ elif page == "NPV with FCU/FCE":
 
                 zero_crossing = ke_values[np.where(np.array(npv_fce_values) <= 0)[0][0]] if any(np.array(npv_fce_values) <= 0) else None
                 if zero_crossing:
-                  st.caption(f"⚫ NPV = 0 con Ke ≈ {zero_crossing:.2%}")
+                  st.caption(f"NPV = 0 con Ke ≈ {zero_crossing:.2%}")
               
                 if npv > 0:
                     st.info("Il progetto crea valore per l'azionista")
