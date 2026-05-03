@@ -403,8 +403,15 @@ elif page == "NPV":
             # Chiama la funzione di formulas.py - NON riscrivere il ciclo
             res = calc_npv(None, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
             st.success(f"NPV = {res:.2f}")
-            graph = pd.DataFrame(rng(0).standard_normal((res,k)), columns = ["a"])
-            st.line_chart(graph)
+          
+            k_values = np.arange(0,0.5, 0.01)
+            npv_values = []
+            for k_val in k_values:
+                npv_values.append(calc_npv(None, fc=fc_list, k=k_val, i_o = i_0, t = t_list, cost = cost))
+
+            chart_npv = pd.DataFrame({"k": k_values, "NPV": npv_values})
+            st.line_chart(chart_npv, x = "k", y= "NPV")
+          
             if res > 0: 
                 st.info("The project creates value.")
             elif res < 0: 
