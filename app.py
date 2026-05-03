@@ -405,12 +405,9 @@ elif page == "NPV":
             st.success(f"NPV = {res:.2f}")
           
             k_values = np.arange(0,0.5, 0.01)
-            npv_values = []
-            for k_val in k_values:
-                npv_values.append(calc_npv(None, fc=fc_list, k=k_val, i_0 = i_0, t = t_list, cost = cost))
-
-            chart_npv = pd.DataFrame({"k": k_values, "NPV": npv_values})
-            st.line_chart(chart_npv, x = "k", y= "NPV")
+            
+            chart_npv = pd.DataFrame({"k": k_values, "Cash Flows": fc_list})
+            st.line_chart(chart_npv, x = "k", y= "Cash Flows")
           
             if res > 0: 
                 st.info("The project creates value.")
