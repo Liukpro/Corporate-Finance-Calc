@@ -403,14 +403,14 @@ elif page == "NPV":
             # Chiama la funzione di formulas.py - NON riscrivere il ciclo
             res = calc_npv(None, fc=fc_list, k=k, i_0=i_0, t=t_list, cost=cost)
             st.success(f"NPV = {res:.2f}")
+            graph = pd.DataFrame(rng(0).standard_normal((res,k)), columns = ["a"])
+            st.line_chart(graph)
             if res > 0: 
                 st.info("The project creates value.")
             elif res < 0: 
                 st.warning("The project destroys value.")
         except ValueError as e:
             st.error(str(e))
-          graph = pd.DataFrame(rng(0).standard_normal((res,k)), columns = ["a"])
-          st.line_chart(graph)
 
 
 #BONDs
