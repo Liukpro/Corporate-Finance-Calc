@@ -1,4 +1,6 @@
+import pandas as pd
 import streamlit as st
+from numpy.random import default_rng as rng
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
                       calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero, calc_ros, 
@@ -407,6 +409,10 @@ elif page == "NPV":
                 st.warning("The project destroys value.")
         except ValueError as e:
             st.error(str(e))
+          graph = pd.DataFrame(rng(0).standard_normal((res,k)), columns = ["a"])
+          st.line_chart(graph)
+
+
 #BONDs
 elif page == "Bond Evaluation":
     st.subheader("Bond Valuation")
