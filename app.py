@@ -441,7 +441,7 @@ elif page == "NPV with FCU/FCE":
                 else:
                     st.info("NPV = 0")
             except ValueError as e:
-                st.error(str(e)))
+                st.error(str(e))
     
     else:
         st.markdown("### NPV con FCE (Ke come tasso di sconto)")
