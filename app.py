@@ -57,12 +57,11 @@ st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
     "Cash Flow Analysis",
     "Ratio Analysis",
-    "NPV",
+    "NPV with FCU/FCE",
     "Bond Evaluation",
     "Stock Evaluation",
     "Mortgage",
     "WACC",
-    "NPV with FCU/FCE",
     "Coming Soon..."
 ])
 
