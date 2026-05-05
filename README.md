@@ -38,9 +38,5 @@ Please read License files
 
 This project is not a finished application.
 
-It is a **financial computation engine under active development**, currently in a transitional stage between:
-- a functional prototype (Streamlit-based calculator)
-- and a modular financial analytics system with formal architecture (DAG + resolver design)
-
 ---
 
