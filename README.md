@@ -20,7 +20,7 @@ Note: This is a calculator, not an automated analysis engine. All data must be e
 
 ## Calculation logic
 
-All formulas are implemented as pure functions in `formule.py`, with:
+All formulas are implemented as pure functions in `formulas.py`, with:
 
 - **Multiple calculation paths** - each metric can be computed in different ways (e.g., FCCNOgc from Revenue/Costs or from MOL)
 - **Explicit error handling** - division by zero and insufficient data raise exceptions
