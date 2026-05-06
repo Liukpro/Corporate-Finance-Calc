@@ -1,4 +1,4 @@
-#Cash Flow and Ratio Analysis
+#Cash Flow and Ratio Analysis, ANALISI STORICA
 def calc_fccnogc(fccnogc, ric_op_mon = None, cost_op_mon = None, imp = None, ammort = None, mol = None, rol = None):
     if fccnogc is not None:
         return fccnogc
