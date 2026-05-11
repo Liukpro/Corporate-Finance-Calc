@@ -13,10 +13,10 @@ def calc_ammortamenti(esborsi, anni_list, vita_progetto):
     risultati = []
     
     for i in range(len(esborsi)):
-        serie = [0] * vita_progetto
+        esborso = float(esborsi[i])
+        anni = int(anni_list[i])
         
-        esborso = esborsi[i]
-        anni = anni_list[i]
+        serie = [0] * vita_progetto
         quota = esborso / anni
         
         for t in range(anni):
