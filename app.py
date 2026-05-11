@@ -1,12 +1,8 @@
 import pandas as pd
 import streamlit as st
 import numpy as np
-from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
-                      calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
-                      calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero, calc_ros, 
-                      calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, calc_vaoc, 
-                      build_italian_table, build_french_table, calc_wacc, calc_npv_fcu, calc_npv_fce )
-from analisi prospettica area caratteristica import *
+from formulas import *
+from analisi_prospettica _area_caratteristica import *
 
 
 # Configurazione Pagina
