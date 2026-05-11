@@ -391,8 +391,7 @@ elif page == "Analisi Prospettica":
     if st.button("Calcola"):
         try:
             mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
-            ammortamenti_RAW = calc_ammortamenti(esborsi, anni_list, n)
-            ammortamenti = merge_ammortamenti(ammortamenti_RAW)
+            ammortamenti_matrice, ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
             shield = calc_shield_ammortamenti(ammortamenti, tc)
             fccnogc = calc_fccnogc2(mo_netto, shield)
             delta_ccno = calc_var_ccno(ccno)
