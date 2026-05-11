@@ -10,7 +10,7 @@ A web-based tool (Streamlit) that calculates standard financial metrics from man
 |------|---------------------|
 | Cash flows | FCCNOgc, FCGC, FCID, FCFR, FCRf, FCU, FCE, Liquidity variation |
 | Profitability ratios | ROS, ROI, ROE |
-| prospective analysis | Operating Free Cash Flow (after working capital changes) |
+| Prospective Analysis | Operating Free Cash Flow (after working capital changes) |
 | Investment valuation | NPV with fixed periodic costs |
 | Bonds | Zero coupon (value and YTM), Coupon bonds |
 | Stocks | Gordon growth model, No-growth model, VAOC |
