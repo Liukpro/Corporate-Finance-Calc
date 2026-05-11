@@ -688,57 +688,57 @@ elif page == "Mortgage":
         ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"],
         key="mortgage_display_mode"
     )
-    
     if mortgage_type == "Italiano (Quota Capitale Costante)":
         st.markdown("### Piano di Ammortamento Italiano (Annuale)")
-        
+
         current_params = (mortgage_debt, annual_rate, years)
-        
+
         if "italian_params" not in st.session_state or st.session_state["italian_params"] != current_params:
             st.session_state.pop("italian_table", None)
             st.session_state["italian_params"] = current_params
 
         if st.button("Calcola Ammortamento Italiano", key="btn_italian"):
-            table = build_italian_table(mortgage_debt, annual_rate, years)
-            st.session_state["italian_table"] = table
+            n = years
+            k = annual_rate
+
+            capital_annual = mortgage_debt / n
+
+            annual_table = []
+
+            for y in range(1, n + 1):
+
+                residual_prev = mortgage_debt - (y - 1) * capital_annual
+
+                interest_year = residual_prev * k
+
+                payment_year = capital_annual + interest_year
+
+                residual = mortgage_debt - y * capital_annual
+
+                annual_table.append({
+                    "Anno": y,
+                    "Capitale Pagato": capital_annual,
+                    "Interessi Pagati": interest_year,
+                    "Rata Annua Totale": payment_year,
+                    "Debito Residuo": residual
+                })
+
+            st.session_state["italian_table"] = annual_table
 
         if "italian_table" in st.session_state:
             table = st.session_state["italian_table"]
 
-            annual_table = []
-
-            for year in range(1, years + 1):
-                year_rows = [r for r in table if r["year"] == year]
-
-                if not year_rows:
-                    continue
-
-                capital_year = sum(r["capital"] for r in year_rows)
-                interest_year = sum(r["interest"] for r in year_rows)
-                payment_year = sum(r["payment"] for r in year_rows)
-                residual_year = year_rows[-1]["residual"]
-
-                annual_table.append({
-                    "Anno": year,
-                    "Capitale Pagato": capital_year,
-                    "Interessi Pagati": interest_year,
-                    "Rata Annua Totale": payment_year,
-                    "Debito Residuo": residual_year
-                })
-
-            total_interest = sum(r["Interessi Pagati"] for r in annual_table)
-            first_year_payment = annual_table[0]["Rata Annua Totale"]
-            last_year_payment = annual_table[-1]["Rata Annua Totale"]
+            total_interest = sum(r["Interessi Pagati"] for r in table)
 
             col_a, col_b, col_c, col_d = st.columns(4)
-            col_a.metric("Quota Capitale Annuo", f"€{annual_table[0]['Capitale Pagato']:,.2f}")
-            col_b.metric("Prima Rata Annuia", f"€{first_year_payment:,.2f}")
-            col_c.metric("Ultima Rata Annuia", f"€{last_year_payment:,.2f}")
+            col_a.metric("Quota Capitale Annuo", f"€{table[0]['Capitale Pagato']:,.2f}")
+            col_b.metric("Interessi Anno 1", f"€{table[0]['Interessi Pagati']:,.2f}")
+            col_c.metric("Interessi Anno Ultimo", f"€{table[-1]['Interessi Pagati']:,.2f}")
             col_d.metric("Totale Interessi", f"€{total_interest:,.2f}")
 
             st.info(f"**Totale pagato:** €{mortgage_debt + total_interest:,.2f}")
 
-            st.dataframe(annual_table, use_container_width=True)
+            st.dataframe(table, use_container_width=True)
     
     else:
         st.markdown("### Piano di Ammortamento Francese")
