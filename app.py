@@ -388,7 +388,7 @@ elif page == "Analisi Prospettica":
         with col2:
             anni_list.append(int(st.number_input(f"Anni ammortamento esborso {i+1}", min_value=1, step=1, value=n, key=f"ap_anni_{i}")))
 
-    if st.button("Calcola Analisi Prospettica"):
+    if st.button("Calcola"):
         try:
             mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
             ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
