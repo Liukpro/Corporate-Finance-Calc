@@ -6,7 +6,7 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero, calc_ros, 
                       calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, calc_vaoc, 
                       build_italian_table, build_french_table, calc_wacc, calc_npv_fcu, calc_npv_fce)
-from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammortamenti, calc_shield_ammortamenti,
+from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammortamenti,merge_ammortamenti, calc_shield_ammortamenti,
                                                      calc_fccnogc2, calc_var_ccno, calc_fcgc2)
 
 
