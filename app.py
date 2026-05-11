@@ -6,6 +6,7 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero, calc_ros, 
                       calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, calc_vaoc, 
                       build_italian_table, build_french_table, calc_wacc, calc_npv_fcu, calc_npv_fce )
+from analisi prospettica area caratteristica import *
 
 
 # Configurazione Pagina
@@ -55,7 +56,8 @@ if st.sidebar.button("Reset Session"):
   
 st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
-    "Cash Flow Analysis",
+    "Cash Flow Analysis, Historical",
+    "Analisi Prospettica"
     "Ratio Analysis",
     "NPV with FCU/FCE",
     "Bond Evaluation",
@@ -349,6 +351,72 @@ if page == "Cash Flow Analysis":
                 st.success(f"Total Liquidity Variation = {res:.2f}")
             except ValueError as e:
                 st.error(str(e))
+
+elif page == "Analisi Prospettica":
+    st.subheader("Analisi Prospettica — Area Caratteristica")
+
+    vita_progetto = st.number_input("Vita del progetto (periodi)", min_value=1, step=1, value=3, key="ap_vita")
+    tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.24, format="%.2f", key="ap_tc")
+    n = int(vita_progetto)
+
+    st.markdown("**Ricavi e costi operativi per periodo:**")
+    ricavi_operativi = []
+    costi_operativi = []
+    ccno = []
+
+    for t in range(n):
+        st.markdown(f"*Periodo {t+1}*")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            ricavi_operativi.append(st.number_input(f"Ricavi operativi", key=f"ap_ric_{t}", value=0.0))
+        with col2:
+            costi_operativi.append(st.number_input(f"Costi operativi", key=f"ap_cost_{t}", value=0.0))
+        with col3:
+            ccno.append(st.number_input(f"CCNO", key=f"ap_ccno_{t}", value=0.0))
+
+    st.markdown("**Esborsi per investimenti (ammortizzabili):**")
+    n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="ap_n_esborsi")
+    esborsi = []
+    anni_list = []
+
+    for i in range(int(n_esborsi)):
+        col1, col2 = st.columns(2)
+        with col1:
+            esborsi.append(st.number_input(f"Esborso {i+1}", key=f"ap_esborso_{i}", value=0.0))
+        with col2:
+            anni_list.append(st.number_input(f"Anni ammortamento esborso {i+1}", min_value=1, step=1, value=n, key=f"ap_anni_{i}"))
+
+    if st.button("Calcola Analisi Prospettica"):
+        try:
+            mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
+            ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
+            shield = calc_shield_ammortamenti(ammortamenti, tc)
+            fccnogc = calc_fccnogc(mo_netto, shield)
+            delta_ccno = calc_var_ccno(ccno)
+            fcgc = calc_fcgc(fccnogc, delta_ccno)
+
+            st.markdown("---")
+            st.markdown("**Risultati per periodo:**")
+
+            header = ["Periodo"] + [f"t={t+1}" for t in range(n)]
+            rows = [
+                ["MO Netto"]         + [f"{v:,.0f}" for v in mo_netto],
+                ["Ammortamenti"]     + [f"{v:,.0f}" for v in ammortamenti],
+                ["Tax Shield Amm."]  + [f"{v:,.0f}" for v in shield],
+                ["FCCNOGC"]          + [f"{v:,.0f}" for v in fccnogc],
+                ["Δ CCNO"]           + [f"{v:,.0f}" for v in delta_ccno],
+                ["FCGC"]             + [f"{v:,.0f}" for v in fcgc],
+            ]
+
+            import pandas as pd
+            df = pd.DataFrame(rows, columns=header)
+            st.dataframe(df, use_container_width=True)
+
+        except Exception as e:
+            st.error(str(e))
+
+
+
 #RATIO ANALYSIS
 elif page == "Ratio Analysis":
     st.subheader("Profitability Ratios")
