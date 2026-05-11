@@ -14,7 +14,7 @@ from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammorta
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
 
 st.title("Corporate Finance Calc")
-st.caption("v_alpha_3.1, #added metrics for Analisi Prospettica)
+st.caption("v_alpha_3.1, #added metrics for Analisi Prospettica")
 
 st.sidebar.markdown("""
 **License:** Apache 2.0  
