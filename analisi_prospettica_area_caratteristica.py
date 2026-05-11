@@ -16,7 +16,7 @@ def calc_ammortamenti(esborsi, anni_list, vita_progetto):
         quota = esborso / anni
         for i in range(anni):
             if t + i < vita_progetto:
-                ammortamenti[t + i] += quota
+                ammortamenti[t + i] = quota
                 
     return ammortamenti
 
