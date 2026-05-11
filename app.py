@@ -358,7 +358,7 @@ elif page == "Analisi Prospettica":
     st.subheader("Analisi Prospettica — Area Caratteristica")
 
     vita_progetto = st.number_input("Vita del progetto (periodi)", min_value=1, step=1, value=3, key="ap_vita")
-    tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.24, format="%.2f", key="ap_tc")
+    tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.35, format="%.2f", key="ap_tc")
     n = int(vita_progetto)
 
     st.markdown("**Ricavi e costi operativi per periodo:**")
