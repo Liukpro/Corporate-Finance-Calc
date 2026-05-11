@@ -69,7 +69,7 @@ page = st.sidebar.radio("Select one", [
 ])
 
 #CASH FLOW ANALYSIS
-if page == "Cash Flow Analysis":
+if page == "Cash Flow Analysis, Historical":
     st.subheader("Cash Flow Calculation")
 
     op = st.selectbox("Select the Cash Flow to calculate:", 
