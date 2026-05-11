@@ -24,7 +24,7 @@ def calc_shield_ammortamenti(ammortamenti, tc):
     tax_shield_ammortamenti_list = [amm * tc for amm in ammortamenti]
     return tax_shield_ammortamenti_list
 
-def calc_fccnogc(mo_netto, tax_shield_ammortamenti_list):
+def calc_fccnogc2(mo_netto, tax_shield_ammortamenti_list):
     fccnogc = []
     for t in range(len(mo_netto)):
         fccnogc.append(mo_netto[t] + tax_shield_ammortamenti_list[t])
@@ -41,7 +41,7 @@ def calc_var_ccno(ccno):
     
     return delta_ccno
 
-def calc_fcgc(fccnogc, delta_ccno):
+def calc_fcgc2(fccnogc, delta_ccno):
     fcgc = []
     
     for t in range(len(fccnogc)):
