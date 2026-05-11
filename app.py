@@ -397,21 +397,21 @@ elif page == "Analisi Prospettica":
           delta_ccno = calc_var_ccno(ccno)
           fcgc = calc_fcgc2(fccnogc, delta_ccno)
 
-            st.markdown("---")
-            st.markdown("**Risultati per periodo:**")
+          st.markdown("---")
+          st.markdown("**Risultati per periodo:**")
 
-            header = ["Metrica"] + [f"t={t+1}" for t in range(n)]
-            rows = [
-                ["MO Netto"]        + [f"{v:,.2f}" for v in mo_netto],
-                ["Ammortamenti"]    + [f"{v:,.2f}" for v in ammortamenti],
-                ["Tax Shield Amm."] + [f"{v:,.2f}" for v in shield],
-                ["FCCNOGC"]         + [f"{v:,.2f}" for v in fccnogc],
-                ["Δ CCNO"]          + [f"{v:,.2f}" for v in delta_ccno],
-                ["FCGC"]            + [f"{v:,.2f}" for v in fcgc],
-            ]
+          header = ["Metrica"] + [f"t={t+1}" for t in range(n)]
+          rows = [
+              ["MO Netto"]        + [f"{v:,.2f}" for v in mo_netto],
+              ["Ammortamenti"]    + [f"{v:,.2f}" for v in ammortamenti],
+              ["Tax Shield Amm."] + [f"{v:,.2f}" for v in shield],
+              ["FCCNOGC"]         + [f"{v:,.2f}" for v in fccnogc],
+              ["Δ CCNO"]          + [f"{v:,.2f}" for v in delta_ccno],
+              ["FCGC"]            + [f"{v:,.2f}" for v in fcgc],
+          ]
 
-            df = pd.DataFrame(rows, columns=header)
-            st.dataframe(df, use_container_width=True)
+          df = pd.DataFrame(rows, columns=header)
+          st.dataframe(df, use_container_width=True)
 
         except Exception as e:
             st.error(str(e))
