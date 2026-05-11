@@ -390,17 +390,16 @@ elif page == "Analisi Prospettica":
 
     if st.button("Calcola"):
         try:
-            mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
-            ammortamenti_matrice, ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
-            shield = calc_shield_ammortamenti(ammortamenti, tc)
-            fccnogc = calc_fccnogc2(mo_netto, shield)
-            delta_ccno = calc_var_ccno(ccno)
-            fcgc = calc_fcgc2(fccnogc, delta_ccno)
+          mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
+          ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
+          shield = calc_shield_ammortamenti(ammortamenti, tc)
+          fccnogc = calc_fccnogc2(mo_netto, shield)
+          delta_ccno = calc_var_ccno(ccno)
+          fcgc = calc_fcgc2(fccnogc, delta_ccno)
 
             st.markdown("---")
             st.markdown("**Risultati per periodo:**")
 
-            import pandas as pd
             header = ["Metrica"] + [f"t={t+1}" for t in range(n)]
             rows = [
                 ["MO Netto"]        + [f"{v:,.2f}" for v in mo_netto],
