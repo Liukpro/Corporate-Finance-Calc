@@ -447,6 +447,41 @@ elif page == "Ratio Analysis":
             st.error(str(e))
         except ZeroDivisionError:
             st.error("Mathematical Error: Division by zero.")
+
+# WACC
+elif page == "WACC":
+    st.subheader("WACC - Weighted Average Cost of Capital")
+    st.caption("Formula: WACC = r_e × (E/V) + r_d × (1 - t_c) × (D/V)")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Costo del Capitale Proprio**")
+        cost_of_equity = st.number_input("r_e (Costo dell'Equity)", value=0.12, min_value=0.0, max_value=1.0, step=0.01, format="%.4f")
+        equity = st.number_input("E (Equity - Patrimonio Netto)", value=500000.0, min_value=0.0, step=10000.0)
+    
+    with col2:
+        st.markdown("**Costo del Debito**")
+        cost_of_debt = st.number_input("r_d (Costo del Debito)", value=0.05, min_value=0.0, max_value=1.0, step=0.01, format="%.4f")
+        debt = st.number_input("D (Debito Finanziario)", value=300000.0, min_value=0.0, step=10000.0)
+        tax_rate = st.number_input("t_c (Aliquota Fiscale)", value=0.24, min_value=0.0, max_value=0.5, step=0.01, format="%.4f")
+    
+    if st.button("Calcola WACC"):
+        try:
+            wacc = calc_wacc(cost_of_equity, cost_of_debt, tax_rate, equity, debt)
+            st.session_state.wacc = wacc
+            
+            st.markdown("---")
+            st.metric("WACC", f"{wacc:.2%}")
+            
+            with st.expander("Vedi calcolo dettagliato"):
+                total = equity + debt
+                st.write(f"E/V = {equity:,.0f} / {total:,.0f} = {equity/total:.2%}")
+                st.write(f"D/V = {debt:,.0f} / {total:,.0f} = {debt/total:.2%}")
+                st.write(f"r_e × (E/V) = {cost_of_equity:.2%} × {equity/total:.2%} = {cost_of_equity * equity/total:.2%}")
+                st.write(f"r_d × (1-t_c) × (D/V) = {cost_of_debt:.2%} × {1-tax_rate:.2%} × {debt/total:.2%} = {cost_of_debt * (1-tax_rate) * debt/total:.2%}")
+        except ValueError as e:
+            st.error(str(e))
           
 # NPV with FCU/FCE
 elif page == "NPV with FCU/FCE":
@@ -845,40 +880,7 @@ elif page == "Mortgage":
                 st.dataframe(table, use_container_width=True)
 
 
-# WACC
-elif page == "WACC":
-    st.subheader("WACC - Weighted Average Cost of Capital")
-    st.caption("Formula: WACC = r_e × (E/V) + r_d × (1 - t_c) × (D/V)")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("**Costo del Capitale Proprio**")
-        cost_of_equity = st.number_input("r_e (Costo dell'Equity)", value=0.12, min_value=0.0, max_value=1.0, step=0.01, format="%.4f")
-        equity = st.number_input("E (Equity - Patrimonio Netto)", value=500000.0, min_value=0.0, step=10000.0)
-    
-    with col2:
-        st.markdown("**Costo del Debito**")
-        cost_of_debt = st.number_input("r_d (Costo del Debito)", value=0.05, min_value=0.0, max_value=1.0, step=0.01, format="%.4f")
-        debt = st.number_input("D (Debito Finanziario)", value=300000.0, min_value=0.0, step=10000.0)
-        tax_rate = st.number_input("t_c (Aliquota Fiscale)", value=0.24, min_value=0.0, max_value=0.5, step=0.01, format="%.4f")
-    
-    if st.button("Calcola WACC"):
-        try:
-            wacc = calc_wacc(cost_of_equity, cost_of_debt, tax_rate, equity, debt)
-            st.session_state.wacc = wacc
-            
-            st.markdown("---")
-            st.metric("WACC", f"{wacc:.2%}")
-            
-            with st.expander("Vedi calcolo dettagliato"):
-                total = equity + debt
-                st.write(f"E/V = {equity:,.0f} / {total:,.0f} = {equity/total:.2%}")
-                st.write(f"D/V = {debt:,.0f} / {total:,.0f} = {debt/total:.2%}")
-                st.write(f"r_e × (E/V) = {cost_of_equity:.2%} × {equity/total:.2%} = {cost_of_equity * equity/total:.2%}")
-                st.write(f"r_d × (1-t_c) × (D/V) = {cost_of_debt:.2%} × {1-tax_rate:.2%} × {debt/total:.2%} = {cost_of_debt * (1-tax_rate) * debt/total:.2%}")
-        except ValueError as e:
-            st.error(str(e))
+
 
 elif page == "Coming Soon...":
     st.write("Stay tuned for Risk Analysis and Portfolio")
