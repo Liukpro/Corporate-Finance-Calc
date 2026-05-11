@@ -10,27 +10,25 @@ def calc_mo_netto(ricavi_operativi, costi_operativi, tc):
     return mo_netto
 
 def calc_ammortamenti(esborsi, anni_list, vita_progetto):
-    risultati = []
+    matrice = []
     
     for i in range(len(esborsi)):
+        serie = [0.0] * vita_progetto
+        
         esborso = float(esborsi[i])
         anni = int(anni_list[i])
         
         quota = esborso / anni
         
-        serie = []
-        for t in range(vita_progetto):
-            if t < anni:
-                serie.append(float(quota))
-            else:
-                serie.append(0.0)
+        for t in range(anni):
+            if t < vita_progetto:
+                serie[t] = quota
         
-        risultati.append(serie)
+        matrice.append(serie)
     
-    return risultati
-
-def merge_ammortamenti(lista_ammortamenti):
-    return [sum(x) for x in zip(*lista_ammortamenti)]
+    totale = [sum(periodo) for periodo in zip(*matrice)]
+    
+    return matrice, totale
 
 def calc_shield_ammortamenti(ammortamenti, tc):
     tax_shield_ammortamenti_list = [amm * tc for amm in ammortamenti]
