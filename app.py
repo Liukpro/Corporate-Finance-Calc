@@ -58,7 +58,7 @@ if st.sidebar.button("Reset Session"):
 st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
     "Cash Flow Analysis, Historical",
-    "Analisi Prospettica"
+    "Analisi Prospettica",
     "Ratio Analysis",
     "NPV with FCU/FCE",
     "Bond Evaluation",
