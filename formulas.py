@@ -235,29 +235,54 @@ def calc_vaoc(stock_price_grow=None, stock_price_no_grow=None):
     else:
         raise ValueError("Insufficient Data for VAOC")
 
-def calc_capital_share(mortgage, years):
-    if mortgage is not None and years is not None and years != 0:
-        return mortgage / years
+def calc_capital_share(mortgage, n):
+    """
+    Quota capitale costante:
+    C = M / n
+    """
+    if mortgage is not None and n is not None and n != 0:
+        return mortgage / n
     raise ValueError("Insufficient Data for capital share")
 
 
-def calc_interest_t(debt, n, t, k):
-    if debt is not None and n is not None and t is not None and k is not None:
-        interest_t = (debt * (1 - (t - 1) / n)) * k
-        return interest_t
-    raise ValueError("Insufficient Data for interest calculation")
-
-
 def calc_residual_debt(mortgage, n, t):
+    """
+    Debito residuo al tempo t:
+    D_t = M * (1 - t/n)
+    """
     if mortgage is not None and n is not None and t is not None:
-        residual_debt = mortgage * (1 - t / n)
-        return residual_debt
+        return mortgage * (1 - t / n)
     raise ValueError("Insufficient Data for residual debt")
 
 
-def calc_mortgage_payment(capital_share, interests_share):
-    if capital_share is not None and interests_share is not None:
-        return capital_share + interests_share
+def calc_residual_debt_prev(mortgage, n, t):
+    """
+    Debito residuo al tempo t-1:
+    D_(t-1) = M * (1 - (t-1)/n)
+    """
+    if mortgage is not None and n is not None and t is not None:
+        return mortgage * (1 - (t - 1) / n)
+    raise ValueError("Insufficient Data for residual debt t-1")
+
+
+def calc_interest_t(mortgage, n, t, k):
+    """
+    Interessi al tempo t:
+    I_t = D_(t-1) * k
+    """
+    if mortgage is not None and n is not None and t is not None and k is not None:
+        residual_prev = calc_residual_debt_prev(mortgage, n, t)
+        return residual_prev * k
+    raise ValueError("Insufficient Data for interest calculation")
+
+
+def calc_mortgage_payment(capital_share, interest_share):
+    """
+    Rata:
+    R_t = quota capitale + interessi
+    """
+    if capital_share is not None and interest_share is not None:
+        return capital_share + interest_share
     raise ValueError("Insufficient Data for payment")
 
 
@@ -289,30 +314,32 @@ def calc_capital_share_fr(payment, interest):
     raise ValueError("Insufficient Data for capital share")
 
 
-def build_italian_table(debt, annual_rate, years):
-    """Restituisce lista di dizionari con tabella completa"""
-    months = years * 12
-    monthly_rate = annual_rate / 12
-    capital_share_monthly = debt / months
-    
+def build_italian_table(mortgage, annual_rate, years):
+    n = years * 12
+    k = annual_rate / 12
+
+    capital_share = calc_capital_share(mortgage, n)
+
     table = []
-    residual = debt
-    
-    for t in range(1, months + 1):
-        interest = (debt * (1 - (t - 1) / months)) * monthly_rate
-        capital = capital_share_monthly if t < months else residual
-        payment = capital + interest
-        residual = debt * (1 - t / months)
-        
+
+    for t in range(1, n + 1):
+        # Interessi calcolati correttamente con D_(t-1)
+        interest = calc_interest_t(mortgage, n, t, k)
+
+        payment = capital_share + interest
+
+        # Debito residuo dopo il pagamento (D_t)
+        residual = calc_residual_debt(mortgage, n, t)
+
         table.append({
-            "month": t,
+            "period": t,
             "year": (t - 1) // 12 + 1,
-            "capital": round(capital, 2),
-            "interest": round(interest, 2),
-            "payment": round(payment, 2),
-            "residual": round(max(residual, 0), 2)
+            "capital": capital_share,
+            "interest": interest,
+            "payment": payment,
+            "residual": residual
         })
-    
+
     return table
 
 
