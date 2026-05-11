@@ -12,7 +12,7 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
 
 st.title("Corporate Finance Calc")
-st.caption("v3.0")
+st.caption("v_alpha_3.0, still a work in progress")
 
 st.sidebar.markdown("""
 **License:** Apache 2.0  
