@@ -29,6 +29,9 @@ def calc_ammortamenti(esborsi, anni_list, vita_progetto):
     
     return risultati
 
+def merge_ammortamenti(lista_ammortamenti):
+    return [sum(x) for x in zip(*lista_ammortamenti)]
+
 def calc_shield_ammortamenti(ammortamenti, tc):
     tax_shield_ammortamenti_list = [amm * tc for amm in ammortamenti]
     return tax_shield_ammortamenti_list
