@@ -689,45 +689,55 @@ elif page == "Mortgage":
         key="mortgage_display_mode"
     )
     
-    if mortgage_type == "Italiano (Quota Capitale Costante)":
-        st.markdown("### Piano di Ammortamento Italiano")
+if mortgage_type == "Italiano (Quota Capitale Costante)":
+    st.markdown("### Piano di Ammortamento Italiano")
+    
+    # Chiave unica per capire se gli input cambiano
+    current_params = (mortgage_debt, annual_rate, years)
+    
+    # Reset automatico se cambiano i parametri
+    if "italian_params" not in st.session_state or st.session_state["italian_params"] != current_params:
+        st.session_state.pop("italian_table", None)
+        st.session_state["italian_params"] = current_params
+    
+    if st.button("Calcola Ammortamento Italiano", key="btn_italian"):
+        table = build_italian_table(mortgage_debt, annual_rate, years)
+        st.session_state['italian_table'] = table
+    
+    # Mostra la tabella se esiste
+    if 'italian_table' in st.session_state:
+        table = st.session_state['italian_table']
         
-        if st.button("Calcola Ammortamento Italiano", key="btn_italian"):
-            table = build_italian_table(mortgage_debt, annual_rate, years)
-            st.session_state['italian_table'] = table
+        total_interest = sum(row["interest"] for row in table)
+        first_payment = table[0]["payment"]
+        last_payment = table[-1]["payment"]
         
-        # Mostra la tabella se esiste in session_state
-        if 'italian_table' in st.session_state:
-            table = st.session_state['italian_table']
-            
-            total_interest = sum(row["interest"] for row in table)
-            first_payment = table[0]["payment"]
-            last_payment = table[-1]["payment"]
-            
-            col_a, col_b, col_c, col_d = st.columns(4)
-            col_a.metric("Quota Capitale Mensile", f"€{table[0]['capital']:,.2f}")
-            col_b.metric("Prima Rata", f"€{first_payment:,.2f}")
-            col_c.metric("Ultima Rata", f"€{last_payment:,.2f}")
-            col_d.metric("Totale Interessi", f"€{total_interest:,.2f}")
-            
-            st.info(f"**Totale pagato:** €{mortgage_debt + total_interest:,.2f}")
-            
-            if display_mode == "Resa annuale (sintesi)":
-                annual_summary = []
-                for year in range(1, years + 1):
-                    year_rows = [r for r in table if r["year"] == year]
-                    annual_summary.append({
-                        "Anno": year,
-                        "Capitale Pagato": sum(r["capital"] for r in year_rows),
-                        "Interessi Pagati": sum(r["interest"] for r in year_rows),
-                        "Totale Rata": sum(r["payment"] for r in year_rows),
-                        "Debito Residuo": year_rows[-1]["residual"] if year_rows else 0
-                    })
-                st.dataframe(annual_summary, use_container_width=True)
-            elif display_mode == "Mensile (primi 12 mesi)":
-                st.dataframe(table[:12], use_container_width=True)
-            else:
-                st.dataframe(table, use_container_width=True)
+        col_a, col_b, col_c, col_d = st.columns(4)
+        col_a.metric("Quota Capitale Mensile", f"€{table[0]['capital']:,.2f}")
+        col_b.metric("Prima Rata", f"€{first_payment:,.2f}")
+        col_c.metric("Ultima Rata", f"€{last_payment:,.2f}")
+        col_d.metric("Totale Interessi", f"€{total_interest:,.2f}")
+        
+        st.info(f"**Totale pagato:** €{mortgage_debt + total_interest:,.2f}")
+        
+        if display_mode == "Resa annuale (sintesi)":
+            annual_summary = []
+            for year in range(1, years + 1):
+                year_rows = [r for r in table if r["year"] == year]
+                annual_summary.append({
+                    "Anno": year,
+                    "Capitale Pagato": sum(r["capital"] for r in year_rows),
+                    "Interessi Pagati": sum(r["interest"] for r in year_rows),
+                    "Totale Rata": sum(r["payment"] for r in year_rows),
+                    "Debito Residuo": year_rows[-1]["residual"] if year_rows else 0
+                })
+            st.dataframe(annual_summary, use_container_width=True)
+        
+        elif display_mode == "Mensile (primi 12 mesi)":
+            st.dataframe(table[:12], use_container_width=True)
+        
+        else:
+            st.dataframe(table, use_container_width=True)
     
     else:
         st.markdown("### Piano di Ammortamento Francese")
