@@ -1,8 +1,13 @@
 import pandas as pd
 import streamlit as st
 import numpy as np
-from formulas import *
-from analisi_prospettica_area_caratteristica import *
+from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
+                      calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
+                      calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero, calc_ros, 
+                      calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, calc_vaoc, 
+                      build_italian_table, build_french_table, calc_wacc, calc_npv_fcu, calc_npv_fce)
+from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammortamenti, calc_shield_ammortamenti
+                                                     calc_fccnogc2, calc_var_ccno, calc_fcgc2)
 
 
 # Configurazione Pagina
@@ -348,6 +353,7 @@ if page == "Cash Flow Analysis":
             except ValueError as e:
                 st.error(str(e))
 
+#Analisi Prospettica
 elif page == "Analisi Prospettica":
     st.subheader("Analisi Prospettica — Area Caratteristica")
 
@@ -380,37 +386,36 @@ elif page == "Analisi Prospettica":
         with col1:
             esborsi.append(st.number_input(f"Esborso {i+1}", key=f"ap_esborso_{i}", value=0.0))
         with col2:
-            anni_list.append(st.number_input(f"Anni ammortamento esborso {i+1}", min_value=1, step=1, value=n, key=f"ap_anni_{i}"))
+            anni_list.append(int(st.number_input(f"Anni ammortamento esborso {i+1}", min_value=1, step=1, value=n, key=f"ap_anni_{i}")))
 
     if st.button("Calcola Analisi Prospettica"):
         try:
             mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
             ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
             shield = calc_shield_ammortamenti(ammortamenti, tc)
-            fccnogc = calc_fccnogc(mo_netto, shield)
+            fccnogc = calc_fccnogc2(mo_netto, shield)
             delta_ccno = calc_var_ccno(ccno)
-            fcgc = calc_fcgc(fccnogc, delta_ccno)
+            fcgc = calc_fcgc2(fccnogc, delta_ccno)
 
             st.markdown("---")
             st.markdown("**Risultati per periodo:**")
 
-            header = ["Periodo"] + [f"t={t+1}" for t in range(n)]
+            import pandas as pd
+            header = ["Metrica"] + [f"t={t+1}" for t in range(n)]
             rows = [
-                ["MO Netto"]         + [f"{v:,.0f}" for v in mo_netto],
-                ["Ammortamenti"]     + [f"{v:,.0f}" for v in ammortamenti],
-                ["Tax Shield Amm."]  + [f"{v:,.0f}" for v in shield],
-                ["FCCNOGC"]          + [f"{v:,.0f}" for v in fccnogc],
-                ["Δ CCNO"]           + [f"{v:,.0f}" for v in delta_ccno],
-                ["FCGC"]             + [f"{v:,.0f}" for v in fcgc],
+                ["MO Netto"]        + [f"{v:,.2f}" for v in mo_netto],
+                ["Ammortamenti"]    + [f"{v:,.2f}" for v in ammortamenti],
+                ["Tax Shield Amm."] + [f"{v:,.2f}" for v in shield],
+                ["FCCNOGC"]         + [f"{v:,.2f}" for v in fccnogc],
+                ["Δ CCNO"]          + [f"{v:,.2f}" for v in delta_ccno],
+                ["FCGC"]            + [f"{v:,.2f}" for v in fcgc],
             ]
 
-            import pandas as pd
             df = pd.DataFrame(rows, columns=header)
             st.dataframe(df, use_container_width=True)
 
         except Exception as e:
             st.error(str(e))
-
 
 
 #RATIO ANALYSIS
