@@ -416,7 +416,6 @@ elif page == "Analisi Prospettica":
         except Exception as e:
             st.error(str(e))
 
-
 #RATIO ANALYSIS
 elif page == "Ratio Analysis":
     st.subheader("Profitability Ratios")
@@ -767,7 +766,7 @@ elif page == "Stock Evaluation":
 elif page == "Mortgage":
     st.subheader("Mutuo - Ammortamento")
     st.caption("Confronto tra ammortamento italiano (quota capitale costante) e francese (rata costante)")
-    st.info("**Nota:** I calcoli sono basati su rate MENSILI.")
+    st.info("**Nota:** Per ora i calcoli per l'ammortamento italiano sono disponibili solo con resa annuale")
     
     mortgage_type = st.radio("Tipo di ammortamento", ["Italiano (Quota Capitale Costante)", "Francese (Rata Costante)"])
     
