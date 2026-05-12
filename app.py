@@ -58,7 +58,7 @@ if st.sidebar.button("Reset Session"):
 st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
     "Cash Flow Analysis, Ex-Post",
-    "Cash Flow Analysis, Ex-Ante,
+    "Cash Flow Analysis, Ex-Ante",
     "WACC",
     "NPV with FCU/FCE",
     "Bond Evaluation",
