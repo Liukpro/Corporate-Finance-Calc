@@ -57,8 +57,8 @@ if st.sidebar.button("Reset Session"):
   
 st.sidebar.title("Tools")
 page = st.sidebar.radio("Select one", [
-    "Cash Flow Analysis, Historical",
-    "Analisi Prospettica",
+    "Cash Flow Analysis, Ex-Post",
+    "Cash Flow Analysis, Ex-Ante,
     "WACC",
     "NPV with FCU/FCE",
     "Bond Evaluation",
@@ -69,7 +69,7 @@ page = st.sidebar.radio("Select one", [
 ])
 
 #CASH FLOW ANALYSIS
-if page == "Cash Flow Analysis, Historical":
+if page == "Cash Flow Analysis, Ex-Post":
     st.subheader("Cash Flow Calculation")
 
     op = st.selectbox("Select the Cash Flow to calculate:", 
@@ -354,7 +354,7 @@ if page == "Cash Flow Analysis, Historical":
                 st.error(str(e))
 
 #Analisi Prospettica
-elif page == "Analisi Prospettica":
+elif page == "Cash Flow Analysis, Ex-Ante":
     st.subheader("Analisi Prospettica — Area Caratteristica")
 
     vita_progetto = st.number_input("Vita del progetto (periodi)", min_value=1, step=1, value=3, key="ap_vita")
