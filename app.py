@@ -778,7 +778,7 @@ elif page == "Mortgage":
         monthly_rate = annual_rate / 12
         st.caption(f"Tasso mensile equivalente: {monthly_rate:.4%}")
     with col3:
-        years = st.number_input("Durata (anni)", value=20, min_value=1, max_value=50, step=1, key="years")
+        years = st.number_input("Numero di rate", value=20, min_value=1, max_value= 10000, step=1, key="years")
         months = years * 12
         st.caption(f"Durata in mesi: {months}")
     
