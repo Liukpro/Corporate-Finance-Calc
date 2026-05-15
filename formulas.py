@@ -196,7 +196,7 @@ def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk):
         raise ValueError("Insufficient Data")
 
 
-def calc_stock_price(stock_price=None, dividend=None, k=None, g=None,
+def calc_stock_price(stock_price=None, dividend=None, k=None, g=None, b= None
                      dividend_1=None, earnings_t0=None, payout_ratio=None,
                      retention_ratio=None, roe=None, model="gordon"):
     
