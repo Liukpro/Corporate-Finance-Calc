@@ -719,11 +719,6 @@ elif page == "Stock Evaluation":
                     model="no_growth"
                 )
 
-                vaoc = calc_vaoc(price, no_growth_price)
-
-                st.info(f"VAOC = {vaoc:.2f}")
-                st.caption(f"No-growth value = {no_growth_price:.2f}")
-
             except ValueError as e:
                 st.error(str(e))
 
