@@ -500,11 +500,11 @@ elif page == "NPV with FCU/FCE":
                 if use_saved_wacc:
                     wacc = st.session_state.wacc
                 else:
-                    wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.5) / 100
+                    wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.001) / 100
             else:
-                wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.5) / 100
+                wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.001) / 100
             
-            i0_fcu = st.number_input("Investimento Iniziale I₀ (€)", value=100000.0, min_value=0.0, step=10000.0)
+            i0_fcu = st.number_input("Investimento Iniziale I₀ (€)", value=100000.0, min_value=0.0, step=1.0)
             cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
         
         with col2:
@@ -514,7 +514,7 @@ elif page == "NPV with FCU/FCE":
         fcu_list = []
         npv_fcu_values = []
         for i in range(t_fcu):
-            fcu_list.append(st.number_input(f"FCU periodo {i+1}", key=f"fcu_{i}", value=10000.0, step=1000.0))
+            fcu_list.append(st.number_input(f"FCU periodo {i+1}", key=f"fcu_{i}", value=10000.0, step=1.0))
         
         if st.button("Calcola NPV (FCU)"):
             try:
