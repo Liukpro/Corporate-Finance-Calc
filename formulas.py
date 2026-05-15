@@ -196,38 +196,43 @@ def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk):
         raise ValueError("Insufficient Data")
 
 
-def calc_stock_price(stock_price=None, dividend=None, k=None, g=None, b= None,
-                     dividend_1=None, earnings_t0=None, payout_ratio=None,
-                     retention_ratio=None, roe=None, model="gordon"):
-    
+def calc_stock_price(stock_price=None, k=None, g=None, b=None,
+                     dividend_1=None, earnings_t0=None,
+                     retention_ratio=None, roe=None,
+                     model="gordon"):
+
     if stock_price is not None:
         return stock_price
-        
-    if retention_ratio is not None and roe is not None and g is None:
-        g = retention_ratio * roe
-        
+
+    # growth
+    if g is None:
+        if retention_ratio is not None and roe is not None:
+            g = retention_ratio * roe
+        elif b is not None and roe is not None:
+            g = b * roe
+
+    # dividend
+    if dividend_1 is None:
+        if earnings_t0 is not None and b is not None:
+            dividend_1 = earnings_t0 * (1 - b)
+        else:
+            raise ValueError("Insufficient data for dividend")
+
+    # no growth
     if model == "no_growth":
-        if dividend is None or k is None or k == 0:
-            raise ValueError("Insufficient Data for no growth model")
-        stock_price = dividend / k
-        return stock_price
-        
-    elif model == "gordon":
-        if dividend_1 is None:
-            if earnings_t0 is not None and payout_ratio is None and g is not None:
-                earnings_t1 = earnings_t0 * (1 + g)
-                payout_ratio = b * roe
-                dividend_1 = earnings_t1 * payout_ratio
-            else:
-                raise ValueError("Insufficient Data for Gordon model")
+        if k is None:
+            raise ValueError("k required")
+        return dividend_1 / k
 
-        if k is None or g is None or (k - g) == 0:
-            raise ValueError("Invalid k or g")
-        stock_price = dividend_1 / (k - g)
-        return stock_price
+    # gordon
+    if model == "gordon":
+        if k is None or g is None:
+            raise ValueError("k and g required")
+        if k <= g:
+            raise ValueError("k must be > g")
+        return dividend_1 / (k - g)
 
-    else:
-        raise ValueError("Unknown model")
+    raise ValueError("Unknown model")
     
 def calc_vaoc(stock_price_grow=None, stock_price_no_grow=None):
     if stock_price_grow is not None and stock_price_no_grow is not None:
