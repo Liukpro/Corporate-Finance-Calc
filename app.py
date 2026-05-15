@@ -648,118 +648,139 @@ elif page == "Bond Evaluation":
 #STOCKs
 elif page == "Stock Evaluation":
     st.subheader("Stock Valuation")
-    
-    model = st.selectbox("Valuation Model", ["Gordon Growth Model", "No Growth Model"])
-    
-    if model == "Gordon Growth Model":
-        st.markdown("### Gordon Growth Model (Dividend Discount Model)")
-        st.warning("Richiede k > g (required return > growth rate)")
-        
-        calc_method = st.radio("Input Method", 
-                               ["Direct (Dividend₁, k, g)", 
-                                "From Earnings (E₀, Payout, ROE, k)"])
-        
-        if calc_method == "Direct (Dividend₁, k, g)":
+
+    model = st.selectbox("Valuation Model", ["gordon", "no_growth"])
+
+    # =========================
+    # GORDON MODEL
+    # =========================
+    if model == "gordon":
+        st.markdown("### Gordon Growth Model")
+        st.warning("Constraint: k > g")
+
+        calc_method = st.radio(
+            "Input Method",
+            ["Direct (D₁, k, g)", "From Earnings (E₀, b, ROE, k)"]
+        )
+
+        # -------- DIRECT --------
+        if calc_method == "Direct (D₁, k, g)":
             col1, col2, col3 = st.columns(3)
+
             with col1:
-                dividend_1 = st.number_input("Expected Dividend next year (D₁)", value=2.0, min_value=0.0)
+                dividend_1 = st.number_input("Dividend D₁", value=2.0, min_value=0.0)
+
             with col2:
-                k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.01)
+                k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.0)
+
             with col3:
                 g = st.number_input("Growth Rate (g)", value=0.05, format="%.4f", min_value=0.0)
-            
+
             earnings_t0 = None
-            payout_ratio = None
+            b = None
             retention_ratio = None
             roe = None
-            
-        else:  # From Earnings
+
+        # -------- FROM EARNINGS --------
+        else:
             col1, col2 = st.columns(2)
+
             with col1:
-                earnings_t0 = st.number_input("Current Earnings (E₀)", value=5.0, min_value=0.0)
-                payout_ratio = st.number_input("Payout Ratio", value=0.40, format="%.4f", min_value=0.0, max_value=1.0)
+                earnings_t0 = st.number_input("Earnings (E₀)", value=5.0, min_value=0.0)
+                b = st.number_input("Payout Ratio (b)", value=0.40, format="%.4f", min_value=0.0, max_value=1.0)
+
             with col2:
-                k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.01)
-                roe = st.number_input("Return on Equity (ROE)", value=0.15, format="%.4f", min_value=0.0)
-            
-            retention_ratio = 1 - payout_ratio
-            g = None  # sarà calcolato dalla funzione
-            dividend_1 = None
-            
-            st.info(f"Retention Ratio = {retention_ratio:.4f}")
-        
+                k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.0)
+                roe = st.number_input("ROE", value=0.15, format="%.4f", min_value=0.0)
+
+            retention_ratio = None   # non necessario esplicito
+            g = None                 # calcolato dalla funzione
+            dividend_1 = None       # calcolato dalla funzione
+
+            st.info(f"Payout ratio (b) = {b:.4f}")
+
+        # =========================
+        # CALCULATION
+        # =========================
         if st.button("Calculate Stock Price"):
             try:
                 price = calc_stock_price(
                     stock_price=None,
                     k=k,
                     g=g,
+                    b=b,
                     dividend_1=dividend_1,
                     earnings_t0=earnings_t0,
-                    payout_ratio=payout_ratio,
                     retention_ratio=retention_ratio,
                     roe=roe,
                     model="gordon"
                 )
+
                 st.success(f"Stock Price = {price:.2f}")
-                
-                # VAOC usando calc_vaoc e calc_stock_price per no-growth
-                if earnings_t0 is not None and k is not None:
-                    no_growth_price = calc_stock_price(
-                        stock_price=None,
-                        dividend=earnings_t0,
-                        k=k,
-                        model="no_growth"
-                    )
-                    vaoc = calc_vaoc(price, no_growth_price)
-                    st.info(f"VAOC = {vaoc:.2f} (Growth premium)")
-                    st.caption(f"No-growth value: {no_growth_price:.2f} | Growth premium: {vaoc:.2f}")
-                    
+
+                # VAOC
+                no_growth_price = calc_stock_price(
+                    stock_price=None,
+                    k=k,
+                    dividend_1=earnings_t0 if earnings_t0 is not None else dividend_1,
+                    model="no_growth"
+                )
+
+                vaoc = calc_vaoc(price, no_growth_price)
+
+                st.info(f"VAOC = {vaoc:.2f}")
+                st.caption(f"No-growth value = {no_growth_price:.2f}")
+
             except ValueError as e:
                 st.error(str(e))
-    
-    else:  # No Growth Model
-        st.markdown("### No Growth Model (Constant Dividend)")
-        
+
+    # =========================
+    # NO GROWTH MODEL
+    # =========================
+    else:
+        st.markdown("### No Growth Model")
+
         col1, col2 = st.columns(2)
+
         with col1:
-            dividend = st.number_input("Constant Dividend", value=2.0, min_value=0.0)
+            dividend_1 = st.number_input("Dividend (D)", value=2.0, min_value=0.0)
+
         with col2:
-            k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.01)
-        
+            k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.0)
+
         if st.button("Calculate Stock Price"):
             try:
                 price = calc_stock_price(
                     stock_price=None,
-                    dividend=dividend,
                     k=k,
+                    dividend_1=dividend_1,
                     model="no_growth"
                 )
+
                 st.success(f"Stock Price = {price:.2f}")
+
             except ValueError as e:
                 st.error(str(e))
-    
-    # VAOC diretto
+
+    # =========================
+    # VAOC SECTION
+    # =========================
     st.markdown("---")
     st.subheader("Value of Growth Opportunities (VAOC)")
-    st.caption("Calculate the difference between growth and no-growth stock values")
-    
+
     col1, col2 = st.columns(2)
+
     with col1:
-        price_growth = st.number_input("Stock Price (with growth)", value=50.0, min_value=0.0, key="vaoc_growth")
+        price_growth = st.number_input("Growth Price", value=50.0, min_value=0.0, key="vaoc_g")
+
     with col2:
-        price_no_growth = st.number_input("Stock Price (no growth)", value=30.0, min_value=0.0, key="vaoc_no_growth")
-    
+        price_no_growth = st.number_input("No-Growth Price", value=30.0, min_value=0.0, key="vaoc_ng")
+
     if st.button("Calculate VAOC"):
         try:
             vaoc = calc_vaoc(price_growth, price_no_growth)
             st.success(f"VAOC = {vaoc:.2f}")
-            if vaoc > 0:
-                st.info("Positive VAOC = growth creates value")
-            elif vaoc < 0:
-                st.warning("Negative VAOC = growth destroys value")
-            else:
-                st.info("VAOC = 0 = growth adds no value")
+
         except ValueError as e:
             st.error(str(e))
           
