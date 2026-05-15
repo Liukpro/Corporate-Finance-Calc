@@ -651,9 +651,6 @@ elif page == "Stock Evaluation":
 
     model = st.selectbox("Valuation Model", ["gordon", "no_growth"])
 
-    # =========================
-    # GORDON MODEL
-    # =========================
     if model == "gordon":
         st.markdown("### Gordon Growth Model")
         st.warning("Constraint: k > g")
@@ -663,7 +660,6 @@ elif page == "Stock Evaluation":
             ["Direct (D₁, k, g)", "From Earnings (E₀, b, ROE, k)"]
         )
 
-        # -------- DIRECT --------
         if calc_method == "Direct (D₁, k, g)":
             col1, col2, col3 = st.columns(3)
 
@@ -681,27 +677,24 @@ elif page == "Stock Evaluation":
             retention_ratio = None
             roe = None
 
-        # -------- FROM EARNINGS --------
         else:
             col1, col2 = st.columns(2)
 
             with col1:
                 earnings_t0 = st.number_input("Earnings (E₀)", value=5.0, min_value=0.0)
-                b = st.number_input("Payout Ratio (b)", value=0.40, format="%.4f", min_value=0.0, max_value=1.0)
+                b = st.number_input("Retention Ratio (b)", value=0.40, format="%.4f", min_value=0.0, max_value=1.0)
 
             with col2:
                 k = st.number_input("Required Return (k)", value=0.10, format="%.4f", min_value=0.0)
                 roe = st.number_input("ROE", value=0.15, format="%.4f", min_value=0.0)
 
-            retention_ratio = None   # non necessario esplicito
-            g = None                 # calcolato dalla funzione
-            dividend_1 = None       # calcolato dalla funzione
+            retention_ratio = None   
+            g = None                
+            dividend_1 = None      
 
-            st.info(f"Payout ratio (b) = {b:.4f}")
+            st.info(f"Payout Ratio = {1 - b:.4f}")
 
-        # =========================
-        # CALCULATION
-        # =========================
+
         if st.button("Calculate Stock Price"):
             try:
                 price = calc_stock_price(
@@ -734,9 +727,7 @@ elif page == "Stock Evaluation":
             except ValueError as e:
                 st.error(str(e))
 
-    # =========================
-    # NO GROWTH MODEL
-    # =========================
+
     else:
         st.markdown("### No Growth Model")
 
@@ -762,9 +753,7 @@ elif page == "Stock Evaluation":
             except ValueError as e:
                 st.error(str(e))
 
-    # =========================
-    # VAOC SECTION
-    # =========================
+
     st.markdown("---")
     st.subheader("Value of Growth Opportunities (VAOC)")
 
