@@ -214,8 +214,9 @@ def calc_stock_price(stock_price=None, dividend=None, k=None, g=None, b= None
         
     elif model == "gordon":
         if dividend_1 is None:
-            if earnings_t0 is not None and payout_ratio is not None and g is not None:
+            if earnings_t0 is not None and payout_ratio is None and g is not None:
                 earnings_t1 = earnings_t0 * (1 + g)
+                payout_ratio = b * roe
                 dividend_1 = earnings_t1 * payout_ratio
             else:
                 raise ValueError("Insufficient Data for Gordon model")
