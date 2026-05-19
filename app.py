@@ -778,12 +778,13 @@ elif page == "Mortgage":
     col1, col2, col3 = st.columns(3)
     with col1:
         mortgage_debt = st.number_input("Debito iniziale (€)", value=100000.0, min_value=0.0, step=10000.0, key="mortgage_debt")
+ 
     with col2:
         annual_rate = st.number_input("Tasso di interesse annuo (%)", value=3.0, min_value=0.0, step=0.5, key="annual_rate") / 100
-        st.caption(f"Tasso mensile equivalente: {monthly_rate:.4%}")
+        st.caption(f"Tasso annuo: {annual_rate:.2%}")
     with col3:
         years = st.number_input("Anni", value=20, min_value=1, max_value= 10000, step=1, key="years")
-        st.caption(f"Durata in mesi: {months}")
+        st.caption(f"Durata: {years} anni ({years * 12} mesi)")
     
     st.markdown("---")
     
