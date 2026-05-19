@@ -783,7 +783,7 @@ elif page == "Mortgage":
         monthly_rate = annual_rate / 12
         st.caption(f"Tasso mensile equivalente: {monthly_rate:.4%}")
     with col3:
-        years = st.number_input("Numero di rate", value=20, min_value=1, max_value= 10000, step=1, key="years")
+        years = st.number_input("Anni", value=20, min_value=1, max_value= 10000, step=1, key="years")
         months = years * 12
         st.caption(f"Durata in mesi: {months}")
     
@@ -792,9 +792,10 @@ elif page == "Mortgage":
     # Display mode fuori dal bottone (con key per mantenere lo stato)
     display_mode = st.radio(
         "Visualizzazione", 
-        ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"],
+        ["Resa annuale (sintesi)", "Mensile (primi 12 mesi)", "Completa (tutti i mesi)"], #aggiungere bimestrale, trimestrale, quzadrimestrale e semestrale
         key="mortgage_display_mode"
     )
+  #modificare in base ai display mode disponibili
     if mortgage_type == "Italiano (Quota Capitale Costante)":
         st.markdown("### Piano di Ammortamento Italiano (Annuale)")
 
@@ -806,6 +807,7 @@ elif page == "Mortgage":
 
         if st.button("Calcola Ammortamento Italiano", key="btn_italian"):
             n = years
+          #aggiungere if not annual select st.button periodizzazione ammortamento
             k = annual_rate
 
             capital_annual = mortgage_debt / n
