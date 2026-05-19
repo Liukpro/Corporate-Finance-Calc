@@ -798,7 +798,7 @@ elif page == "Mortgage":
     if mortgage_type == "Italiano (Quota Capitale Costante)":
         st.markdown("### Piano di ammortamento Italiano")
         if st.button("Calcola Ammortamento Italiano", key = "btn_italian"):
-            table = build_italian_table(mortgage_debt, monthly_rate, months)
+            table = build_italian_table(mortgage_debt, annual_rate, years)
             st.session_state['italian_table'] = table
         
         if 'italian_table' in st.session_state:
