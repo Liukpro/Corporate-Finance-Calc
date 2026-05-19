@@ -799,18 +799,18 @@ elif page == "Mortgage":
     if mortgage_type == "Italiano (Quota Capitale Costante)":
         st.markdown("### Piano di ammortamento Italiano")
         if st.button("Calcola Ammortamento Italiano", key = "btn_italian"):
-            table = build_italian_table(mortgage, annual_rate, years)
+            table = build_italian_table(mortgage_debt, monthly_rate, months)
             st.session_state['italian_table'] = table
         
         if 'italian_table' in st.session_state:
             table = st.session_state['italian_table']
             total_interest = sum(row["interest"] for row in table)
-            mortgage = table[0]["payment"] if table else 0
+            first_payment = table[0]["payment"] if table else 0
 
             col_a, col_b, col_c = st.columns(3)
-            col_a.metric("Rata Mensile", f"€{mortgage:,.2f}")
+            col_a.metric("Prima Rata", f"€{first_payment:,.2f}")
             col_b.metric("Totale interessi", f"€{total_interest:,.2f}")
-            col_c.metric("Totale_capitale", f"€{mortgage_payment - total_interest:,.2f}")
+            col_c.metric("Totale_capitale", f"€{mortgage_debt:,.2f}")
             
             if display_mode == "Resa annuale (sintesi)":
                 annual_summary = []
@@ -826,6 +826,7 @@ elif page == "Mortgage":
                 st.dataframe(annual_summary, use_container_width=True)
             elif display_mode == "Mensile (primi 12 mesi)":
                 st.dataframe(table[:12], use_container_width=True)
+
             else:
                 st.dataframe(table, use_container_width=True)
 
