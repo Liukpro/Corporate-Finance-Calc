@@ -321,7 +321,7 @@ def calc_capital_share_fr(payment, interest):
 
 
 def build_italian_table(mortgage, annual_rate, years):
-    n = years * 12
+    n = years
     k = annual_rate / 12
 
     capital_share = calc_capital_share(mortgage, n)
