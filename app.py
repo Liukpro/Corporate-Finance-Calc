@@ -832,7 +832,7 @@ elif page == "Mortgage":
     elif st.markdown("### Piano di Ammortamento Francese"):
         
         if st.button("Calcola Ammortamento Francese", key="btn_french"):
-            table = build_french_table(mortgage_debt, annual_rate, years)
+            table = build_italian_table(mortgage_debt, annual_rate, years)
             st.session_state['french_table'] = table
         
         # Mostra la tabella se esiste in session_state
