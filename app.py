@@ -805,10 +805,10 @@ elif page == "Mortgage":
         if 'italian_table' in st.session_state:
             table = st.session_state['italian_table']
             total_interest = sum(row["interest"] for row in table)
-            mortgage_payment = table[0]["payment"] if table else 0
+            mortgage = table[0]["payment"] if table else 0
 
             col_a, col_b, col_c = st.columns(3)
-            col_a.metric("Rata Mensile", f"€{mortgage_payment:,.2f}")
+            col_a.metric("Rata Mensile", f"€{mortgage:,.2f}")
             col_b.metric("Totale interessi", f"€{total_interest:,.2f}")
             col_c.metric("Totale_capitale", f"€{mortgage_payment - total_interest:,.2f}")
             
