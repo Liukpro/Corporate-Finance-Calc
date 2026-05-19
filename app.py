@@ -797,60 +797,39 @@ elif page == "Mortgage":
     )
   #modificare in base ai display mode disponibili
     if mortgage_type == "Italiano (Quota Capitale Costante)":
-        st.markdown("### Piano di Ammortamento Italiano (Annuale)")
+        st.markdown("### Piano di ammortamento Italiano")
+        if st.button("Calcola Ammortamento Italiano", key = "btn_italian"):
+            table = build_italian_table(mortgage, annual_rate, years)
+            st.session_state['italian_table'] = table
+        
+        if 'italian_table' in st.session_state:
+            table = st.session_state['italian_table']
+            total_interest = sum(row["interest"] for row in table)
+            mortgage_payment = table[0]["payment"] if table else 0
 
-        current_params = (mortgage_debt, annual_rate, years)
+            col_a, col_b, col_c = st.columns(3)
+            col_a.metric("Rata Mensile", f"€{mortgage_payment:,.2f}")
+            col_b.metric("Totale interessi", f"€{total_interest:,.2f}")
+            col_c.metric("Totale_capitale", f"€{mortgage_payment - total_interest:,.2f}")
+            
+            if display_mode == "Resa annuale (sintesi)":
+                annual_summary = []
+                for year in range(1, years + 1):
+                    year_rows = [r for r in table if r["year"] == year]
+                    annual_summary.append({
+                        "Anno": year,
+                        "Capitale Pagato": sum(r["capital"] for r in year_rows),
+                        "Interessi Pagati": sum(r["interest"] for r in year_rows),
+                        "Totale Rata": sum(r["payment"] for r in year_rows),
+                        "Debito Residuo": year_rows[-1]["residual"] if year_rows else 0
+                    })
+                st.dataframe(annual_summary, use_container_width=True)
+            elif display_mode == "Mensile (primi 12 mesi)":
+                st.dataframe(table[:12], use_container_width=True)
+            else:
+                st.dataframe(table, use_container_width=True)
 
-        if "italian_params" not in st.session_state or st.session_state["italian_params"] != current_params:
-            st.session_state.pop("italian_table", None)
-            st.session_state["italian_params"] = current_params
-
-        if st.button("Calcola Ammortamento Italiano", key="btn_italian"):
-            n = years
-          #aggiungere if not annual select st.button periodizzazione ammortamento
-            k = annual_rate
-
-            capital_annual = mortgage_debt / n
-
-            annual_table = []
-
-            for y in range(1, n + 1):
-
-                residual_prev = mortgage_debt - (y - 1) * capital_annual
-
-                interest_year = residual_prev * k
-
-                payment_year = capital_annual + interest_year
-
-                residual = mortgage_debt - y * capital_annual
-
-                annual_table.append({
-                    "Anno": y,
-                    "Capitale Pagato": capital_annual,
-                    "Interessi Pagati": interest_year,
-                    "Rata Annua Totale": payment_year,
-                    "Debito Residuo": residual
-                })
-
-            st.session_state["italian_table"] = annual_table
-
-        if "italian_table" in st.session_state:
-            table = st.session_state["italian_table"]
-
-            total_interest = sum(r["Interessi Pagati"] for r in table)
-
-            col_a, col_b, col_c, col_d = st.columns(4)
-            col_a.metric("Quota Capitale Annuo", f"€{table[0]['Capitale Pagato']:,.2f}")
-            col_b.metric("Interessi Anno 1", f"€{table[0]['Interessi Pagati']:,.2f}")
-            col_c.metric("Interessi Anno Ultimo", f"€{table[-1]['Interessi Pagati']:,.2f}")
-            col_d.metric("Totale Interessi", f"€{total_interest:,.2f}")
-
-            st.info(f"**Totale pagato:** €{mortgage_debt + total_interest:,.2f}")
-
-            st.dataframe(table, use_container_width=True)
-    
-    else:
-        st.markdown("### Piano di Ammortamento Francese")
+    elif st.markdown("### Piano di Ammortamento Francese"):
         
         if st.button("Calcola Ammortamento Francese", key="btn_french"):
             table = build_french_table(mortgage_debt, annual_rate, years)
