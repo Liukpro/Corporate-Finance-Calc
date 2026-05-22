@@ -41,6 +41,7 @@ Please read License files
 ## System Status (Work in Progress)
 
 This project is not a finished application, results may be subject to errors. Do not rely only on the data shown.
+This project is entirely based on "Finanza Aziendale" a university-taught course at the Università degli Studi di Bergamo, by professor Cincinelli Peter in 2026, with given permission.
 
 ---
 
