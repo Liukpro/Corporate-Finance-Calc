@@ -14,7 +14,7 @@ All formulas are implemented as pure functions in `formulas.py`, with:
 - **Explicit error handling** - division by zero and insufficient data raise exceptions
 - **Session state** - the app stores previous calculation results  
 - **Demo on Streamlit:** https://corporate-finance-calc.streamlit.app/
-**Warning**: to access the demo press "Yes, get this app back up!" after entering the given url. 
+## **Warning**: to access the demo press "Yes, get this app back up!" after entering the given url. 
 
 ---
 
