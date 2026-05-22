@@ -8,13 +8,13 @@ A web-based tool (Streamlit) that calculates standard financial metrics from man
 
 ## Calculation logic
 
-All formulas are implemented as pure functions in `formulas.py`, with:
+All formulas are implemented as pure functions in 'formulas.py' and 'analisi_prospettica_area_caratteristica', with:
 
-- **Multiple calculation paths** - each metric can be computed in different ways (e.g., FCCNOgc from Revenue/Costs or from MOL)
+- **Multiple calculation paths** - each metric can be computed in different selectable ways (e.g., FCCNOgc from Revenue/Costs or from MOL)
 - **Explicit error handling** - division by zero and insufficient data raise exceptions
 - **Session state** - the app stores previous calculation results  
 - **Demo on Streamlit:** https://corporate-finance-calc.streamlit.app/
-## **Warning**: to access the demo press "Yes, get this app back up!" after entering the given url. 
+### **Warning**: to access the demo press "Yes, get this app back up!" after entering the given url. 
 
 ---
 
