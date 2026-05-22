@@ -4,6 +4,20 @@
 
 A web-based tool (Streamlit) that calculates standard financial metrics from manual inputs. No complex automation, no Excel parsing - just transparent formulas and immediate results.
 
+---
+
+## Calculation logic
+
+All formulas are implemented as pure functions in `formulas.py`, with:
+
+- **Multiple calculation paths** - each metric can be computed in different ways (e.g., FCCNOgc from Revenue/Costs or from MOL)
+- **Explicit error handling** - division by zero and insufficient data raise exceptions
+- **Session state** - the app stores previous calculation results  
+- **Demo on Streamlit:** https://corporate-finance-calc.streamlit.app/
+**Warning**: to access the demo press "Yes, get this app back up!" after entering the given url. 
+
+---
+
 ### Current features
 
 | Area | What it calculates |
@@ -16,17 +30,6 @@ A web-based tool (Streamlit) that calculates standard financial metrics from man
 | Stocks | Gordon growth model, No-growth model, VAOC |
 
 Note: This is a calculator, not an automated analysis engine. All data must be entered manually. There is no cross-validation or automatic consistency checking.
-
----
-
-## Calculation logic
-
-All formulas are implemented as pure functions in `formulas.py`, with:
-
-- **Multiple calculation paths** - each metric can be computed in different ways (e.g., FCCNOgc from Revenue/Costs or from MOL)
-- **Explicit error handling** - division by zero and insufficient data raise exceptions
-- **Session state** - the app stores previous calculation results  
-- **Demo on Streamlit:** https://corporate-finance-calc.streamlit.app/
 
 ---
 
