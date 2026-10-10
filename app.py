@@ -9,8 +9,8 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
 from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammortamenti, calc_shield_ammortamenti,
                                                      calc_fccnogc2, calc_var_ccno, calc_fcgc2,
                                                      calc_netto_vendita, calc_esborsi, calc_vc,
-                                                     calc_costo_opportunita, calc_cessione, calc_fcid2)
-
+                                                     calc_costo_opportunita, calc_cessione, calc_fcid2,
+                                                     calc_fcu2)
 
 # Configurazione Pagina
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
@@ -32,7 +32,7 @@ keys_to_init = [
     'ric_op_mon', 'cost_op_mon', 'ammort', 'mol', 'of', 'imp', 'ut_net',
     'ccno', 'rimb_cap', 'div',
     # Analisi prospettica keys (NUOVE - Ex ante)
-    'fcid_ea',
+    'fcid_ea', 'fcgc_ea', 'fcu_ea',
     # Bond keys
     'bond_zero_va', 'bond_zero_ytm', 'bond_coupon_va',
     # Stock keys
@@ -358,7 +358,7 @@ if page == "Cash Flow Analysis, Ex-Post":
                 st.error(str(e))
 
 elif page == "Cash Flow Analysis, Ex-Ante":
-    op = st.selectbox("Cosa vuoi calcolare?", ["FCGC", "FCID"], key="ap_op")
+    op = st.selectbox("Cosa vuoi calcolare?", ["FCGC", "FCID", "FCU"], key="ap_op")
 
     if op == "FCGC":
         st.subheader("Analisi Prospettica — Area Caratteristica")
@@ -402,6 +402,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
               fccnogc = calc_fccnogc2(mo_netto, shield)
               delta_ccno = calc_var_ccno(ccno)
               fcgc = calc_fcgc2(fccnogc, delta_ccno)
+              st.session_state['fcgc_ea'] = fcgc
 
               st.markdown("---")
               st.markdown("**Risultati per periodo:**")
@@ -496,7 +497,40 @@ elif page == "Cash Flow Analysis, Ex-Ante":
 
             except Exception as e:
                 st.error(str(e))
+              
+    elif op == "FCU":
+        st.subheader("Analisi Prospettica — Flusso di Cassa Unlevered (FCU)")
+        st.caption("FCU = FCGC + FCID. Calcola prima FCGC e FCID nelle rispettive sezioni.")
 
+        if st.button("Calcola", key="fcu_calcola"):
+            try:
+                fcgc_ea = st.session_state['fcgc_ea']
+                fcid_ea = st.session_state['fcid_ea']
+
+                if fcgc_ea is None or fcid_ea is None:
+                    st.warning("Calcola prima FCGC e FCID.")
+                elif len(fcid_ea) != len(fcgc_ea) + 1:
+                    st.error("FCGC e FCID hanno una vita del progetto diversa.")
+                else:
+                    fcu_ea = calc_fcu2(fcgc_ea, fcid_ea)
+                    st.session_state['fcu_ea'] = fcu_ea
+
+                    st.markdown("---")
+                    st.markdown("**Risultati per periodo:**")
+
+                    n = len(fcid_ea) - 1
+                    header = ["Metrica"] + [f"t={t}" for t in range(n + 1)]
+                    rows = [
+                        ["FCGC"] + [f"{0:,.2f}"] + [f"{v:,.2f}" for v in fcgc_ea],
+                        ["FCID"] + [f"{v:,.2f}" for v in fcid_ea],
+                        ["FCU"]  + [f"{v:,.2f}" for v in fcu_ea],
+                    ]
+
+                    df = pd.DataFrame(rows, columns=header)
+                    st.dataframe(df, use_container_width=True)
+
+            except Exception as e:
+                st.error(str(e))
 #RATIO ANALYSIS
 elif page == "Ratio Analysis":
     st.subheader("Profitability Ratios")
