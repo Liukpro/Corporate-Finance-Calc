@@ -62,12 +62,12 @@ def calc_esborsi(esborsi, anni_esborsi, vita_progetto):
     flussi = [0.0] * (vita_progetto + 1)
 
     for i in range(len(esborsi)):
-        flussi[anni_esborsi[i]] - = esborsi[i]
+        flussi[anni_esborsi[i]] -= esborsi[i]
 
     return flussi
 
 #valore contabile futuro disinvestimento
-def calc_vc(eesborso, anno_esborso, vita, t):
+def calc_vc(esborso, anno_esborso, vita, t):
     anni_passati = t - anno_esborso
 
     if anni_passati < 0:
@@ -80,7 +80,7 @@ def calc_vc(eesborso, anno_esborso, vita, t):
 
 #mancato disinvestimento
 def calc_costo_opportunita(prezzo, vc, tc, vita_progetto):
-    flussi = [0.0] * (vita_progetto + 1)
+    flussi = [0] * (vita_progetto + 1)
     flussi[0.0] = - calc_netto_vendita(prezzo, vc, tc)
     return flussi
 
@@ -88,7 +88,7 @@ def calc_costo_opportunita(prezzo, vc, tc, vita_progetto):
 def calc_cessione(prezzo, anno_cessione, esborsi, anni_esborsi, vite, tc, vita_progetto):
     vc_totale = 0.0
 
-    for i in range(len(esborsi):
+    for i in range(len(esborsi)):
         vc_totale += calc_vc(esborsi[i], anni_esborsi[i], vite[i], anno_cessione)
 
     flussi = [0.0] * (vita_progetto +1)
