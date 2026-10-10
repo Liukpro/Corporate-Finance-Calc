@@ -52,3 +52,54 @@ def calc_fcgc2(fccnogc, delta_ccno):
         fcgc.append(fccnogc[t] - delta_ccno[t])
         
     return fcgc
+
+#FCID
+def calc_netto_vendita(prezzo, vc, tc):
+    return prezzo - tc * (prezzo - vc)
+
+#sia per esborsi che per i costi incrementali
+def calc_esborsi(esborsi, anni_esborsi, vita_progetto):
+    flussi = [0.0] * (vita_progetto + 1)
+
+    for i in range(len(esborsi)):
+        flussi[anni_esborsi[i]] - = esborsi[i]
+
+    return flussi
+
+#valore contabile futuro disinvestimento
+def calc_vc(eesborso, anno_esborso, vita, t):
+    anni_passati = t - anno_esborso
+
+    if anni_passati < 0:
+        anni_passati = 0
+    if anni_passati > vita:
+        anni_passati = vita
+
+    quota = esborso / vita
+    return esborso - quota * anni_passati
+
+#mancato disinvestimento
+def calc_costo_opportunita(prezzo, vc, tc, vita_progetto):
+    flussi = [0.0] * (vita_progetto + 1)
+    flussi[0.0] = - calc_netto_vendita(prezzo, vc, tc)
+    return flussi
+
+#valore contabile del nuovo impianto
+def calc_cessione(prezzo, anno_cessione, esborsi, anni_esborsi, vite, tc, vita_progetto):
+    vc_totale = 0.0
+
+    for i in range(len(esborsi):
+        vc_totale += calc_vc(esborsi[i], anni_esborsi[i], vite[i], anno_cessione)
+
+    flussi = [0.0] * (vita_progetto +1)
+    flussi[anno_cessione] = calc_netto_vendita(prezzo, vc_totale, tc)
+    return flussi
+
+#FCID totale
+def calc_fcid2(esb, costi, opp, ces):
+    fcid = []
+
+    for t in range(len(esb)):
+        fcid.append(esb[t] + costi[t] + opp[t] + ces[t])
+
+    return fcid
