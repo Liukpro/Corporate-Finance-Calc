@@ -7,7 +7,9 @@ from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, calc_vaoc, 
                       build_italian_table, build_french_table, calc_wacc, calc_npv_fcu, calc_npv_fce)
 from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammortamenti, calc_shield_ammortamenti,
-                                                     calc_fccnogc2, calc_var_ccno, calc_fcgc2)
+                                                     calc_fccnogc2, calc_var_ccno, calc_fcgc2,
+                                                     calc_netto_vendita, calc_esborsi, calc_vc,
+                                                     calc_costo_opportunita, calc_cessione, calc_fcid2)
 
 
 # Configurazione Pagina
@@ -29,6 +31,8 @@ keys_to_init = [
     'ros', 'roi', 'roe', 'pat_net', 'deb_f', 'liq', 'pos_fin_net', 'cin',
     'ric_op_mon', 'cost_op_mon', 'ammort', 'mol', 'of', 'imp', 'ut_net',
     'ccno', 'rimb_cap', 'div',
+    # Analisi prospettica keys (NUOVE - Ex ante)
+    'fcid_ea',
     # Bond keys
     'bond_zero_va', 'bond_zero_ytm', 'bond_coupon_va',
     # Stock keys
@@ -353,68 +357,145 @@ if page == "Cash Flow Analysis, Ex-Post":
             except ValueError as e:
                 st.error(str(e))
 
-#Analisi Prospettica
 elif page == "Cash Flow Analysis, Ex-Ante":
-    st.subheader("Analisi Prospettica — Area Caratteristica")
+    op = st.selectbox("Cosa vuoi calcolare?", ["FCGC", "FCID"], key="ap_op")
 
-    vita_progetto = st.number_input("Vita del progetto (periodi)", min_value=1, step=1, value=3, key="ap_vita")
-    tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.35, format="%.2f", key="ap_tc")
-    n = int(vita_progetto)
+    if op == "FCGC":
+        st.subheader("Analisi Prospettica — Area Caratteristica")
 
-    st.markdown("**Ricavi e costi operativi per periodo:**")
-    ricavi_operativi = []
-    costi_operativi = []
-    ccno = []
+        vita_progetto = st.number_input("Vita del progetto (periodi)", min_value=1, step=1, value=3, key="ap_vita")
+        tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.35, format="%.2f", key="ap_tc")
+        n = int(vita_progetto)
 
-    for t in range(n):
-        st.markdown(f"*Periodo {t+1}*")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            ricavi_operativi.append(st.number_input(f"Ricavi operativi", key=f"ap_ric_{t}", value=0.0))
-        with col2:
-            costi_operativi.append(st.number_input(f"Costi operativi", key=f"ap_cost_{t}", value=0.0))
-        with col3:
-            ccno.append(st.number_input(f"CCNO", key=f"ap_ccno_{t}", value=0.0))
+        st.markdown("**Ricavi e costi operativi per periodo:**")
+        ricavi_operativi = []
+        costi_operativi = []
+        ccno = []
 
-    st.markdown("**Esborsi per investimenti (ammortizzabili):**")
-    n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="ap_n_esborsi")
-    esborsi = []
-    anni_list = []
+        for t in range(n):
+            st.markdown(f"*Periodo {t+1}*")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                ricavi_operativi.append(st.number_input(f"Ricavi operativi", key=f"ap_ric_{t}", value=0.0))
+            with col2:
+                costi_operativi.append(st.number_input(f"Costi operativi", key=f"ap_cost_{t}", value=0.0))
+            with col3:
+                ccno.append(st.number_input(f"CCNO", key=f"ap_ccno_{t}", value=0.0))
 
-    for i in range(int(n_esborsi)):
+        st.markdown("**Esborsi per investimenti (ammortizzabili):**")
+        n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="ap_n_esborsi")
+        esborsi = []
+        anni_list = []
+
+        for i in range(int(n_esborsi)):
+            col1, col2 = st.columns(2)
+            with col1:
+                esborsi.append(st.number_input(f"Esborso {i+1}", key=f"ap_esborso_{i}", value=0.0))
+            with col2:
+                anni_list.append(int(st.number_input(f"Anni ammortamento esborso {i+1}", min_value=1, step=1, value=n, key=f"ap_anni_{i}")))
+
+        if st.button("Calcola"):
+            try:
+              mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
+              ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
+              shield = calc_shield_ammortamenti(ammortamenti, tc)
+              fccnogc = calc_fccnogc2(mo_netto, shield)
+              delta_ccno = calc_var_ccno(ccno)
+              fcgc = calc_fcgc2(fccnogc, delta_ccno)
+
+              st.markdown("---")
+              st.markdown("**Risultati per periodo:**")
+
+              header = ["Metrica"] + [f"t={t+1}" for t in range(n)]
+              rows = [
+                  ["MO Netto"]        + [f"{v:,.2f}" for v in mo_netto],
+                  ["Ammortamenti"]    + [f"{v:,.2f}" for v in ammortamenti],
+                  ["Tax Shield Amm."] + [f"{v:,.2f}" for v in shield],
+                  ["FCCNOGC"]         + [f"{v:,.2f}" for v in fccnogc],
+                  ["Δ CCNO"]          + [f"{v:,.2f}" for v in delta_ccno],
+                  ["FCGC"]            + [f"{v:,.2f}" for v in fcgc],
+              ]
+
+              df = pd.DataFrame(rows, columns=header)
+              st.dataframe(df, use_container_width=True)
+
+            except Exception as e:
+                st.error(str(e))
+
+    elif op == "FCID":
+        st.subheader("Analisi Prospettica — Area Investimenti/Disinvestimenti")
+
+        vita_progetto = st.number_input("Vita del progetto (periodi)", min_value=1, step=1, value=4, key="id_vita")
+        tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.40, format="%.2f", key="id_tc")
+        n = int(vita_progetto)
+
+        st.markdown("**Esborsi per il nuovo impianto (ammortizzabili):**")
+        n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="id_n_esborsi")
+        esborsi = []
+        anni_esborsi = []
+        vite = []
+
+        for i in range(int(n_esborsi)):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                esborsi.append(st.number_input(f"Esborso {i+1}", key=f"id_esb_{i}", value=0.0))
+            with col2:
+                anni_esborsi.append(int(st.number_input(f"Anno di pagamento {i+1}", min_value=0, max_value=n, step=1, value=0, key=f"id_anno_esb_{i}")))
+            with col3:
+                vite.append(int(st.number_input(f"Anni ammortamento {i+1}", min_value=1, step=1, value=n, key=f"id_vita_esb_{i}")))
+
+        st.markdown("**Costi incrementali (es. spese promozionali):**")
+        n_costi = st.number_input("Numero di costi incrementali", min_value=0, step=1, value=0, key="id_n_costi")
+        costi_inc = []
+        anni_costi = []
+
+        for i in range(int(n_costi)):
+            col1, col2 = st.columns(2)
+            with col1:
+                costi_inc.append(st.number_input(f"Costo {i+1}", key=f"id_costo_{i}", value=0.0))
+            with col2:
+                anni_costi.append(int(st.number_input(f"Anno del costo {i+1}", min_value=0, max_value=n, step=1, value=0, key=f"id_anno_costo_{i}")))
+
+        st.markdown("**Costo opportunità (vecchio impianto riutilizzato):**")
         col1, col2 = st.columns(2)
         with col1:
-            esborsi.append(st.number_input(f"Esborso {i+1}", key=f"ap_esborso_{i}", value=0.0))
+            prezzo_opp = st.number_input("Prezzo di vendita alternativo", key="id_prezzo_opp", value=0.0)
         with col2:
-            anni_list.append(int(st.number_input(f"Anni ammortamento esborso {i+1}", min_value=1, step=1, value=n, key=f"ap_anni_{i}")))
+            vc_opp = st.number_input("Valore contabile vecchio impianto", key="id_vc_opp", value=0.0)
 
-    if st.button("Calcola"):
-        try:
-          mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
-          ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
-          shield = calc_shield_ammortamenti(ammortamenti, tc)
-          fccnogc = calc_fccnogc2(mo_netto, shield)
-          delta_ccno = calc_var_ccno(ccno)
-          fcgc = calc_fcgc2(fccnogc, delta_ccno)
+        st.markdown("**Cessione finale del nuovo impianto:**")
+        col1, col2 = st.columns(2)
+        with col1:
+            prezzo_ces = st.number_input("Prezzo di cessione", key="id_prezzo_ces", value=0.0)
+        with col2:
+            anno_ces = int(st.number_input("Anno di cessione", min_value=0, max_value=n, step=1, value=n, key="id_anno_ces"))
 
-          st.markdown("---")
-          st.markdown("**Risultati per periodo:**")
+        if st.button("Calcola", key="id_calcola"):
+            try:
+                esb = calc_esborsi(esborsi, anni_esborsi, n)
+                costi = calc_esborsi(costi_inc, anni_costi, n)
+                opp = calc_costo_opportunita(prezzo_opp, vc_opp, tc, n)
+                ces = calc_cessione(prezzo_ces, anno_ces, esborsi, anni_esborsi, vite, tc, n)
+                fcid_ea = calc_fcid2(esb, costi, opp, ces)
+                st.session_state['fcid_ea'] = fcid_ea
 
-          header = ["Metrica"] + [f"t={t+1}" for t in range(n)]
-          rows = [
-              ["MO Netto"]        + [f"{v:,.2f}" for v in mo_netto],
-              ["Ammortamenti"]    + [f"{v:,.2f}" for v in ammortamenti],
-              ["Tax Shield Amm."] + [f"{v:,.2f}" for v in shield],
-              ["FCCNOGC"]         + [f"{v:,.2f}" for v in fccnogc],
-              ["Δ CCNO"]          + [f"{v:,.2f}" for v in delta_ccno],
-              ["FCGC"]            + [f"{v:,.2f}" for v in fcgc],
-          ]
+                st.markdown("---")
+                st.markdown("**Risultati per periodo:**")
 
-          df = pd.DataFrame(rows, columns=header)
-          st.dataframe(df, use_container_width=True)
+                header = ["Metrica"] + [f"t={t}" for t in range(n + 1)]
+                rows = [
+                    ["Esborsi impianto"]   + [f"{v:,.2f}" for v in esb],
+                    ["Costi incrementali"] + [f"{v:,.2f}" for v in costi],
+                    ["Costo opportunità"]  + [f"{v:,.2f}" for v in opp],
+                    ["Cessione netta"]     + [f"{v:,.2f}" for v in ces],
+                    ["FCID"]               + [f"{v:,.2f}" for v in fcid_ea],
+                ]
 
-        except Exception as e:
-            st.error(str(e))
+                df = pd.DataFrame(rows, columns=header)
+                st.dataframe(df, use_container_width=True)
+
+            except Exception as e:
+                st.error(str(e))
 
 #RATIO ANALYSIS
 elif page == "Ratio Analysis":
