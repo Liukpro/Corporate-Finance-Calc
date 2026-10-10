@@ -103,3 +103,12 @@ def calc_fcid2(esb, costi, opp, ces):
         fcid.append(esb[t] + costi[t] + opp[t] + ces[t])
 
     return fcid
+
+#FCU
+def calc_fcu2(fcgc, fcid):
+    fcu = [fcid[0]]
+
+    for t in range(1, len(fcid)):
+        fcu.append(fcgc[t - 1] + fcid[t])
+
+    return fcu
