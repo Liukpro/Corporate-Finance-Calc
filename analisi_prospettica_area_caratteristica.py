@@ -80,8 +80,8 @@ def calc_vc(esborso, anno_esborso, vita, t):
 
 #mancato disinvestimento
 def calc_costo_opportunita(prezzo, vc, tc, vita_progetto):
-    flussi = [0] * (vita_progetto + 1)
-    flussi[0.0] = - calc_netto_vendita(prezzo, vc, tc)
+    flussi = [0.0] * (vita_progetto + 1)
+    flussi[0] = - calc_netto_vendita(prezzo, vc, tc)
     return flussi
 
 #valore contabile del nuovo impianto
