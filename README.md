@@ -8,11 +8,11 @@ A web-based tool (Streamlit) that calculates standard financial metrics from man
 
 ## Calculation logic
 
-All formulas are implemented as pure functions in 'formulas.py' and 'analisi_prospettica_area_caratteristica', with:
+All formulas are implemented as pure functions in `formulas.py` (historical analysis, ex post) and `analisi_prospettica_area_caratteristica.py` (prospective analysis, ex ante), with:
 
 - **Multiple calculation paths** - each metric can be computed in different selectable ways (e.g., FCCNOgc from Revenue/Costs or from MOL)
 - **Explicit error handling** - division by zero and insufficient data raise exceptions
-- **Session state** - the app stores previous calculation results  
+- **Session state** - the app stores previous calculation results (ex-ante results are stored under separate keys, so they never overwrite the ex-post ones)
 - **Demo on Streamlit:** https://corporate-finance-calc.streamlit.app/
 ### **Warning**: to access the demo press "Yes, get this app back up!" after entering the given url. 
 
@@ -22,12 +22,14 @@ All formulas are implemented as pure functions in 'formulas.py' and 'analisi_pro
 
 | Area | What it calculates |
 |------|---------------------|
-| Cash flows | FCCNOgc, FCGC, FCID, FCFR, FCRf, FCU, FCE, Liquidity variation |
+| Cash flows (ex post) | FCCNOgc, FCGC, FCID, FCFR, FCRf, FCU, FCE, Liquidity variation |
+| Prospective Analysis (ex ante) | FCGC per period (net operating margin, depreciation tax shield, working capital changes), FCID per period (outlays, incremental costs, opportunity cost of reused assets, final disposal net of capital gain/loss taxes), FCU = FCGC + FCID |
+| Cost of capital | WACC |
 | Profitability ratios | ROS, ROI, ROE |
-| Prospective Analysis | Operating Free Cash Flow (after working capital changes) |
-| Investment valuation | NPV with fixed periodic costs |
+| Investment valuation | NPV with FCU (discounted at WACC) or FCE (discounted at Ke), with fixed periodic costs |
 | Bonds | Zero coupon (value and YTM), Coupon bonds |
 | Stocks | Gordon growth model, No-growth model, VAOC |
+| Mortgage | Italian (constant capital share) and French (constant payment) amortization schedules |
 
 Note: This is a calculator, not an automated analysis engine. All data must be entered manually. There is no cross-validation or automatic consistency checking.
 
@@ -42,7 +44,11 @@ Please read License files
 
 This project is not a finished application, results may be subject to errors. Do not rely only on the data shown.
 
+Known limitations of the prospective analysis (work in progress):
+- FCGC is shown from t=1, while FCID and FCU start from t=0. The NPV page still uses its own convention (flows from t=1, initial investment entered separately), so it is not yet linked to the ex-ante FCU.
+- Depreciation of each outlay starts from the first operating year, regardless of its payment year.
+- Working capital is not released automatically at the end of the project (set CCNO to 0 in the last period).
+
 This project is entirely based on "Finanza Aziendale" a university-taught course at the Università degli Studi di Bergamo, by professor Cincinelli Peter in 2026, with given permission.
 
 ---
-
