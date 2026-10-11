@@ -713,28 +713,26 @@ elif page == "NPV with FCU/FCE":
 elif page == "Bond Evaluation":
     st.subheader("Bond Valuation")
     sub_op = st.selectbox("Type", ["Zero Coupon Bond", "Coupon Bond"])
-    
+
     if sub_op == "Zero Coupon Bond":
         st.markdown("### Zero Coupon Bond Valuation")
         col1, col2 = st.columns(2)
         with col1:
             vn = st.number_input("Face Value (VN)", value=100.0)
-            k = st.number_input("Discount Rate (Market Rate)", value=0.03, format="%.4f")
+            va = st.number_input("Current Bond Price", value=95.0, key="ytm_price")
         with col2:
-            dur = st.number_input("Duration (years)", value=1.0)
-            
+            dur = st.number_input("Duration (years)", value=1.0, step=0.5)
+            k = st.number_input("Discount Rate (Market Rate)", value=0.03, format="%.4f")
+
         if st.button("Calculate Bond Value"):
             try:
-                # Chiama la funzione
                 res = calc_va_bond_zero(None, k=k, vn=vn, dur=dur)
                 st.success(f"Bond Present Value = {res:.2f}")
             except ValueError as e:
                 st.error(str(e))
-        
+
         if st.button("Calculate Yield to Maturity"):
             try:
-                va = st.number_input("Current Bond Price", value=95.0, key="ytm_price")
-                # Chiama la funzione appena aggiunta
                 ytm = calc_yield_to_mat_zero(None, va=va, vn=vn, dur=dur)
                 st.success(f"Yield to Maturity = {ytm:.4%}")
             except ValueError as e:
