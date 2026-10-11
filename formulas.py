@@ -160,22 +160,26 @@ def calc_npv(npv, fc, k, i_0, t, cost):
     return result
     
 #BONDS
+def _n_periods(t, freq):
+    n = t * freq
+    if abs(n - round(n)) > 1e-9:
+        raise ValueError("Maturity x coupons per year must be a whole number")
+    return round(n)
+
+
 def calc_va_bond_zero(va, k, vn, dur):
     if va is not None:
         return va
-    
-    if k is None or vn is None or dur is None:
+    if k is None or vn is None or dur is None or k <= -1:
         raise ValueError("Insufficient Data")
-
     return vn / ((1 + k) ** dur)
-    
-def calc_yield_to_mat_zero(k, va, vn, dur):
-    if k is not None:
-        return k
-    if va !=0 and vn != 0 and dur != 0:
-        return (vn / va) ** (1/dur) - 1
-    else:
+
+
+def calc_yield_to_mat_zero(va, vn, dur):
+    if va is None or vn is None or dur is None or va <= 0 or vn <= 0 or dur <= 0:
         raise ValueError("Insufficient Data")
+    return (vn / va) ** (1 / dur) - 1
+
 
 def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk, freq=1):
     """k_merk = effective annual market rate, freq = coupons per year."""
@@ -183,8 +187,8 @@ def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk, freq=1):
         return va_ced
     if None in (vn_ced, k_ced, t_ced, k_merk) or k_merk <= -1:
         raise ValueError("Insufficient Data")
-    n = round(t_ced * freq)
-    y = (1 + k_merk) ** (1 / freq) - 1          # per-period rate
+    n = _n_periods(t_ced, freq)
+    y = (1 + k_merk) ** (1 / freq) - 1
     c = vn_ced * k_ced / freq
     return sum(c / (1 + y) ** i for i in range(1, n + 1)) + vn_ced / (1 + y) ** n
 
@@ -193,13 +197,13 @@ def calc_ytm_ced_bond(va, vn, k_ced, t, freq=1):
     """Returns (nominal annual yield, effective annual yield)."""
     if None in (va, vn, k_ced, t) or va <= 0 or vn <= 0 or t <= 0:
         raise ValueError("Insufficient Data")
-    n = round(t * freq)
+    n = _n_periods(t, freq)
     c = vn * k_ced / freq
 
     def price(y):
         return sum(c / (1 + y) ** i for i in range(1, n + 1)) + vn / (1 + y) ** n
 
-    lo, hi = -0.99, 1.0                          # bisection on per-period yield
+    lo, hi = -0.99, 1.0
     for _ in range(200):
         mid = (lo + hi) / 2
         if price(mid) > va:
