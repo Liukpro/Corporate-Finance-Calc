@@ -3,8 +3,8 @@ import streamlit as st
 import numpy as np
 from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
                       calc_fcfr, calc_fcrf, calc_var_liq, calc_fcu,
-                      calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero, calc_ros, 
-                      calc_roi, calc_roe, calc_va_ced_bond, calc_stock_price, calc_vaoc, 
+                      calc_fce, calc_npv, calc_va_bond_zero, calc_yield_to_mat_zero,
+                      calc_va_ced_bond, calc_ytm_ced_bond, calc_stock_price, calc_vaoc, 
                       build_italian_table, build_french_table, calc_wacc, calc_npv_fcu, calc_npv_fce)
 from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammortamenti, calc_shield_ammortamenti,
                                                      calc_fccnogc2, calc_var_ccno, calc_fcgc2,
@@ -733,32 +733,42 @@ elif page == "Bond Evaluation":
 
         if st.button("Calculate Yield to Maturity"):
             try:
-                ytm = calc_yield_to_mat_zero(None, va=va, vn=vn, dur=dur)
+                ytm = calc_yield_to_mat_zero(va=va, vn=vn, dur=dur)
                 st.success(f"Yield to Maturity = {ytm:.4%}")
             except ValueError as e:
                 st.error(str(e))
-    
+
     else:  # Coupon Bond
         st.markdown("### Coupon Bond Valuation")
         col1, col2 = st.columns(2)
         with col1:
             vn_ced = st.number_input("Face Value (VN)", value=100.0, key="coupon_vn")
-            k_ced = st.number_input("Coupon Rate (annual)", value=0.05, format="%.4f")
-            t_ced = st.number_input("Time to Maturity (years)", value=5.0)
+            k_ced_pct = st.number_input("Coupon Rate (annual, %)", value=1.2, format="%.4f")
+            t_ced = st.number_input("Time to Maturity (years)", value=1.5, step=0.5)
         with col2:
-            freq = st.selectbox("Coupons per year", [1,2,4], index=1)
-            va_ced = st.number_input("Current Bond Price",value=99.83, key="coupon_price")
-            k_merk = st.number_input("Market Discount Rate", value=0.04, format="%.4f")
-            
+            freq = st.selectbox("Coupons per year", [1, 2, 4], index=1)
+            va_ced = st.number_input("Current Bond Price", value=99.83, key="coupon_price")
+            k_merk_pct = st.number_input("Market Discount Rate (effective annual, %)",
+                                         value=4.0, format="%.4f")
+
+        k_ced = k_ced_pct / 100
+        k_merk = k_merk_pct / 100
+
         if st.button("Calculate Coupon Bond Value"):
             try:
-                res = calc_va_ced_bond(None, vn_ced=vn_ced, k_ced=k_ced, t_ced=t_ced, k_merk=k_merk)
+                res = calc_va_ced_bond(None, vn_ced=vn_ced, k_ced=k_ced,
+                                       t_ced=t_ced, k_merk=k_merk, freq=freq)
                 st.success(f"Coupon Bond Present Value = {res:.2f}")
-                annual_coupon = vn_ced * k_ced
-                st.info(f"Annual Coupon Payment = {annual_coupon:.2f}")
+                st.info(f"Coupon per period = {vn_ced * k_ced / freq:.2f}")
             except ValueError as e:
                 st.error(str(e))
 
+        if st.button("Calculate Coupon Bond Yield to Maturity"):
+            try:
+                nom, eff = calc_ytm_ced_bond(va_ced, vn_ced, k_ced, t_ced, freq)
+                st.success(f"YTM nominal = {nom:.4%} | effective annual = {eff:.4%}")
+            except ValueError as e:
+                st.error(str(e))
 #STOCKs
 elif page == "Stock Evaluation":
     st.subheader("Stock Valuation")
