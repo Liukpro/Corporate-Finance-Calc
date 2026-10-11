@@ -746,11 +746,12 @@ elif page == "Bond Evaluation":
             k_ced = st.number_input("Coupon Rate (annual)", value=0.05, format="%.4f")
             t_ced = st.number_input("Time to Maturity (years)", value=5.0)
         with col2:
+            freq = st.selectbox("Coupons per year", [1,2,4], index=1)
+            va_ced = st.number_input("Current Bond Price",value=99.83, key="coupon_price")
             k_merk = st.number_input("Market Discount Rate", value=0.04, format="%.4f")
             
         if st.button("Calculate Coupon Bond Value"):
             try:
-                # Chiama la funzione
                 res = calc_va_ced_bond(None, vn_ced=vn_ced, k_ced=k_ced, t_ced=t_ced, k_merk=k_merk)
                 st.success(f"Coupon Bond Present Value = {res:.2f}")
                 annual_coupon = vn_ced * k_ced
