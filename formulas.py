@@ -177,23 +177,37 @@ def calc_yield_to_mat_zero(k, va, vn, dur):
     else:
         raise ValueError("Insufficient Data")
 
-def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk):
+def calc_va_ced_bond(va_ced, vn_ced, k_ced, t_ced, k_merk, freq=1):
+    """k_merk = effective annual market rate, freq = coupons per year."""
     if va_ced is not None:
         return va_ced
-    elif vn_ced is not None and k_ced is not None and t_ced is not None and k_merk is not None:
-        ced = vn_ced * k_ced
-        va_ced = 0.0
-        n = int(t_ced)
-        f = t_ced - n
-        for i in range(n):
-            va_ced += ced / ((1 + k_merk) ** (i + 1))
-        if f > 0:
-            if k_merk != -1:
-                va_ced += ced * f / ((1 + k_merk) ** t_ced)
-        va_ced += vn_ced / ((1 + k_merk) ** t_ced)
-        return va_ced
-    else:
+    if None in (vn_ced, k_ced, t_ced, k_merk) or k_merk <= -1:
         raise ValueError("Insufficient Data")
+    n = round(t_ced * freq)
+    y = (1 + k_merk) ** (1 / freq) - 1          # per-period rate
+    c = vn_ced * k_ced / freq
+    return sum(c / (1 + y) ** i for i in range(1, n + 1)) + vn_ced / (1 + y) ** n
+
+
+def calc_ytm_ced_bond(va, vn, k_ced, t, freq=1):
+    """Returns (nominal annual yield, effective annual yield)."""
+    if None in (va, vn, k_ced, t) or va <= 0 or vn <= 0 or t <= 0:
+        raise ValueError("Insufficient Data")
+    n = round(t * freq)
+    c = vn * k_ced / freq
+
+    def price(y):
+        return sum(c / (1 + y) ** i for i in range(1, n + 1)) + vn / (1 + y) ** n
+
+    lo, hi = -0.99, 1.0                          # bisection on per-period yield
+    for _ in range(200):
+        mid = (lo + hi) / 2
+        if price(mid) > va:
+            lo = mid
+        else:
+            hi = mid
+    y = (lo + hi) / 2
+    return y * freq, (1 + y) ** freq - 1
 
 
 def calc_stock_price(stock_price=None, k=None, g=None, b=None,
