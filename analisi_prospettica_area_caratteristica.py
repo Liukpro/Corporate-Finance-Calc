@@ -34,6 +34,9 @@ def calc_fccnogc2(mo_netto, tax_shield_ammortamenti_list):
         fccnogc.append(mo_netto[t] + tax_shield_ammortamenti_list[t])
     return fccnogc
 
+def aggiungi_t0(flussi):
+    return [0.0] + list(flussi)
+
 def calc_var_ccno(ccno):
     delta_ccno = []
     
@@ -106,9 +109,6 @@ def calc_fcid2(esb, costi, opp, ces):
 
 #FCU
 def calc_fcu2(fcgc, fcid):
-    fcu = [fcid[0]]
-
-    for t in range(1, len(fcid)):
-        fcu.append(fcgc[t - 1] + fcid[t])
-
-    return fcu
+    if len(fcgc) != len(fcid):
+        raise ValueError("FCGC e FCID devono avere lo stesso numero di periodi")
+    return [fcgc[t] + fcid[t] for t in range(len(fcid))]
