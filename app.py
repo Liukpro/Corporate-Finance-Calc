@@ -410,7 +410,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
               st.markdown("---")
               st.markdown("**Risultati per periodo:**")
 
-              header = ["Metrica"] + [f"t={t}" for t in range(n)]
+              header = ["Metrica"] + [f"t={t}" for t in range(n + 1)]
               rows = [
                   ["MO Netto"]        + [f"{v:,.2f}" for v in aggiungi_t0(mo_netto)],
                   ["Ammortamenti"]    + [f"{v:,.2f}" for v in aggiungi_t0(ammortamenti)],
