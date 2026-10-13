@@ -9,20 +9,20 @@ def calc_mo_netto(ricavi_operativi, costi_operativi, tc):
         
     return mo_netto
 
-def calc_ammortamenti(esborsi, anni_list, vita_progetto):
+def calc_ammortamenti(esborsi, anni_pagamento, anni_ammortamento, vita_progetto):
     ammortamenti = [0.0] * vita_progetto
-
     for i in range(len(esborsi)):
-        esborso = float(esborsi[i])
-        anni = int(anni_list[i])
-
-        quota = esborso / anni
-
-        for t in range(anni):
-            if t < vita_progetto:
-                ammortamenti[t] += quota
-
+        anni = int(anni_ammortamento[i])
+        quota = float(esborsi[i]) / anni
+        for k in range(anni):
+            t = int(anni_pagamento[i]) + 1 + k   # periodo (1..n) della quota
+            if t <= vita_progetto:
+                ammortamenti[t - 1] += quota
     return ammortamenti
+    
+# la quota parte dal periodo successivo al pagamento. 
+# È la stessa convenzione di calc_vc (valore contabile = esborso − quota × anni passati dal pagamento), 
+# quindi FCGC e cessione nel FCID diventano coerenti. 
 
 def calc_shield_ammortamenti(ammortamenti, tc):
     tax_shield_ammortamenti_list = [amm * tc for amm in ammortamenti]
