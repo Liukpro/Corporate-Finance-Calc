@@ -598,6 +598,12 @@ elif page == "NPV with FCU/FCE":
     if approach == "FCU (Cash Flow Unlevered)":
         st.markdown("### NPV con FCU (WACC come tasso di sconto)")
         t_fcu_list = []
+
+        fcu_ea = st.session_state.get('fcu_ea')
+        use_fcu_ea = False
+        if fcu_ea is not None:
+            use_fcu_ea = st.checkbox("Usa FCU ex ante (flussi da t=0, I₀ incluso)", value=True, key="npv_use_fcu_ea")
+
         col1, col2 = st.columns(2)
         with col1:
             if st.session_state.get('wacc') is not None:
@@ -609,18 +615,31 @@ elif page == "NPV with FCU/FCE":
                     wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.001) / 100
             else:
                 wacc = st.number_input("WACC (%)", value=8.0, min_value=0.0, step=0.001) / 100
-            
-            i0_fcu = st.number_input("Investimento Iniziale I₀ (€)", value=100000.0, min_value=0.0, step=1.0)
-            cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
-        
+
+            if use_fcu_ea:
+                i0_fcu = -fcu_ea[0]
+                cost = 0.0
+                st.info(f"I₀ = −FCU(t=0) = {i0_fcu:,.2f}")
+            else:
+                i0_fcu = st.number_input("Investimento Iniziale I₀ (€)", value=100000.0, min_value=0.0, step=1.0)
+                cost = st.number_input("Costo fisso per periodo (€)", value=0.0)
+
         with col2:
-            t_fcu = st.number_input("Numero di periodi", min_value=1, step=1, value=5)
-        
+            if use_fcu_ea:
+                t_fcu = len(fcu_ea) - 1
+                st.info(f"Numero di periodi: {t_fcu}")
+            else:
+                t_fcu = st.number_input("Numero di periodi", min_value=1, step=1, value=5)
+
         st.markdown("**Flussi di Cassa (FCU) per periodo**")
         fcu_list = []
         npv_fcu_values = []
-        for i in range(t_fcu):
-            fcu_list.append(st.number_input(f"FCU periodo {i+1}", key=f"fcu_{i}", value=10000.0, step=1.0))
+        if use_fcu_ea:
+            fcu_list = list(fcu_ea[1:])
+            st.dataframe(pd.DataFrame({"t": range(1, t_fcu + 1), "FCU": fcu_list}), use_container_width=True)
+        else:
+            for i in range(t_fcu):
+                fcu_list.append(st.number_input(f"FCU periodo {i+1}", key=f"fcu_{i}", value=10000.0, step=1.0))
         
         if st.button("Calcola NPV (FCU)"):
             try:
