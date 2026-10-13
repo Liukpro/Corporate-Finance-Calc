@@ -26,7 +26,7 @@ All formulas are implemented as pure functions in `formulas.py` (historical anal
 | Prospective Analysis (ex ante) | FCGC per period (net operating margin, depreciation tax shield, working capital changes), FCID per period (outlays, incremental costs, opportunity cost of reused assets, final disposal net of capital gain/loss taxes), FCU = FCGC + FCID |
 | Cost of capital | WACC |
 | Profitability ratios | ROS, ROI, ROE |
-| Investment valuation | NPV with FCU (discounted at WACC) or FCE (discounted at Ke), with fixed periodic costs |
+| Investment valuation | NPV with FCU (discounted at WACC) or FCE (discounted at Ke), with fixed periodic costs. The FCU-based NPV can use the ex-ante FCU directly (flows from t=0, initial investment included) or manual inputs |
 | Bonds | Zero coupon (value and YTM), Coupon bonds |
 | Stocks | Gordon growth model, No-growth model, VAOC |
 | Mortgage | Italian (constant capital share) and French (constant payment) amortization schedules |
@@ -57,10 +57,10 @@ Please read License files
 
 This project is not a finished application, results may be subject to errors. Do not rely only on the data shown.
 
-Known limitations of the prospective analysis (work in progress):
-- FCGC is shown from t=1, while FCID and FCU start from t=0. The NPV page still uses its own convention (flows from t=1, initial investment entered separately), so it is not yet linked to the ex-ante FCU.
-- Depreciation of each outlay starts from the first operating year, regardless of its payment year.
-- Working capital is not released automatically at the end of the project (set CCNO to 0 in the last period).
+Notes on the prospective analysis (work in progress):
+- Depreciation of each outlay starts the period after its payment year. If the depreciation life extends beyond the project life, the quotas after the last period are not deducted in the FCGC; the residual book value is accounted for at disposal in the FCID.
+- The NPV page reads the ex-ante FCU from the session: if you change the inputs in the ex-ante page, recalculate FCGC, FCID and FCU before going back to the NPV.
+- The ex-post FCU is not linked to the NPV page (it is a single past value, not a series of future flows): enter it manually if needed.
 
 This project is entirely based on "Finanza Aziendale" a university-taught course at the Università degli Studi di Bergamo, by professor Cincinelli Peter in 2026, with given permission.
 
