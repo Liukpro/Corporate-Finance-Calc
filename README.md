@@ -23,14 +23,13 @@ All formulas are implemented as pure functions in `formulas.py` (historical anal
 | Area | What it calculates |
 |------|---------------------|
 | Cash flows (ex post) | FCCNOgc, FCGC, FCID, FCFR, FCRf, FCU, FCE, Liquidity variation |
-| Prospective Analysis (ex ante) | FCGC per period (net operating margin, depreciation tax shield, working capital changes), FCID per period (outlays, incremental costs, opportunity cost of reused assets, final disposal net of capital gain/loss taxes), FCU = FCGC + FCID |
+| Prospective Analysis (ex ante) | Shared project inputs (life, tax rate, outlays with payment year and depreciation years), then FCGC per period (net operating margin, depreciation tax shield, working capital changes with optional release at the end of the project), FCID per period (outlays, incremental costs, opportunity cost of reused assets, final disposal net of capital gain/loss taxes), FCU = FCGC + FCID. All flows share the same time axis, t=0 to t=n |
 | Cost of capital | WACC |
 | Profitability ratios | ROS, ROI, ROE |
 | Investment valuation | NPV with FCU (discounted at WACC) or FCE (discounted at Ke), with fixed periodic costs. The FCU-based NPV can use the ex-ante FCU directly (flows from t=0, initial investment included) or manual inputs |
 | Bonds | Zero coupon (value and YTM), Coupon bonds |
 | Stocks | Gordon growth model, No-growth model, VAOC |
 | Mortgage | Italian (constant capital share) and French (constant payment) amortization schedules |
-
 ### Metrics' Details
 
 | Metric | Full name | What it represents |
