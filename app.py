@@ -10,7 +10,7 @@ from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammorta
                                                      calc_fccnogc2, calc_var_ccno, calc_fcgc2,
                                                      calc_netto_vendita, calc_esborsi, calc_vc,
                                                      calc_costo_opportunita, calc_cessione, calc_fcid2,
-                                                     calc_fcu2)
+                                                     calc_fcu2, aggiungi_t0)
 
 # Configurazione Pagina
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
@@ -402,19 +402,20 @@ elif page == "Cash Flow Analysis, Ex-Ante":
               fccnogc = calc_fccnogc2(mo_netto, shield)
               delta_ccno = calc_var_ccno(ccno)
               fcgc = calc_fcgc2(fccnogc, delta_ccno)
-              st.session_state['fcgc_ea'] = fcgc
+              st.session_state['fcgc_ea'] = aggiungi_t0(fcgc)
+              fcgc_ea_display = st.session_state['fcgc_ea']
 
               st.markdown("---")
               st.markdown("**Risultati per periodo:**")
 
-              header = ["Metrica"] + [f"t={t+1}" for t in range(n)]
+              header = ["Metrica"] + [f"t={t}" for t in range(n)]
               rows = [
-                  ["MO Netto"]        + [f"{v:,.2f}" for v in mo_netto],
-                  ["Ammortamenti"]    + [f"{v:,.2f}" for v in ammortamenti],
-                  ["Tax Shield Amm."] + [f"{v:,.2f}" for v in shield],
-                  ["FCCNOGC"]         + [f"{v:,.2f}" for v in fccnogc],
-                  ["Δ CCNO"]          + [f"{v:,.2f}" for v in delta_ccno],
-                  ["FCGC"]            + [f"{v:,.2f}" for v in fcgc],
+                  ["MO Netto"]        + [f"{v:,.2f}" for v in aggiungi_t0(mo_netto)],
+                  ["Ammortamenti"]    + [f"{v:,.2f}" for v in aggiungi_t0(ammortamenti)],
+                  ["Tax Shield Amm."] + [f"{v:,.2f}" for v in aggiungi_t0(shield)],
+                  ["FCCNOGC"]         + [f"{v:,.2f}" for v in aggiungi_t0(fccnogc)],
+                  ["Δ CCNO"]          + [f"{v:,.2f}" for v in ggiungi_t0(delta_ccno)],
+                  ["FCGC"]            + [f"{v:,.2f}" for v in fcgc_ea_display],
               ]
 
               df = pd.DataFrame(rows, columns=header)
@@ -509,7 +510,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
 
                 if fcgc_ea is None or fcid_ea is None:
                     st.warning("Calcola prima FCGC e FCID.")
-                elif len(fcid_ea) != len(fcgc_ea) + 1:
+                elif len(fcid_ea) != len(fcgc_ea):
                     st.error("FCGC e FCID hanno una vita del progetto diversa.")
                 else:
                     fcu_ea = calc_fcu2(fcgc_ea, fcid_ea)
@@ -521,7 +522,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
                     n = len(fcid_ea) - 1
                     header = ["Metrica"] + [f"t={t}" for t in range(n + 1)]
                     rows = [
-                        ["FCGC"] + [f"{0:,.2f}"] + [f"{v:,.2f}" for v in fcgc_ea],
+                        ["FCGC"] + [f"{v:,.2f}" for v in fcgc_ea],
                         ["FCID"] + [f"{v:,.2f}" for v in fcid_ea],
                         ["FCU"]  + [f"{v:,.2f}" for v in fcu_ea],
                     ]
