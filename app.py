@@ -16,7 +16,7 @@ from analisi_prospettica_area_caratteristica import (calc_mo_netto, calc_ammorta
 st.set_page_config(page_title="Corporate Finance Calc", layout="wide")
 
 st.title("Corporate Finance Calc")
-st.caption("v_alpha_3.3, #added ex-ante FCID and FCU, #bond evaluation update # english-italian mix vocabs- to be updated")
+st.caption("v_alpha_3.4, #unified ex-ante time axis (t=0 to t=n), #automatic CCNO release, #shared ex-ante inputs, #depreciation from payment year, #NPV linked to ex-ante FCU, #english-italian mix vocabs- to be updated")
 
 st.sidebar.markdown("""
 **License:** Apache 2.0  
