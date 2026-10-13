@@ -377,7 +377,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
           anni_esborsi.append(int(st.number_input(f"Anno di pagamento {i+1}", min_value=0, max_value=n, step=1, value=0, key=f"ea_anno_esb_{i}")))
       with col3:
           vite.append(int(st.number_input(f"Anni ammortamento {i+1}", min_value=1, step=1, value=n, key=f"ea_vita_esb_{i}")))
- st.markdown("---")
+
 
     op = st.selectbox("Cosa vuoi calcolare?", ["FCGC", "FCID", "FCU"], key="ap_op")
 
