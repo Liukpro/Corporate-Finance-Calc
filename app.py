@@ -381,6 +381,8 @@ elif page == "Cash Flow Analysis, Ex-Ante":
                 costi_operativi.append(st.number_input(f"Costi operativi", key=f"ap_cost_{t}", value=0.0))
             with col3:
                 ccno.append(st.number_input(f"CCNO", key=f"ap_ccno_{t}", value=0.0))
+              
+        libera_ccno = st.checkbox("Libera il CCNO nell'ultimo periodo", value=False, key="ap_libera_ccno")
 
         st.markdown("**Esborsi per investimenti (ammortizzabili):**")
         n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="ap_n_esborsi")
@@ -400,7 +402,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
               ammortamenti = calc_ammortamenti(esborsi, anni_list, n)
               shield = calc_shield_ammortamenti(ammortamenti, tc)
               fccnogc = calc_fccnogc2(mo_netto, shield)
-              delta_ccno = calc_var_ccno(ccno)
+              delta_ccno = calc_var_ccno(ccno, libera_ccno)
               fcgc = calc_fcgc2(fccnogc, delta_ccno)
               st.session_state['fcgc_ea'] = aggiungi_t0(fcgc)
               fcgc_ea_display = st.session_state['fcgc_ea']
