@@ -379,7 +379,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
             vite.append(int(st.number_input(f"Anni ammortamento {i+1}", min_value=1, step=1, value=n, key=f"ea_vita_esb_{i}")))
 
 
-    op = st.selectbox("Cosa vuoi calcolare?", ["FCGC", "FCID", "FCU"], key="ap_op")
+  op = st.selectbox("Cosa vuoi calcolare?", ["FCGC", "FCID", "FCU"], key="ap_op")
 
     if op == "FCGC":
         st.subheader("Analisi Prospettica — Area Caratteristica")
