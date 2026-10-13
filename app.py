@@ -416,7 +416,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
                   ["Ammortamenti"]    + [f"{v:,.2f}" for v in aggiungi_t0(ammortamenti)],
                   ["Tax Shield Amm."] + [f"{v:,.2f}" for v in aggiungi_t0(shield)],
                   ["FCCNOGC"]         + [f"{v:,.2f}" for v in aggiungi_t0(fccnogc)],
-                  ["Δ CCNO"]          + [f"{v:,.2f}" for v in ggiungi_t0(delta_ccno)],
+                  ["Δ CCNO"]          + [f"{v:,.2f}" for v in aggiungi_t0(delta_ccno)],
                   ["FCGC"]            + [f"{v:,.2f}" for v in fcgc_ea_display],
               ]
 
