@@ -358,25 +358,25 @@ if page == "Cash Flow Analysis, Ex-Post":
                 st.error(str(e))
 
 elif page == "Cash Flow Analysis, Ex-Ante":
-  st.subheader("Parametri del progetto (comuni a FCGC, FCID e FCU)")
-  col1, col2 = st.columns(2)
-  with col1:
-      vita_progetto = st.number_input("Vita del progetto (periodi)", min_value=1, step=1, value=4, key="ea_vita")
-  with col2:
-      tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.35, format="%.2f", key="ea_tc")
-  n = int(vita_progetto)
+    st.subheader("Parametri del progetto (comuni a FCGC, FCID e FCU)")
+    col1, col2 = st.columns(2)
+    with col1:
+        vita_progetto = st.number_input("Vita del progetto (periodi)", min_value=1, step=1, value=4, key="ea_vita")
+    with col2:
+        tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.35, format="%.2f", key="ea_tc")
+    n = int(vita_progetto)
 
-  st.markdown("**Esborsi per investimenti ammortizzabili:**")
-  n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="ea_n_esborsi")
-  esborsi, anni_esborsi, vite = [], [], []
-  for i in range(int(n_esborsi)):
-      col1, col2, col3 = st.columns(3)
-      with col1:
-          esborsi.append(st.number_input(f"Esborso {i+1}", key=f"ea_esb_{i}", value=0.0))
-      with col2:
-          anni_esborsi.append(int(st.number_input(f"Anno di pagamento {i+1}", min_value=0, max_value=n, step=1, value=0, key=f"ea_anno_esb_{i}")))
-      with col3:
-          vite.append(int(st.number_input(f"Anni ammortamento {i+1}", min_value=1, step=1, value=n, key=f"ea_vita_esb_{i}")))
+    st.markdown("**Esborsi per investimenti ammortizzabili:**")
+    n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="ea_n_esborsi")
+    esborsi, anni_esborsi, vite = [], [], []
+    for i in range(int(n_esborsi)):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            esborsi.append(st.number_input(f"Esborso {i+1}", key=f"ea_esb_{i}", value=0.0))
+        with col2:
+            anni_esborsi.append(int(st.number_input(f"Anno di pagamento {i+1}", min_value=0, max_value=n, step=1, value=0, key=f"ea_anno_esb_{i}")))
+        with col3:
+            vite.append(int(st.number_input(f"Anni ammortamento {i+1}", min_value=1, step=1, value=n, key=f"ea_vita_esb_{i}")))
 
 
     op = st.selectbox("Cosa vuoi calcolare?", ["FCGC", "FCID", "FCU"], key="ap_op")
