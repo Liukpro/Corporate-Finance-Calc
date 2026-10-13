@@ -419,6 +419,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
                   ["Δ CCNO"]          + [f"{v:,.2f}" for v in aggiungi_t0(delta_ccno)],
                   ["FCGC"]            + [f"{v:,.2f}" for v in fcgc_ea_display],
               ]
+              st.write(len(header), [len(r) for r in rows])
 
               df = pd.DataFrame(rows, columns=header)
               st.dataframe(df, use_container_width=True)
@@ -528,8 +529,6 @@ elif page == "Cash Flow Analysis, Ex-Ante":
                         ["FCID"] + [f"{v:,.2f}" for v in fcid_ea],
                         ["FCU"]  + [f"{v:,.2f}" for v in fcu_ea],
                     ]
-                  
-                    st.write(len(header), [len(r) for r in rows])
 
                     df = pd.DataFrame(rows, columns=header)
                     st.dataframe(df, use_container_width=True)
