@@ -37,7 +37,7 @@ def calc_fccnogc2(mo_netto, tax_shield_ammortamenti_list):
 def aggiungi_t0(flussi):
     return [0.0] + list(flussi)
 
-def calc_var_ccno(ccno):
+def calc_var_ccno(ccno, libera_a_fine=False):
     delta_ccno = []
     
     for t in range(len(ccno)):
@@ -45,6 +45,8 @@ def calc_var_ccno(ccno):
             delta_ccno.append(ccno[t])
         else:
             delta_ccno.append(ccno[t] - ccno[t - 1])
+        if libera_a_fine and delta_ccno:
+            delta_ccno[-1] -= ccno[-1]
     
     return delta_ccno
 
