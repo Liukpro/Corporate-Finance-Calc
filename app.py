@@ -466,17 +466,17 @@ elif page == "Cash Flow Analysis, Ex-Ante":
 
         if st.button("Calcola", key="id_calcola"):
             try:
-                esb = calc_esborsi(esborsi, anni_esborsi, n)
-                costi = calc_esborsi(costi_inc, anni_costi, n)
-                opp = calc_costo_opportunita(prezzo_opp, vc_opp, tc, n)
-                ces = calc_cessione(prezzo_ces, anno_ces, esborsi, anni_esborsi, vite, tc, n)
+                esb = calc_esborsi(esborsi, anni_esborsi, H)
+                costi = calc_esborsi(costi_inc, anni_costi, H)
+                opp = calc_costo_opportunita(prezzo_opp, vc_opp, tc, H)
+                ces = calc_cessione(prezzo_ces, anno_ces, esborsi, anni_esborsi, vite, tc, H)
                 fcid_ea = calc_fcid2(esb, costi, opp, ces)
                 st.session_state['fcid_ea'] = fcid_ea
 
                 st.markdown("---")
                 st.markdown("**Risultati per periodo:**")
 
-                header = ["Metrica"] + [f"t={t}" for t in range(n + 1)]
+                header = ["Metrica"] + [f"t={t}" for t in range(H + 1)]
                 rows = [
                     ["Esborsi impianto"]   + [f"{v:,.2f}" for v in esb],
                     ["Costi incrementali"] + [f"{v:,.2f}" for v in costi],
