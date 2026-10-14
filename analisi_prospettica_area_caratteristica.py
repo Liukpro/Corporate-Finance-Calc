@@ -13,10 +13,12 @@ def calc_ammortamenti(esborsi, anni_pagamento, anni_ammortamento, vita_progetto)
     ammortamenti = [0.0] * vita_progetto
     for i in range(len(esborsi)):
         anni = int(anni_ammortamento[i])
+        if anni <= 0:
+            continue
         quota = float(esborsi[i]) / anni
         for k in range(anni):
-            t = int(anni_pagamento[i]) + k   # periodo (0..n) della quota
-            if t <= vita_progetto:
+            t = int(anni_pagamento[i]) + 1 + k   # periodo (0..n) della quota
+            if t <= orizzonte:
                 ammortamenti[t - 1] += quota
     return ammortamenti
     
@@ -73,13 +75,12 @@ def calc_esborsi(esborsi, anni_esborsi, vita_progetto):
 
 #valore contabile futuro disinvestimento
 def calc_vc(esborso, anno_esborso, vita, t):
+    if vita <= 0:
+        return esborso
+        
     anni_passati = t - anno_esborso
-
-    if anni_passati < 0:
-        anni_passati = 0
-    if anni_passati > vita:
-        anni_passati = vita
-
+    anni passati = max(0, min(anni_passati, vita))
+    
     quota = esborso / vita
     return esborso - quota * anni_passati
 
