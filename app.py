@@ -1,7 +1,8 @@
 import pandas as pd
 import streamlit as st
 import numpy as np
-from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid,
+from formulas import (calc_fccnogc, calc_rol, calc_fcgc, calc_fcid, 
+                      calc_vnc, calc_prezzo_realizzo,
                       calc_fcfr, calc_fcrf, calc_ros, calc_roi, calc_roe,
                       calc_var_liq, calc_fcu, calc_fce, calc_npv, calc_va_bond_zero, 
                       calc_yield_to_mat_zero, calc_va_ced_bond, calc_ytm_ced_bond, calc_stock_price, 
@@ -188,16 +189,55 @@ if page == "Cash Flow Analysis, Ex-Post":
                 st.error(str(e))
 
     elif op == "FCID":
-        st.write("Cash Flow from Investing Activities")
-        st.warning("Scegli UNO dei seguenti metodi (gli altri lasciali vuoti)")
-        
-        metodo = st.radio("Seleziona metodo:", 
-                          ["FCID diretto", "Disinvestimenti - Investimenti", "Solo Investimenti (negativo)"],
+        st.caption("Cash Flow from Investing Activities")
+
+        def disinvestimento_input(i):
+            """Ritorna il prezzo di realizzo (positivo) di un disinvestimento."""
+            st.markdown(f"**Disinvestimento {i+1}**")
+            modo = st.radio("Dati disponibili",
+                            ["Prezzo di realizzo già noto", "Da valore contabile e plus/minusvalenza"],
+                            key=f"dis_modo_{i}")
+            if modo == "Prezzo di realizzo già noto":
+                return st.number_input("Prezzo di realizzo", value=0.0, key=f"dis_prezzo_{i}")
+
+            vc_modo = st.radio("Valore contabile",
+                               ["Valore diretto", "Costo storico e fondo ammortamento",
+                                "Costo storico e % ammortizzata", "Costo storico, quota annua e anni"],
+                               key=f"dis_vcmodo_{i}")
+            if vc_modo == "Valore diretto":
+                vc = calc_vnc(vnc=st.number_input("Valore netto contabile", value=0.0, key=f"dis_vc_{i}"))
+            else:
+                cs = st.number_input("Costo storico", value=0.0, key=f"dis_cs_{i}")
+                if vc_modo == "Costo storico e fondo ammortamento":
+                    vc = calc_vnc(costo_storico=cs, fondo=st.number_input("Fondo ammortamento", value=0.0, key=f"dis_fondo_{i}"))
+                elif vc_modo == "Costo storico e % ammortizzata":
+                    perc = st.number_input("% ammortizzata (0,90 = 90%)", value=0.0, min_value=0.0,
+                                           max_value=1.0, format="%.4f", key=f"dis_perc_{i}")
+                    vc = calc_vnc(costo_storico=cs, perc_amm=perc)
+                else:
+                    q = st.number_input("Quota annua", value=0.0, key=f"dis_quota_{i}")
+                    a = st.number_input("Anni ammortizzati", value=0, step=1, min_value=0, key=f"dis_anni_{i}")
+                    vc = calc_vnc(costo_storico=cs, quota=q, anni=a)
+
+            esito = st.radio("Esito della cessione", ["Nessuna plus/minusvalenza", "Plusvalenza", "Minusvalenza"],
+                             key=f"dis_esito_{i}", horizontal=True)
+            plus = minus = 0.0
+            if esito == "Plusvalenza":
+                plus = st.number_input("Plusvalenza (valore positivo)", value=0.0, min_value=0.0, key=f"dis_plus_{i}")
+            elif esito == "Minusvalenza":
+                minus = st.number_input("Minusvalenza (valore positivo)", value=0.0, min_value=0.0, key=f"dis_minus_{i}")
+
+            prezzo = calc_prezzo_realizzo(vc, plus, minus)
+            st.caption(f"Prezzo di realizzo = {vc:,.2f} + {plus:,.2f} − {minus:,.2f} = {prezzo:,.2f}")
+            return prezzo
+
+        metodo = st.radio("Seleziona metodo:",
+                          ["FCID diretto", "Da investimenti e disinvestimenti"],
                           key="fcid_method")
-        
+
         if metodo == "FCID diretto":
             fcid_val = st.number_input("Valore FCID diretto", value=0.0, key="fcid_direct")
-            
+
             if st.button("Calculate FCID", key="btn_fcid_direct"):
                 try:
                     res = calc_fcid(fcid=fcid_val)
@@ -205,70 +245,23 @@ if page == "Cash Flow Analysis, Ex-Post":
                     st.success(f"FCID = {res:.2f}")
                 except ValueError as e:
                     st.error(str(e))
-        
-        elif metodo == "Disinvestimenti - Investimenti":
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("**Dati Disinvestimenti**")
-                dis = st.number_input("Disinvestimenti (valore diretto)", value=0.0, key="dis_direct")
-                
-                st.markdown("---")
-                st.markdown("**Oppure calcola disinvestimento da:**")
-                vnc = st.number_input("VNC (Valore Netto Contabile)", value=0.0, key="vnc")
-                val_sto = st.number_input("Valore storico", value=0.0, key="val_sto")
-                ammo_ti = st.number_input("Quota ammortamento annuale", value=0.0, key="ammo_ti")
-                n_ammo = st.number_input("Anni di ammortamento", value=0, step=1, key="n_ammo")
-                plus = st.number_input("Plusvalenza", value=0.0, key="plus")
-                minus = st.number_input("Minusvalenza", value=0.0, key="minus")
-            
-            with col2:
-                st.markdown("**Dati Investimenti**")
-                inv = st.number_input("Investimenti (valore diretto)", value=0.0, key="inv_direct")
-                
-                st.markdown("---")
-                st.markdown("**Oppure somma di acquisizioni:**")
-                acqui_1 = st.number_input("Acquisizione 1", value=0.0, key="acqui_1")
-                acqui_2 = st.number_input("Acquisizione 2", value=0.0, key="acqui_2")
-            
-            if st.button("Calculate FCID", key="btn_fcid_dis_inv"):
+
+        else:
+            st.markdown("### Investimenti (esborsi)")
+            n_inv = st.number_input("Numero di investimenti", min_value=0, step=1, value=0, key="fcid_n_inv")
+            investimenti = [st.number_input(f"Investimento {i+1}", value=0.0, key=f"fcid_inv_{i}")
+                            for i in range(int(n_inv))]
+
+            st.markdown("### Disinvestimenti (cessioni effettuate)")
+            n_dis = st.number_input("Numero di disinvestimenti", min_value=0, step=1, value=0, key="fcid_n_dis")
+            disinvestimenti = [disinvestimento_input(i) for i in range(int(n_dis))]
+
+            if st.button("Calculate FCID", key="btn_fcid_calc"):
                 try:
-                    params = {}
-                    if inv != 0:
-                        params["inv"] = inv
-                    if dis != 0:
-                        params["dis"] = dis
-                    if vnc != 0:
-                        params["vnc"] = vnc
-                    if val_sto != 0:
-                        params["val_sto"] = val_sto
-                    if ammo_ti != 0:
-                        params["ammo_ti"] = ammo_ti
-                    if n_ammo != 0:
-                        params["n_ammo"] = n_ammo
-                    if plus != 0:
-                        params["plus"] = plus
-                    if minus != 0:
-                        params["minus"] = minus
-                    if acqui_1 != 0:
-                        params["acqui_1"] = acqui_1
-                    if acqui_2 != 0:
-                        params["acqui_2"] = acqui_2
-                    
-                    res = calc_fcid(**params)
+                    res = calc_fcid(investimenti=investimenti, disinvestimenti=disinvestimenti)
                     st.session_state.fcid = res
-                    st.success(f"FCID = {res:.2f}")
-                except ValueError as e:
-                    st.error(str(e))
-        
-        else:  # Solo Investimenti
-            inv = st.number_input("Investimenti", value=0.0, key="inv_only")
-            
-            if st.button("Calculate FCID", key="btn_fcid_inv_only"):
-                try:
-                    res = calc_fcid(inv=inv)
-                    st.session_state.fcid = res
-                    st.success(f"FCID = {res:.2f}")
-                    st.caption(f"Calcolo: -{inv} (nessun disinvestimento)")
+                    st.success(f"FCID = {res:,.2f}")
+                    st.caption(f"Disinvestimenti {sum(disinvestimenti):,.2f} − Investimenti {sum(investimenti):,.2f}")
                 except ValueError as e:
                     st.error(str(e))
 
