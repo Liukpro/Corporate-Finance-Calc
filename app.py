@@ -359,7 +359,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
     n = int(vita_progetto)
     H = n + 1   # orizzonte: t = 0..H (disinvestimenti e rilascio CCNO a n+1)
 
-    # ---------- ESBORSI (comuni) ----------
+    # esborsi
     st.markdown("**Esborsi per investimenti:**")
     n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="ea_n_esborsi")
     esborsi, anni_esborsi, vite = [], [], []
@@ -381,7 +381,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
 
     op = st.selectbox("Cosa vuoi calcolare?", ["FCGC", "FCID", "FCU"], key="ap_op")
 
-    # ================= FCGC =================
+    # FCGC_EA
     if op == "FCGC":
         st.subheader("Analisi Prospettica — Area Caratteristica")
 
@@ -446,7 +446,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
             except Exception as e:
                 st.error(str(e))
 
-    # ================= FCID =================
+    # FCID_EA
     elif op == "FCID":
         st.subheader("Analisi Prospettica — Area Investimenti/Disinvestimenti")
 
@@ -487,7 +487,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
                 st.caption(f"Valore contabile = {vc:,.2f}")
             vc_man.append(vc)
 
-        # ---- disinvestimenti ----
+        # Disinvestimenti_EA
         st.markdown("---")
         st.markdown("**Disinvestimenti (cessioni di beni del progetto):**")
         n_ces = st.number_input("Numero di disinvestimenti", min_value=0, step=1, value=0, key="id_n_ces")
@@ -558,7 +558,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
             except Exception as e:
                 st.error(str(e))
 
-    # ================= FCU =================
+    # FCU_EA
     elif op == "FCU":
         st.subheader("Analisi Prospettica — Flusso di Cassa Unlevered (FCU)")
         st.caption("FCU = FCGC + FCID. Calcola prima FCGC e FCID nelle rispettive sezioni.")
@@ -655,7 +655,7 @@ elif page == "WACC":
         except ValueError as e:
             st.error(str(e))
           
-# NPV with FCU/FCE
+# NPV with FCU/FCU_EA/FCE
 elif page == "NPV with FCU/FCE":
     st.subheader("NPV - Due Approcci")
     st.caption("NPV con logica del capitale investito (FCU) vs logica dell'azionista (FCE)")
@@ -1068,4 +1068,4 @@ elif page == "Mortgage":
 
 
 elif page == "Coming Soon...":
-    st.write("Stay tuned for Risk Analysis and Portfolio")
+    st.write("Work in progress")
