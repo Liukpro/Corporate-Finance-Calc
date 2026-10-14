@@ -462,7 +462,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
         with col1:
             prezzo_ces = st.number_input("Prezzo di cessione", key="id_prezzo_ces", value=0.0)
         with col2:
-            anno_ces = int(st.number_input("Anno di cessione", min_value=0, max_value=n, step=1, value=n, key="id_anno_ces"))
+            anno_ces = int(st.number_input("Anno di cessione", min_value=0, max_value=H, step=1, value=H, key=f"id_anno_ces_{H}"))
 
         if st.button("Calcola", key="id_calcola"):
             try:
