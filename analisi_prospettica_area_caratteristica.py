@@ -15,7 +15,7 @@ def calc_ammortamenti(esborsi, anni_pagamento, anni_ammortamento, vita_progetto)
         anni = int(anni_ammortamento[i])
         quota = float(esborsi[i]) / anni
         for k in range(anni):
-            t = int(anni_pagamento[i]) + 1 + k   # periodo (1..n) della quota
+            t = int(anni_pagamento[i]) + k   # periodo (0..n) della quota
             if t <= vita_progetto:
                 ammortamenti[t - 1] += quota
     return ammortamenti
