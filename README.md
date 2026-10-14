@@ -61,6 +61,6 @@ Notes on the prospective analysis (work in progress):
 - The NPV page reads the ex-ante FCU from the session: if you change the inputs in the ex-ante page, recalculate FCGC, FCID and FCU before going back to the NPV.
 - The ex-post FCU is not linked to the NPV page (it is a single past value, not a series of future flows): enter it manually if needed.
 
-This project is entirely based on "Finanza Aziendale" a university-taught course at the Università degli Studi di Bergamo, by professor Cincinelli Peter in 2026, with given permission.
+This project is entirely based on "Finanza Aziendale" a university-taught course at the Università degli Studi di Bergamo, by professor Cincinelli Peter in 2026.
 
 ---
