@@ -9,7 +9,7 @@ def calc_fccnogc(fccnogc=None, ric_op_mon=None, cost_op_mon=None, imp=None, ammo
     elif rol is not None and ammort is not None and imp is not None:
         return rol - imp + ammort
     else:
-        raise ValueError("Insufficient Data")
+        raise ValueError("Servono ricavi operativi monetari, costi operativi monetari e imposte, oppure MOL e imposte, oppure RO-L, ammortamenti e imposte")
 
 
 def calc_rol(rol=None, ric_op_mon=None, cost_op_mon=None, ammort=None, mol=None):
