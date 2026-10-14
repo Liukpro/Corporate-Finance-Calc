@@ -387,50 +387,63 @@ elif page == "Cash Flow Analysis, Ex-Ante":
     if op == "FCGC":
         st.subheader("Analisi Prospettica — Area Caratteristica")
 
-        st.markdown("**Ricavi e costi operativi per periodo:**")
-        ricavi_operativi = []
-        costi_operativi = []
-        ccno = []
+        metodo_fc = st.radio("Dati di partenza", ["Da ricavi e costi operativi", "FCCNOgc già noto"], key="ap_metodo_fc")
+        diretto = (metodo_fc == "FCCNOgc già noto")
+
+        ricavi_operativi, costi_operativi, fccnogc_in, ccno = [], [], [], []
 
         for t in range(n):
             st.markdown(f"*Periodo {t+1}*")
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                ricavi_operativi.append(st.number_input(f"Ricavi operativi", key=f"ap_ric_{t}", value=0.0))
-            with col2:
-                costi_operativi.append(st.number_input(f"Costi operativi", key=f"ap_cost_{t}", value=0.0))
-            with col3:
-                ccno.append(st.number_input(f"CCNO", key=f"ap_ccno_{t}", value=0.0))
-              
+            if diretto:
+                col1, col2 = st.columns(2)
+                with col1:
+                    fccnogc_in.append(st.number_input("FCCNOgc", key=f"ap_fccnogc_{t}", value=0.0))
+                with col2:
+                    ccno.append(st.number_input("CCNO", key=f"ap_ccno_{t}", value=0.0))
+            else:
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    ricavi_operativi.append(st.number_input("Ricavi operativi", key=f"ap_ric_{t}", value=0.0))
+                with col2:
+                    costi_operativi.append(st.number_input("Costi operativi", key=f"ap_cost_{t}", value=0.0))
+                with col3:
+                    ccno.append(st.number_input("CCNO", key=f"ap_ccno_{t}", value=0.0))
+
         libera_ccno = st.checkbox("Libera il CCNO a fine progetto (t = n+1)", value=True, key="ap_libera_ccno")
 
         if st.button("Calcola"):
             try:
-              mo_netto = calc_mo_netto(ricavi_operativi, costi_operativi, tc)
-              ammortamenti = calc_ammortamenti(esborsi, anni_esborsi, vite, n)
-              shield = calc_shield_ammortamenti(ammortamenti, tc)
-              fccnogc = calc_fccnogc2(mo_netto, shield)
-              delta_ccno = calc_var_ccno(ccno, libera_ccno)
-              fcgc = calc_fcgc2(fccnogc, delta_ccno)
-              st.session_state['fcgc_ea'] = aggiungi_t0(fcgc)
-              fcgc_ea_display = st.session_state['fcgc_ea']
+                ccno_p = ccno + [0.0 if libera_ccno else ccno[-1]]
+                delta_ccno = calc_var_ccno(ccno_p)
 
-              st.markdown("---")
-              st.markdown("**Risultati per periodo:**")
+                if diretto:
+                    fccnogc = fccnogc_in + [0.0]
+                else:
+                    ric_p = ricavi_operativi + [0.0]
+                    cost_p = costi_operativi + [0.0]
+                    mo_netto = calc_mo_netto(ric_p, cost_p, tc)
+                    ammortamenti = calc_ammortamenti(esborsi, anni_esborsi, vite, H)
+                    shield = calc_shield_ammortamenti(ammortamenti, tc)
+                    fccnogc = calc_fccnogc2(mo_netto, shield)
 
-              header = ["Metrica"] + [f"t={t}" for t in range(n + 1)]
-              rows = [
-                  ["MO Netto"]        + [f"{v:,.2f}" for v in aggiungi_t0(mo_netto)],
-                  ["Ammortamenti"]    + [f"{v:,.2f}" for v in aggiungi_t0(ammortamenti)],
-                  ["Tax Shield Amm."] + [f"{v:,.2f}" for v in aggiungi_t0(shield)],
-                  ["FCCNOGC"]         + [f"{v:,.2f}" for v in aggiungi_t0(fccnogc)],
-                  ["Δ CCNO"]          + [f"{v:,.2f}" for v in aggiungi_t0(delta_ccno)],
-                  ["FCGC"]            + [f"{v:,.2f}" for v in fcgc_ea_display],
-              ]
-              st.write(len(header), [len(r) for r in rows])
+                fcgc = calc_fcgc2(fccnogc, delta_ccno)
+                st.session_state['fcgc_ea'] = aggiungi_t0(fcgc)
 
-              df = pd.DataFrame(rows, columns=header)
-              st.dataframe(df, use_container_width=True)
+                st.markdown("---")
+                st.markdown("**Risultati per periodo:**")
+
+                header = ["Metrica"] + [f"t={t}" for t in range(H + 1)]
+                fmt = lambda serie: [f"{v:,.2f}" for v in aggiungi_t0(serie)]
+                rows = []
+                if not diretto:
+                    rows += [["MO Netto"] + fmt(mo_netto),
+                             ["Ammortamenti"] + fmt(ammortamenti),
+                             ["Tax Shield Amm."] + fmt(shield)]
+                rows += [["FCCNOGC"] + fmt(fccnogc),
+                         ["Δ CCNO"] + fmt(delta_ccno),
+                         ["FCGC"] + [f"{v:,.2f}" for v in st.session_state['fcgc_ea']]]
+
+                st.dataframe(pd.DataFrame(rows, columns=header), use_container_width=True)
 
             except Exception as e:
                 st.error(str(e))
