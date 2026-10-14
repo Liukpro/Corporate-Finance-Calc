@@ -590,7 +590,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
             except Exception as e:
                 st.error(str(e))
 #RATIO ANALYSIS
-elif page == "Ratio Analysis":
+elif page == "Ratios":
     st.subheader("Profitability Ratios")
     c1, c2 = st.columns(2)
     with c1:
