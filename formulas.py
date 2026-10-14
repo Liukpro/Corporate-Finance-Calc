@@ -66,42 +66,40 @@ def calc_fcgc(fcgc, fccnogc = None, ccno = None):
         raise ValueError("Insufficient Data")
 
 #A bit complex FCID
-def calc_fcid(fcid=None, inv=None, dis=None,
-              vnc=None, val_sto=None, plus=None, minus=None,
-              ammo_ti=None, n_ammo=None,
-              acqui_1=None, acqui_2=None):
+def calc_vnc(vnc=None, costo_storico=None, fondo=None, perc_amm=None, quota=None, anni=None):
+    """Valore netto contabile: diretto, oppure da costo storico con fondo / % ammortizzata / quota x anni."""
+    if vnc is not None:
+        return vnc
+    if costo_storico is None:
+        raise ValueError("Insufficient Data: servono il valore contabile o il costo storico")
+    if fondo is not None:
+        return costo_storico - fondo
+    if perc_amm is not None:
+        return costo_storico * (1 - perc_amm)
+    if quota is not None and anni is not None:
+        return costo_storico - quota * anni
+    raise ValueError("Insufficient Data: manca fondo, % ammortizzata o quota e anni")
 
+
+def calc_prezzo_realizzo(vnc, plus=0.0, minus=0.0):
+    """Prezzo di realizzo = VNC + plusvalenza - minusvalenza (plus e minus in valore positivo). Nessuna imposta."""
+    if vnc is None:
+        raise ValueError("Insufficient Data: manca il valore contabile")
+    return vnc + (plus or 0.0) - (minus or 0.0)
+
+
+def calc_fcid(fcid=None, investimenti=None, disinvestimenti=None):
+    """
+    investimenti: lista di esborsi (positivi)
+    disinvestimenti: lista di prezzi di realizzo incassati (positivi)
+    FCID = sum(disinvestimenti) - sum(investimenti)
+    """
     if fcid is not None:
         return fcid
-
-    # Calcolo investimenti totali
-    if inv is not None:
-        inv_final = inv
-    else:
-        inv_final = (acqui_1 or 0) + (acqui_2 or 0)
-
-    # Calcolo disinvestimenti - SOLO SE ESPLICITAMENTE RICHIESTO
-    if dis is not None:
-        # dis già fornito direttamente
-        pass
-    elif vnc is not None:
-        # dis calcolato da vnc
-        dis = vnc + (plus or 0) - (minus or 0)
-    elif val_sto is not None and ammo_ti is not None and n_ammo is not None:
-        # dis calcolato da valore storico
-        vnc_calc = val_sto - (ammo_ti * n_ammo)
-        dis = vnc_calc + (plus or 0) - (minus or 0)
-    else:
-        # Nessun dato sui disinvestimenti
-        dis = None
-
-    # Risultato finale
-    if dis is not None:
-        return dis - inv_final
-    elif inv_final != 0:
-        return 0 - inv_final
-    else:
-        raise ValueError("Insufficient data: provide at least investments or divestments")
+    if not (investimenti or disinvestimenti):
+        raise ValueError("Insufficient Data: inserisci almeno un investimento o un disinvestimento")
+    return sum(disinvestimenti or []) - sum(investimenti or [])
+#stop
 
 def calc_fcfr(fcfr, rimb_cap = None, pat_net = None, deb_f = None):
     if fcfr is not None:
