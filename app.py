@@ -104,7 +104,7 @@ if page == "Cash Flow Analysis, Ex-Post":
             else:
                 ric = cost = imp = None
                 
-            st.markdown("**Metodo 2: MOL - Taxes**")
+            st.markdown("**Metodo 2: MOL (EBITDA) - Taxes**")
             use_metodo2 = st.checkbox("Usa Metodo 2", key="fccnogc_use_met2")
             
             if use_metodo2:
@@ -114,7 +114,7 @@ if page == "Cash Flow Analysis, Ex-Post":
                 mol = imp2 = None
                 
         with col2:
-            st.markdown("**Metodo 3: ROL - Taxes + Ammort**")
+            st.markdown("**Metodo 3: ROL (EBIT) - Taxes + Ammort**")
             use_metodo3 = st.checkbox("Usa Metodo 3", key="fccnogc_use_met3")
             if use_metodo3:
                 rol_input = st.number_input("RO-L (EBIT)", value=0.0, key="fccnogc_rol")
