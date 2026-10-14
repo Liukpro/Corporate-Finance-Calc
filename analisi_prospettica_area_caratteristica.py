@@ -79,7 +79,7 @@ def calc_vc(esborso, anno_esborso, vita, t):
         return esborso
         
     anni_passati = t - anno_esborso
-    anni passati = max(0, min(anni_passati, vita))
+    anni_passati = max(0, min(anni_passati, vita))
     
     quota = esborso / vita
     return esborso - quota * anni_passati
