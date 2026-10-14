@@ -1,5 +1,5 @@
 #Cash Flow and Ratio Analysis, ANALISI STORICA
-def calc_fccnogc(fccnogc, ric_op_mon = None, cost_op_mon = None, imp = None, ammort = None, mol = None, rol = None):
+def calc_fccnogc(fccnogc=None, ric_op_mon=None, cost_op_mon=None, imp=None, ammort=None, mol=None, rol=None):
     if fccnogc is not None:
         return fccnogc
     elif ric_op_mon is not None and cost_op_mon is not None and imp is not None:
@@ -12,7 +12,7 @@ def calc_fccnogc(fccnogc, ric_op_mon = None, cost_op_mon = None, imp = None, amm
         raise ValueError("Insufficient Data")
 
 
-def calc_rol(rol, ric_op_mon = None, cost_op_mon = None, ammort = None, mol = None):
+def calc_rol(rol=None, ric_op_mon=None, cost_op_mon=None, ammort=None, mol=None):
     if rol is not None:
         return rol
     elif ric_op_mon is not None and cost_op_mon is not None and ammort is not None:
@@ -22,7 +22,7 @@ def calc_rol(rol, ric_op_mon = None, cost_op_mon = None, ammort = None, mol = No
     else:
         raise ValueError("Insufficient Data")
 
-def calc_ros(ros, rol = None, ric_op_mon = None):
+def calc_ros(ros=None, rol=None, ric_op_mon=None):
     if ros is not None:
         return ros
     elif ric_op_mon == 0:
@@ -32,7 +32,7 @@ def calc_ros(ros, rol = None, ric_op_mon = None):
     else:
         raise ValueError("Insufficient Data")
 
-def calc_roi(roi, rol = None, deb_f = None, liq = None, pat_net = None):
+def calc_roi(roi=None, rol=None, deb_f=None, liq=None, pat_net=None):
     if roi is not None:
         return roi
     elif rol is not None and deb_f is not None and liq is not None and pat_net is not None:
@@ -44,7 +44,7 @@ def calc_roi(roi, rol = None, deb_f = None, liq = None, pat_net = None):
     else:
         raise ValueError("Insufficient Data")
 
-def calc_roe(roe, rol = None, of = None, imp = None, pat_net = None):
+def calc_roe(roe=None, rol=None, of=None, imp=None, pat_net=None):
     if roe is not None:
         return roe
     elif pat_net == 0:
@@ -56,7 +56,7 @@ def calc_roe(roe, rol = None, of = None, imp = None, pat_net = None):
         raise ValueError("Insufficient Data")
 
 #nel nuovo file qui non ho inserito il calcolo della variazione di ccno, attenzione in futuro!!
-def calc_fcgc(fcgc, fccnogc = None, ccno = None):
+def calc_fcgc(fcgc=None, fccnogc=None, ccno=None):
     if fcgc is not None:
         return fcgc
     elif fccnogc is not None and ccno is not None:
@@ -101,7 +101,7 @@ def calc_fcid(fcid=None, investimenti=None, disinvestimenti=None):
     return sum(disinvestimenti or []) - sum(investimenti or [])
 #stop
 
-def calc_fcfr(fcfr, rimb_cap = None, pat_net = None, deb_f = None):
+def calc_fcfr(fcfr=None, rimb_cap=None, pat_net=None, deb_f=None):
     if fcfr is not None:
         return fcfr
     elif pat_net is not None and deb_f is not None and rimb_cap is not None:
@@ -109,7 +109,7 @@ def calc_fcfr(fcfr, rimb_cap = None, pat_net = None, deb_f = None):
     else:
         raise ValueError("Insufficient Data")
 
-def calc_fcrf(fcrf, of = None, div = None):
+def calc_fcrf(fcrf=None, of=None, div=None):
     if fcrf is not None:
         return fcrf
     elif of is not None and div is not None:
@@ -117,7 +117,7 @@ def calc_fcrf(fcrf, of = None, div = None):
     else:
         raise ValueError("Insufficient Data")
 
-def calc_var_liq(var_liq, fcgc = None, fcid = None, fcfr = None, fcrf = None):
+def calc_var_liq(var_liq=None, fcgc=None, fcid=None, fcfr=None, fcrf=None):
     if var_liq is not None:
         return var_liq
     elif fcgc is not None and fcid is not None and fcfr is not None and fcrf is not None:
@@ -125,7 +125,7 @@ def calc_var_liq(var_liq, fcgc = None, fcid = None, fcfr = None, fcrf = None):
     else:
         raise ValueError("Insufficient Data")
 
-def calc_fcu(fcu, fcgc = None, fcid = None):
+def calc_fcu(fcu=None, fcgc=None, fcid=None):
     if fcu is not None:
         return fcu
     elif fcgc is not None and fcid is not None:
@@ -133,7 +133,7 @@ def calc_fcu(fcu, fcgc = None, fcid = None):
     else:
         raise ValueError("Insufficient Data")
 
-def calc_fce(fce, fcu = None, fcfr = None, fcrf = None, rimb_cap = None, div = None):
+def calc_fce(fce=None, fcu=None, fcfr=None, fcrf=None, rimb_cap=None, div=None):
     if fce is not None:
         return fce
     elif fcu is not None and fcfr is not None and rimb_cap is not None and fcrf is not None and div is not None:
