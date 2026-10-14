@@ -315,21 +315,20 @@ if page == "Cash Flow Analysis, Ex-Post":
                 st.error(str(e))
 
     elif op == "FCE":
-        st.caption("Formula: FCE = FCU + FCFR - RimborsoCapitale + FCRf - Dividends")
+        st.caption("Formula: FCE = FCU + Nuovi debiti − Rimborso capitale − Oneri finanziari")
         fcu_val = show_dependency('fcu', 'FCU')
-        fcfr_val = show_dependency('fcfr', 'FCFR')
-        fcrf_val = show_dependency('fcrf', 'FCRf')
-        
-        col1, col2 = st.columns(2)
+
+        col1, col2, col3 = st.columns(3)
         with col1:
-            rimb_cap = st.number_input("Capital Repayment", value=0.0, key="fce_rimb_cap")
+            nuovi_debiti = st.number_input("Nuovi debiti finanziari", value=0.0, min_value=0.0, key="fce_nuovi_debiti")
         with col2:
-            div = st.number_input("Dividends Paid", value=0.0, key="fce_div")
-        
+            rimb_cap = st.number_input("Rimborso capitale", value=0.0, min_value=0.0, key="fce_rimb_cap")
+        with col3:
+            of = st.number_input("Oneri finanziari (lordi)", value=0.0, min_value=0.0, key="fce_of")
+
         if st.button("Calculate FCE", key="btn_fce"):
-            
             try:
-                res = calc_fce(fcu=fcu_val, fcfr=fcfr_val, fcrf=fcrf_val, rimb_cap=rimb_cap, div=div)
+                res = calc_fce(fcu=fcu_val, nuovi_debiti=nuovi_debiti, rimb_cap=rimb_cap, of=of)
                 st.session_state.fce = res
                 st.success(f"FCE = {res:.2f}")
             except ValueError as e:
