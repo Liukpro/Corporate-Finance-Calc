@@ -402,7 +402,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
             with col3:
                 ccno.append(st.number_input(f"CCNO", key=f"ap_ccno_{t}", value=0.0))
               
-        libera_ccno = st.checkbox("Libera il CCNO nell'ultimo periodo", value=False, key="ap_libera_ccno")
+        libera_ccno = st.checkbox("Libera il CCNO a fine progetto (t = n+1)", value=True, key="ap_libera_ccno")
 
         if st.button("Calcola"):
             try:
