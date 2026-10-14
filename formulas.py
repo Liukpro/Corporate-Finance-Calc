@@ -133,13 +133,14 @@ def calc_fcu(fcu=None, fcgc=None, fcid=None):
     else:
         raise ValueError("Insufficient Data")
 
-def calc_fce(fce=None, fcu=None, fcfr=None, fcrf=None, rimb_cap=None, div=None):
+def calc_fce(fce=None, fcu=None, nuovi_debiti=None, rimb_cap=None, of=None):
+    """FCE = FCU + nuovi debiti - rimborso capitale - oneri finanziari (lordi).
+    Nessun dividendo e nessun apporto di capitale proprio."""
     if fce is not None:
         return fce
-    elif fcu is not None and fcfr is not None and rimb_cap is not None and fcrf is not None and div is not None:
-        return fcu + fcfr - rimb_cap + fcrf - div
-    else:
+    if fcu is None or nuovi_debiti is None or rimb_cap is None or of is None:
         raise ValueError("Insufficient Data")
+    return fcu + nuovi_debiti - rimb_cap - of
         
 #NPV with variable fcs and fixed cost per period
 def calc_npv(npv, fc, k, i_0, t, cost):
