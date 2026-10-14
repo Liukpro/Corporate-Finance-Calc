@@ -365,8 +365,10 @@ elif page == "Cash Flow Analysis, Ex-Ante":
     with col2:
         tc = st.number_input("Aliquota fiscale (tc)", min_value=0.0, max_value=1.0, value=0.35, format="%.2f", key="ea_tc")
     n = int(vita_progetto)
+    H = n + 1
+  
 
-    st.markdown("**Esborsi per investimenti ammortizzabili:**")
+    st.markdown("**Esborsi per investimenti:**")
     n_esborsi = st.number_input("Numero di esborsi", min_value=1, step=1, value=1, key="ea_n_esborsi")
     esborsi, anni_esborsi, vite = [], [], []
     for i in range(int(n_esborsi)):
@@ -376,7 +378,7 @@ elif page == "Cash Flow Analysis, Ex-Ante":
         with col2:
             anni_esborsi.append(int(st.number_input(f"Anno di pagamento {i+1}", min_value=0, max_value=n, step=1, value=0, key=f"ea_anno_esb_{i}")))
         with col3:
-            vite.append(int(st.number_input(f"Anni ammortamento {i+1}", min_value=1, step=1, value=n, key=f"ea_vita_esb_{i}")))
+            vite.append(int(st.number_input(f"Anni ammortamento {i+1}", min_value=0, step=1, value=n, key=f"ea_vita_esb_{i}", help="0 = non ammortizzabile")))
     st.markdown("---")
 
 
