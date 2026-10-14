@@ -91,14 +91,9 @@ def calc_costo_opportunita(prezzo, vc, tc, vita_progetto):
     return flussi
 
 #valore contabile del nuovo impianto
-def calc_cessione(prezzo, anno_cessione, esborsi, anni_esborsi, vite, tc, vita_progetto):
-    vc_totale = 0.0
-
-    for i in range(len(esborsi)):
-        vc_totale += calc_vc(esborsi[i], anni_esborsi[i], vite[i], anno_cessione)
-
-    flussi = [0.0] * (vita_progetto +1)
-    flussi[anno_cessione] = calc_netto_vendita(prezzo, vc_totale, tc)
+def calc_cessione(prezzo, anno_cessione, vc, tc, orizzonte):
+    flussi = [0.0] * (orizzonte + 1)
+    flussi[anno_cessione] = calc_netto_vendita(prezzo, vc, tc)
     return flussi
 
 #FCID totale
